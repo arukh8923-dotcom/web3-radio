@@ -88,28 +88,25 @@ export function DJStudioPanel({ isOpen, onClose }: DJStudioPanelProps) {
               {activeTab === 'broadcast' && (
                 <BroadcastManager
                   stationId={myStationId || 'demo-station'}
-                  isOwner={true}
+                  stationName="My Station"
                 />
               )}
 
               {activeTab === 'playlist' && (
                 <PlaylistQueue
                   stationId={myStationId || 'demo-station'}
-                  isOwner={true}
                 />
               )}
 
               {activeTab === 'schedule' && (
                 <ScheduledBroadcasts
                   stationId={myStationId || 'demo-station'}
-                  isOwner={true}
                 />
               )}
 
               {activeTab === 'shows' && (
                 <ShowScheduler
                   stationId={myStationId || 'demo-station'}
-                  isOwner={true}
                 />
               )}
             </div>
