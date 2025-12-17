@@ -1,11 +1,39 @@
 import { createClient } from '@supabase/supabase-js';
 
+// ============================================
+// CLIENT-SIDE SUPABASE (Browser)
+// Uses anon key - respects RLS policies
+// ============================================
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Database types (generated from schema)
+// ============================================
+// SERVER-SIDE SUPABASE (API Routes)
+// Uses service role key - bypasses RLS
+// Only use in server components/API routes!
+// ============================================
+export function createServerSupabase() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!serviceKey) {
+    // Fallback to anon key if service role not available
+    return createClient(url, process.env.SUPABASE_ANON_KEY || supabaseAnonKey);
+  }
+  
+  return createClient(url, serviceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
+// ============================================
+// DATABASE TYPES
+// ============================================
 export interface Station {
   id: string;
   frequency: number;
@@ -86,7 +114,9 @@ export interface MoodRing {
   updated_at: string;
 }
 
-// Real-time subscriptions
+// ============================================
+// REAL-TIME SUBSCRIPTIONS
+// ============================================
 export function subscribeToChat(stationId: string, callback: (message: LiveChat) => void) {
   return supabase
     .channel(`chat:${stationId}`)
@@ -131,7 +161,6 @@ export function subscribeToTuneIns(stationId: string, callback: (count: number) 
         filter: `station_id=eq.${stationId}`,
       },
       async () => {
-        // Fetch updated count
         const { count } = await supabase
           .from('tune_ins')
           .select('*', { count: 'exact', head: true })
