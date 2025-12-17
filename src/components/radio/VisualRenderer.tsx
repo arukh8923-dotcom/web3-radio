@@ -27,7 +27,7 @@ export function VisualRenderer({
   mode,
 }: VisualRendererProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
 
   // Load media from IPFS if needed
