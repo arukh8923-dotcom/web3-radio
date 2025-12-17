@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
-import StationCreator from '@/components/dj/StationCreator';
-import { BroadcastManager } from '@/components/dj/BroadcastManager';
-import { PlaylistQueue } from '@/components/dj/PlaylistQueue';
-import { ScheduledBroadcasts } from '@/components/dj/ScheduledBroadcasts';
-import { ShowScheduler } from '@/components/dj/ShowScheduler';
+import {
+  StationCreator,
+  BroadcastManager,
+  PlaylistQueue,
+  ScheduledBroadcasts,
+  ShowScheduler,
+} from '@/components/dj';
 
 interface DJStudioPanelProps {
   isOpen: boolean;
