@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { FrequencyDial } from './FrequencyDial';
 import { VolumeKnob } from './VolumeKnob';
@@ -10,6 +10,8 @@ import { NixieDisplay } from './NixieDisplay';
 import { PilotLight } from './PilotLight';
 import { SpeakerGrille } from './SpeakerGrille';
 import { MoodRingDisplay } from './MoodRingDisplay';
+import { LiveChat } from './LiveChat';
+import { SmokeSignals } from './SmokeSignals';
 import { is420Zone } from '@/constants/frequencies';
 import { useRadio } from '@/hooks/useRadio';
 
@@ -53,6 +55,8 @@ export function RadioCabinet() {
     }
   }, [volume, bass, treble, address, savePreferences]);
 
+  const [chatOpen, setChatOpen] = useState(false);
+  
   const in420Zone = is420Zone(frequency);
   const activePreset = presets.find(p => p.frequency === frequency)?.slot;
 
@@ -172,19 +176,41 @@ export function RadioCabinet() {
             <MoodRingDisplay moodRing={moodRing} stationId={currentStation.id} />
           )}
 
-          {/* Listener Count */}
+          {/* Listener Count & Chat Button */}
           {currentStation && (
-            <div className="mt-3 flex items-center gap-2 text-dial-cream/60 text-sm">
-              <span className="w-2 h-2 rounded-full bg-tuning-red animate-pulse" />
-              <span>{currentStation.listener_count} listeners</span>
-              {currentStation.is_live && (
-                <span className="ml-2 px-2 py-0.5 bg-tuning-red/20 text-tuning-red text-xs rounded">
-                  LIVE
-                </span>
-              )}
+            <div className="mt-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-dial-cream/60 text-sm">
+                <span className="w-2 h-2 rounded-full bg-tuning-red animate-pulse" />
+                <span>{currentStation.listener_count} listeners</span>
+                {currentStation.is_live && (
+                  <span className="ml-2 px-2 py-0.5 bg-tuning-red/20 text-tuning-red text-xs rounded">
+                    LIVE
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => setChatOpen(true)}
+                className="preset-button text-xs"
+              >
+                💬 CHAT
+              </button>
             </div>
           )}
+
+          {/* Smoke Signals (420 Zone) */}
+          {currentStation && in420Zone && (
+            <SmokeSignals stationId={currentStation.id} />
+          )}
         </div>
+      )}
+
+      {/* Live Chat Modal */}
+      {currentStation && (
+        <LiveChat
+          stationId={currentStation.id}
+          isOpen={chatOpen}
+          onClose={() => setChatOpen(false)}
+        />
       )}
     </div>
   );
