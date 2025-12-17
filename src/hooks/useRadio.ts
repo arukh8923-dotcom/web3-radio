@@ -49,7 +49,7 @@ export const useRadio = create<RadioState>()(
   persist(
     (set, get) => ({
       // Initial state
-      frequency: 88.0,
+      frequency: 88.1,
       volume: 50,
       bass: 50,
       treble: 50,

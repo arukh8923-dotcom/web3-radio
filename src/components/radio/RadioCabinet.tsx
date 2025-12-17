@@ -47,6 +47,13 @@ export function RadioCabinet() {
     setWalletAddress(address || null);
   }, [address, setWalletAddress]);
 
+  // Load station on mount and when frequency changes
+  useEffect(() => {
+    if (isOn) {
+      useRadio.getState().loadStationByFrequency(frequency);
+    }
+  }, [frequency, isOn]);
+
   // Save preferences when EQ changes
   useEffect(() => {
     if (address) {
