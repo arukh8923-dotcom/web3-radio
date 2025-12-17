@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAccount } from 'wagmi';
+import Image from 'next/image';
 import { supabase, subscribeToChat, type LiveChat as ChatMessage } from '@/lib/supabase';
+
+interface ChatMessageWithUser extends ChatMessage {
+  users?: {
+    wallet_address: string;
+    farcaster_username: string | null;
+    avatar_url: string | null;
+  };
+}
 
 interface LiveChatProps {
   stationId?: string;
@@ -13,12 +22,11 @@ interface LiveChatProps {
 
 export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProps) {
   const { address } = useAccount();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessageWithUser[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Only use valid station ID for chat
   const chatRoomId = stationId;
 
   // Load initial messages
@@ -44,7 +52,8 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
     if (!isOpen || !chatRoomId) return;
 
     const channel = subscribeToChat(chatRoomId, (message) => {
-      setMessages((prev) => [...prev, message]);
+      // Fetch user data for new message
+      fetchUserForMessage(message);
     });
 
     return () => {
@@ -52,13 +61,28 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
     };
   }, [chatRoomId, isOpen]);
 
+  // Fetch user data for a new realtime message
+  const fetchUserForMessage = async (message: ChatMessage) => {
+    try {
+      const { data: user } = await supabase
+        .from('users')
+        .select('wallet_address, farcaster_username, avatar_url')
+        .eq('id', message.user_id)
+        .single();
+      
+      setMessages((prev) => [...prev, { ...message, users: user || undefined }]);
+    } catch {
+      setMessages((prev) => [...prev, message]);
+    }
+  };
+
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!address || !newMessage.trim() || sending) return;
+    if (!address || !newMessage.trim() || sending || !chatRoomId) return;
 
     setSending(true);
     try {
@@ -91,7 +115,7 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
           <div>
             <h3 className="nixie-tube text-lg">💬 LIVE CHAT</h3>
             <p className="text-dial-cream/50 text-xs">
-              {stationId ? `${frequency.toFixed(1)} FM` : 'No station - tune to a station first'}
+              {stationId ? `${frequency.toFixed(1)} FM` : 'No station'}
             </p>
           </div>
           <button
@@ -106,7 +130,7 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {!chatRoomId ? (
             <p className="text-dial-cream/50 text-center text-sm">
-              Tune to a station (88.1, 92.5, 96.9, 101.1, 104.2, or 107.7 FM) to chat!
+              Tune to a station to chat!
             </p>
           ) : messages.length === 0 ? (
             <p className="text-dial-cream/50 text-center text-sm">
@@ -114,23 +138,7 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
             </p>
           ) : (
             messages.map((msg) => (
-              <div key={msg.id} className="flex gap-2">
-                <div className="w-8 h-8 rounded-full bg-brass/30 flex items-center justify-center text-xs">
-                  {(msg as any).users?.farcaster_username?.[0]?.toUpperCase() || '?'}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-brass text-sm font-dial">
-                      {(msg as any).users?.farcaster_username || 
-                       `${msg.user_id?.slice(0, 6)}...`}
-                    </span>
-                    <span className="text-dial-cream/40 text-xs">
-                      {new Date(msg.created_at).toLocaleTimeString()}
-                    </span>
-                  </div>
-                  <p className="text-dial-cream/80 text-sm">{msg.message}</p>
-                </div>
-              </div>
+              <ChatBubble key={msg.id} message={msg} />
             ))
           )}
           <div ref={messagesEndRef} />
@@ -167,6 +175,49 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ChatBubble({ message }: { message: ChatMessageWithUser }) {
+  const user = message.users;
+  const username = user?.farcaster_username;
+  const avatar = user?.avatar_url;
+  const walletShort = user?.wallet_address 
+    ? `${user.wallet_address.slice(0, 6)}...${user.wallet_address.slice(-4)}`
+    : '???';
+
+  return (
+    <div className="flex gap-2">
+      {/* Avatar */}
+      <div className="w-8 h-8 rounded-full bg-brass/30 flex items-center justify-center text-xs flex-shrink-0 overflow-hidden">
+        {avatar ? (
+          <Image
+            src={avatar}
+            alt={username || 'User'}
+            width={32}
+            height={32}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-brass">
+            {username?.[0]?.toUpperCase() || '?'}
+          </span>
+        )}
+      </div>
+      
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="text-brass text-sm font-dial">
+            {username ? `@${username}` : walletShort}
+          </span>
+          <span className="text-dial-cream/40 text-xs">
+            {new Date(message.created_at).toLocaleTimeString()}
+          </span>
+        </div>
+        <p className="text-dial-cream/80 text-sm break-words">{message.message}</p>
       </div>
     </div>
   );

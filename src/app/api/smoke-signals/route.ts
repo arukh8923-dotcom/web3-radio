@@ -23,7 +23,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ signals: data || [] });
+  // Fetch user info for each signal
+  const signalsWithUsers = await Promise.all(
+    (data || []).map(async (signal) => {
+      const { data: user } = await supabase
+        .from('users')
+        .select('wallet_address, farcaster_username, avatar_url')
+        .eq('wallet_address', signal.sender_address.toLowerCase())
+        .single();
+      return { ...signal, users: user };
+    })
+  );
+
+  return NextResponse.json({ signals: signalsWithUsers });
 }
 
 // POST /api/smoke-signals - Send smoke signal (ephemeral message)

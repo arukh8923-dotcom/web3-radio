@@ -165,7 +165,9 @@ export function SmokeSignals({ stationId }: SmokeSignalsProps) {
               </span>
             </div>
             <p className="text-dial-cream/40 text-xs mt-1">
-              {signal.sender_address.slice(0, 6)}...{signal.sender_address.slice(-4)}
+              {(signal as any).users?.farcaster_username 
+                ? `@${(signal as any).users.farcaster_username}` 
+                : `${signal.sender_address.slice(0, 6)}...${signal.sender_address.slice(-4)}`}
             </p>
           </div>
         ))}
