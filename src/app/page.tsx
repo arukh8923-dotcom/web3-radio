@@ -2,6 +2,8 @@
 
 import { RadioCabinet } from '@/components/radio/RadioCabinet';
 import { ConnectWallet } from '@/components/wallet/ConnectWallet';
+import { HelpGuide } from '@/components/radio/HelpGuide';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 export default function Home() {
   return (
@@ -11,7 +13,10 @@ export default function Home() {
         <h1 className="font-dial text-2xl md:text-3xl text-brass tracking-wider">
           WEB3 RADIO
         </h1>
-        <ConnectWallet />
+        <div className="flex items-center gap-3">
+          <LanguageSelector />
+          <ConnectWallet />
+        </div>
       </header>
 
       {/* Main Radio Interface */}
@@ -21,6 +26,9 @@ export default function Home() {
       <footer className="mt-8 text-center text-dial-cream/50 text-sm">
         <p>Full on-chain radio on Base • Powered by $RADIO & $VIBES</p>
       </footer>
+
+      {/* Help Guide */}
+      <HelpGuide />
     </main>
   );
 }
