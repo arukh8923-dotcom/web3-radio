@@ -57,7 +57,6 @@ export default function Home() {
               onOpenProfile={() => setShowProfile(true)}
               onOpenSettings={() => setShowSettings(true)}
               onOpenHelp={() => setShowHelp(true)}
-              onOpenDJStudio={() => setShowDJStudio(true)}
             />
           </div>
         </div>
@@ -116,8 +115,8 @@ export default function Home() {
       <BottomNav
         onOpenDiscover={() => setShowDiscover(true)}
         onOpenProfile={() => setShowProfile(true)}
-        onOpenSettings={() => setShowSettings(true)}
         onOpenLeaderboard={() => setShowLeaderboard(true)}
+        onOpenDJStudio={() => setShowDJStudio(true)}
       />
     </main>
   );

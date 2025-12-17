@@ -3,16 +3,16 @@
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 
-type NavItem = 'radio' | 'discover' | 'leaderboard' | 'profile' | 'settings';
+type NavItem = 'radio' | 'discover' | 'djstudio' | 'leaderboard' | 'profile';
 
 interface BottomNavProps {
-  onOpenSettings?: () => void;
   onOpenDiscover?: () => void;
   onOpenProfile?: () => void;
   onOpenLeaderboard?: () => void;
+  onOpenDJStudio?: () => void;
 }
 
-export function BottomNav({ onOpenSettings, onOpenDiscover, onOpenProfile, onOpenLeaderboard }: BottomNavProps) {
+export function BottomNav({ onOpenDiscover, onOpenProfile, onOpenLeaderboard, onOpenDJStudio }: BottomNavProps) {
   const [active, setActive] = useState<NavItem>('radio');
   const { isConnected } = useAccount();
 
@@ -42,9 +42,9 @@ export function BottomNav({ onOpenSettings, onOpenDiscover, onOpenProfile, onOpe
           document.querySelector<HTMLButtonElement>('[aria-label="CONNECT ▼"]')?.click();
         }
         break;
-      case 'settings':
-        if (onOpenSettings) {
-          onOpenSettings();
+      case 'djstudio':
+        if (onOpenDJStudio) {
+          onOpenDJStudio();
         }
         break;
     }
@@ -53,9 +53,9 @@ export function BottomNav({ onOpenSettings, onOpenDiscover, onOpenProfile, onOpe
   const navItems: { id: NavItem; icon: string; label: string }[] = [
     { id: 'radio', icon: '📻', label: 'Radio' },
     { id: 'discover', icon: '🔍', label: 'Discover' },
+    { id: 'djstudio', icon: '🎙️', label: 'DJ Studio' },
     { id: 'leaderboard', icon: '🏆', label: 'Top DJs' },
     { id: 'profile', icon: '👤', label: 'Profile' },
-    { id: 'settings', icon: '⚙️', label: 'Settings' },
   ];
 
   return (

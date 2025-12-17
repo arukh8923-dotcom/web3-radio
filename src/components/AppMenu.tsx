@@ -7,10 +7,9 @@ interface AppMenuProps {
   onOpenProfile: () => void;
   onOpenSettings: () => void;
   onOpenHelp: () => void;
-  onOpenDJStudio?: () => void;
 }
 
-export function AppMenu({ onOpenDiscover, onOpenProfile, onOpenSettings, onOpenHelp, onOpenDJStudio }: AppMenuProps) {
+export function AppMenu({ onOpenDiscover, onOpenProfile, onOpenSettings, onOpenHelp }: AppMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -26,11 +25,10 @@ export function AppMenu({ onOpenDiscover, onOpenProfile, onOpenSettings, onOpenH
 
   const menuItems = [
     { icon: '🔍', label: 'Discover Stations', action: onOpenDiscover },
-    { icon: '🎙️', label: 'DJ Studio', action: onOpenDJStudio },
     { icon: '👤', label: 'Profile', action: onOpenProfile },
     { icon: '⚙️', label: 'Settings', action: onOpenSettings },
     { icon: '❓', label: 'Help', action: onOpenHelp },
-  ].filter(item => item.action);
+  ];
 
   return (
     <div className="relative" ref={menuRef}>
