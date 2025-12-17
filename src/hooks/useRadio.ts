@@ -221,6 +221,12 @@ export const useRadio = create<RadioState>()(
         bass: state.bass,
         treble: state.treble,
       }),
+      skipHydration: true,
     }
   )
 );
+
+// Hydrate on client side only
+if (typeof window !== 'undefined') {
+  useRadio.persist.rehydrate();
+}

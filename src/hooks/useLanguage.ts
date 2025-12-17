@@ -19,6 +19,12 @@ export const useLanguage = create<LanguageState>()(
     }),
     {
       name: 'web3-radio-language',
+      skipHydration: true,
     }
   )
 );
+
+// Hydrate on client side only
+if (typeof window !== 'undefined') {
+  useLanguage.persist.rehydrate();
+}

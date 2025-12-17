@@ -1,22 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 
 export function HelpGuide() {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !localStorage.getItem('web3radio-onboarded');
-    }
-    return true;
-  });
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const onboarded = localStorage.getItem('web3radio-onboarded');
+    setShowOnboarding(!onboarded);
+  }, []);
 
   const completeOnboarding = () => {
     localStorage.setItem('web3radio-onboarded', 'true');
     setShowOnboarding(false);
   };
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) return null;
 
   if (showOnboarding) {
     return (
