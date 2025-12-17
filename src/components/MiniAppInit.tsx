@@ -16,9 +16,9 @@ export function MiniAppInit() {
       setContext(ctx);
       
       if (ctx.isInMiniApp) {
-        console.log('Running inside Farcaster Mini App');
+        console.log('Running inside Mini App');
         if (ctx.user) {
-          console.log('User:', ctx.user.username, 'FID:', ctx.user.fid);
+          console.log('User:', ctx.user.username, 'ID:', ctx.user.fid);
         }
       } else {
         console.log('Running in browser mode');

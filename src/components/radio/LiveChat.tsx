@@ -1,9 +1,18 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAccount } from 'wagmi';
 import Image from 'next/image';
 import { supabase, subscribeToChat, type LiveChat as ChatMessage } from '@/lib/supabase';
+
+// Format time consistently to avoid hydration mismatch
+function formatTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
 
 interface ChatMessageWithUser extends ChatMessage {
   users?: {
@@ -105,6 +114,25 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
     setSending(false);
   };
 
+  // Community moderation - report message
+  const handleReportMessage = async (messageId: string) => {
+    if (!address || !chatRoomId) return;
+    
+    try {
+      await fetch('/api/chat/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message_id: messageId,
+          reporter_address: address,
+          station_id: chatRoomId,
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to report message:', error);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -138,7 +166,12 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
             </p>
           ) : (
             messages.map((msg) => (
-              <ChatBubble key={msg.id} message={msg} />
+              <ChatBubble 
+                key={msg.id} 
+                message={msg} 
+                onReport={handleReportMessage}
+                currentUserAddress={address}
+              />
             ))
           )}
           <div ref={messagesEndRef} />
@@ -180,19 +213,46 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
   );
 }
 
-function ChatBubble({ message }: { message: ChatMessageWithUser }) {
+interface ChatBubbleProps {
+  message: ChatMessageWithUser;
+  onReport: (messageId: string) => void;
+  currentUserAddress?: string;
+}
+
+function ChatBubble({ message, onReport, currentUserAddress }: ChatBubbleProps) {
+  const [mounted, setMounted] = useState(false);
+  const [showActions, setShowActions] = useState(false);
+  const [reported, setReported] = useState(false);
   const user = message.users;
   const username = user?.farcaster_username;
   const avatar = user?.avatar_url;
-  const walletShort = user?.wallet_address 
-    ? `${user.wallet_address.slice(0, 6)}...${user.wallet_address.slice(-4)}`
-    : '???';
+  const walletAddress = user?.wallet_address || '???';
+  const isOwnMessage = currentUserAddress?.toLowerCase() === walletAddress?.toLowerCase();
+
+  // Memoize time to prevent hydration issues
+  const timeStr = useMemo(() => formatTime(message.created_at), [message.created_at]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleReport = () => {
+    if (!reported) {
+      onReport(message.id);
+      setReported(true);
+      setShowActions(false);
+    }
+  };
 
   return (
-    <div className="flex gap-2">
+    <div 
+      className="flex gap-2 group"
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
+    >
       {/* Avatar */}
       <div className="w-8 h-8 rounded-full bg-brass/30 flex items-center justify-center text-xs flex-shrink-0 overflow-hidden">
-        {avatar ? (
+        {mounted && avatar ? (
           <Image
             src={avatar}
             alt={username || 'User'}
@@ -210,14 +270,31 @@ function ChatBubble({ message }: { message: ChatMessageWithUser }) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-brass text-sm font-dial">
-            {username ? `@${username}` : walletShort}
+          <span className="text-brass text-sm font-dial truncate max-w-[150px]">
+            {username ? `@${username}` : walletAddress}
           </span>
           <span className="text-dial-cream/40 text-xs">
-            {new Date(message.created_at).toLocaleTimeString()}
+            {timeStr}
           </span>
+          {/* Moderation Actions */}
+          {showActions && !isOwnMessage && currentUserAddress && (
+            <button
+              onClick={handleReport}
+              disabled={reported}
+              className={`text-xs px-1.5 py-0.5 rounded transition-all ${
+                reported 
+                  ? 'text-dial-cream/30 cursor-default' 
+                  : 'text-red-400/60 hover:text-red-400 hover:bg-red-400/10'
+              }`}
+              title={reported ? 'Reported' : 'Report message'}
+            >
+              {reported ? '✓ Reported' : '⚑'}
+            </button>
+          )}
         </div>
-        <p className="text-dial-cream/80 text-sm break-words">{message.message}</p>
+        <p className={`text-dial-cream/80 text-sm break-words ${reported ? 'opacity-50' : ''}`}>
+          {message.message}
+        </p>
       </div>
     </div>
   );

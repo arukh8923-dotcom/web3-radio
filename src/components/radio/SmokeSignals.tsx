@@ -62,8 +62,18 @@ export function SmokeSignals({ stationId }: SmokeSignalsProps) {
     setSending(false);
   };
 
+  const [now, setNow] = useState<number | null>(null);
+
+  // Update time every second for countdown (client-side only)
+  useEffect(() => {
+    setNow(Date.now());
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const getTimeRemaining = (expiresAt: string) => {
-    const remaining = new Date(expiresAt).getTime() - Date.now();
+    if (!now) return '--:--'; // SSR placeholder
+    const remaining = new Date(expiresAt).getTime() - now;
     if (remaining <= 0) return 'Expired';
     const minutes = Math.floor(remaining / 60000);
     const seconds = Math.floor((remaining % 60000) / 1000);
@@ -164,10 +174,10 @@ export function SmokeSignals({ stationId }: SmokeSignalsProps) {
                 ⏱ {getTimeRemaining(signal.expires_at)}
               </span>
             </div>
-            <p className="text-dial-cream/40 text-xs mt-1">
+            <p className="text-dial-cream/40 text-xs mt-1 truncate">
               {(signal as any).users?.farcaster_username 
                 ? `@${(signal as any).users.farcaster_username}` 
-                : `${signal.sender_address.slice(0, 6)}...${signal.sender_address.slice(-4)}`}
+                : signal.sender_address}
             </p>
           </div>
         ))}

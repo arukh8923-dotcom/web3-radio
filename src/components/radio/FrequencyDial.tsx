@@ -50,16 +50,24 @@ export function FrequencyDial({ frequency, onChange, disabled }: FrequencyDialPr
   const indicatorPosition = ((frequency - minFreq) / (maxFreq - minFreq)) * 100;
 
   return (
-    <div 
-      className={`relative bg-dial-cream rounded-lg p-4 ${disabled ? 'opacity-50' : ''}`}
-      ref={dialRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      {/* Frequency Scale */}
-      <div className="relative h-16">
+    <div className={`relative bg-dial-cream rounded-lg p-4 ${disabled ? 'opacity-50' : ''}`}>
+      {/* Draggable Frequency Scale Area - only this area responds to drag */}
+      <div 
+        ref={dialRef}
+        className="relative h-16 cursor-ew-resize select-none"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={(e) => {
+          setIsDragging(true);
+          handleDrag(e.touches[0].clientX);
+        }}
+        onTouchMove={(e) => {
+          if (isDragging) handleDrag(e.touches[0].clientX);
+        }}
+        onTouchEnd={() => setIsDragging(false)}
+      >
         {/* Scale markings */}
         <div className="absolute inset-x-0 top-0 flex justify-between px-2">
           {[88, 92, 96, 100, 104, 108].map((freq) => (
@@ -72,14 +80,14 @@ export function FrequencyDial({ frequency, onChange, disabled }: FrequencyDialPr
 
         {/* Tuning Indicator */}
         <div 
-          className="absolute top-0 w-0.5 h-8 bg-tuning-red transition-all duration-100"
+          className="absolute top-0 w-0.5 h-8 bg-tuning-red transition-all duration-100 pointer-events-none"
           style={{ left: `${Math.max(0, Math.min(100, indicatorPosition))}%` }}
         >
           <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-tuning-red rotate-45" />
         </div>
 
         {/* Band Labels */}
-        <div className="absolute bottom-0 inset-x-0 flex justify-around text-xs text-dial-dark/60 font-dial">
+        <div className="absolute bottom-0 inset-x-0 flex justify-around text-xs text-dial-dark/60 font-dial pointer-events-none">
           <span>MUSIC</span>
           <span>TALK</span>
           <span>NEWS</span>
@@ -87,14 +95,63 @@ export function FrequencyDial({ frequency, onChange, disabled }: FrequencyDialPr
         </div>
       </div>
 
-      {/* Current Frequency Display */}
+      {/* Current Frequency Display + Input - separate from drag area */}
       <div className="text-center mt-4">
         <span className="nixie-tube text-3xl">{formatFrequency(frequency)}</span>
+        
+        {/* Manual Frequency Input with +/- buttons */}
+        <div className="mt-3 flex items-center justify-center gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const newFreq = Math.max(88.0, frequency - FREQUENCY_STEP);
+              onChange(Math.round(newFreq * 10) / 10);
+            }}
+            disabled={disabled || frequency <= 88.0}
+            className="w-8 h-8 flex items-center justify-center text-lg font-bold bg-dial-dark text-dial-cream border border-brass/50 rounded hover:bg-brass/30 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            −
+          </button>
+          <input
+            type="number"
+            min={88.0}
+            max={108.0}
+            step={0.1}
+            value={frequency}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              if (!isNaN(val) && val >= 88.0 && val <= 108.0) {
+                const snapped = Math.round(val / FREQUENCY_STEP) * FREQUENCY_STEP;
+                onChange(snapped);
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            disabled={disabled}
+            className="w-20 px-2 py-1 text-center text-sm font-dial bg-dial-dark text-dial-cream border border-brass/50 rounded focus:outline-none focus:border-brass disabled:opacity-50"
+            placeholder="FM"
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const newFreq = Math.min(108.0, frequency + FREQUENCY_STEP);
+              onChange(Math.round(newFreq * 10) / 10);
+            }}
+            disabled={disabled || frequency >= 108.0}
+            className="w-8 h-8 flex items-center justify-center text-lg font-bold bg-dial-dark text-dial-cream border border-brass/50 rounded hover:bg-brass/30 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            +
+          </button>
+          <span className="text-dial-dark text-sm font-dial">FM</span>
+        </div>
       </div>
 
       {/* 420 Zone Button */}
       <button
-        onClick={() => onChange(420.0)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onChange(420.0);
+        }}
         className="absolute right-2 top-2 px-2 py-1 text-xs font-dial bg-zone-420 text-white rounded hover:bg-zone-420-light transition-colors"
         disabled={disabled}
       >

@@ -1,14 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LANGUAGES, type Language } from '@/lib/i18n';
 
 export function LanguageSelector() {
   const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const currentLang = LANGUAGES.find((l) => l.code === language);
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <button className="flex items-center gap-2 px-3 py-2 bg-black/30 rounded-lg" disabled>
+        <span className="text-lg">🌐</span>
+        <span className="text-dial-cream/50 text-xs">▼</span>
+      </button>
+    );
+  }
 
   return (
     <div className="relative">

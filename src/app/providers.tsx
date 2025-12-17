@@ -5,6 +5,7 @@ import { WagmiProvider, createConfig, http } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { coinbaseWallet, injected } from 'wagmi/connectors';
 import { type ReactNode } from 'react';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 // Simple Wagmi config for Base mainnet
 const config = createConfig({
@@ -29,10 +30,12 @@ const queryClient = new QueryClient({
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThemeProvider>
   );
 }

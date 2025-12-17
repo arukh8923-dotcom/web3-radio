@@ -45,7 +45,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-cabinet-dark min-h-screen">
+      <body className="min-h-screen transition-colors duration-300">
         <Providers>
           <MiniAppInit />
           {children}

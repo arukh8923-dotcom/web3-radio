@@ -42,6 +42,7 @@ export interface Station {
   category: 'music' | 'talk' | 'news' | 'sports' | '420' | 'ambient';
   owner_address: string;
   image_url: string | null;
+  stream_url: string | null;
   is_premium: boolean;
   subscription_fee: string | null;
   listener_count: number;

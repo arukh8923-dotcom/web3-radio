@@ -147,6 +147,9 @@ export const useRadio = create<RadioState>()(
 
       loadPreset: async (slot) => {
         const { presets } = get();
+        // Guard against undefined presets (before hydration)
+        if (!presets || !Array.isArray(presets)) return;
+        
         const preset = presets.find((p) => p.slot === slot);
         if (!preset) return;
         

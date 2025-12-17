@@ -1,0 +1,165 @@
+# Web3 Radio Subgraph Schema
+
+type Station @entity {
+  id: ID!
+  frequency: BigInt!
+  owner: Bytes!
+  name: String!
+  description: String
+  category: String!
+  isPremium: Boolean!
+  subscriptionFee: BigInt
+  listenerCount: BigInt!
+  totalTips: BigInt!
+  signalStrength: BigInt!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  broadcasts: [Broadcast!]! @derivedFrom(field: "station")
+  djs: [DJ!]! @derivedFrom(field: "station")
+  listeners: [Listener!]! @derivedFrom(field: "stations")
+}
+
+type Broadcast @entity {
+  id: ID!
+  station: Station!
+  contentHash: Bytes!
+  contentType: String!
+  title: String
+  dj: Bytes!
+  timestamp: BigInt!
+  unlockTime: BigInt
+  isLive: Boolean!
+}
+
+type DJ @entity {
+  id: ID!
+  address: Bytes!
+  station: Station!
+  addedAt: BigInt!
+  isActive: Boolean!
+  totalBroadcasts: BigInt!
+  totalTipsReceived: BigInt!
+}
+
+type Listener @entity {
+  id: ID!
+  address: Bytes!
+  stations: [Station!]!
+  totalListeningTime: BigInt!
+  totalTipsSent: BigInt!
+  vibesBalance: BigInt!
+  subscribedStations: [Subscription!]! @derivedFrom(field: "listener")
+  achievements: [Achievement!]! @derivedFrom(field: "listener")
+  firstTuneIn: BigInt!
+  lastActive: BigInt!
+}
+
+type Subscription @entity {
+  id: ID!
+  listener: Listener!
+  station: Station!
+  startTime: BigInt!
+  endTime: BigInt!
+  amount: BigInt!
+  isActive: Boolean!
+}
+
+type Tip @entity {
+  id: ID!
+  from: Bytes!
+  to: Bytes!
+  station: Station!
+  amount: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+type Session @entity {
+  id: ID!
+  station: Station!
+  frequency: BigInt!
+  startTime: BigInt!
+  endTime: BigInt!
+  dj: Bytes!
+  attendeeCount: BigInt!
+  mintingClosed: Boolean!
+  nfts: [SessionNFT!]! @derivedFrom(field: "session")
+}
+
+type SessionNFT @entity {
+  id: ID!
+  session: Session!
+  tokenId: BigInt!
+  attendee: Bytes!
+  mintedAt: BigInt!
+}
+
+type HotboxRoom @entity {
+  id: ID!
+  station: Station!
+  creator: Bytes!
+  tokenGate: Bytes!
+  minBalance: BigInt!
+  memberCount: BigInt!
+  isActive: Boolean!
+  createdAt: BigInt!
+}
+
+type SmokeSignal @entity {
+  id: ID!
+  sender: Bytes!
+  station: Station!
+  message: String!
+  timestamp: BigInt!
+  expiryTime: BigInt!
+  vibesCost: BigInt!
+  isExpired: Boolean!
+}
+
+type CommunityDrop @entity {
+  id: ID!
+  station: Station!
+  timestamp: BigInt!
+  rewardAmount: BigInt!
+  rewardType: String!
+  recipientCount: BigInt!
+  executed: Boolean!
+}
+
+type Achievement @entity {
+  id: ID!
+  listener: Listener!
+  achievementType: String!
+  name: String!
+  description: String
+  unlockedAt: BigInt!
+  tokenId: BigInt
+}
+
+type MoodReaction @entity {
+  id: ID!
+  reactor: Bytes!
+  station: Station!
+  mood: String!
+  vibesEarned: BigInt!
+  timestamp: BigInt!
+}
+
+type FrequencyNFT @entity {
+  id: ID!
+  frequency: BigInt!
+  owner: Bytes!
+  station: Station
+  mintedAt: BigInt!
+  metadata: String
+}
+
+# Aggregated stats
+type GlobalStats @entity {
+  id: ID!
+  totalStations: BigInt!
+  totalListeners: BigInt!
+  totalBroadcasts: BigInt!
+  totalTipsVolume: BigInt!
+  totalVibesMinted: BigInt!
+}

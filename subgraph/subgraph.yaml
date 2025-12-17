@@ -1,0 +1,104 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: RadioCoreRegistry
+    network: base
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace with deployed address
+      abi: RadioCoreRegistry
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Station
+        - Listener
+      abis:
+        - name: RadioCoreRegistry
+          file: ./abis/RadioCoreRegistry.json
+      eventHandlers:
+        - event: StationRegistered(indexed address,indexed uint256)
+          handler: handleStationRegistered
+        - event: TunedIn(indexed address,indexed uint256)
+          handler: handleTunedIn
+        - event: TunedOut(indexed address,indexed uint256)
+          handler: handleTunedOut
+        - event: SignalStrengthUpdated(indexed uint256,uint256)
+          handler: handleSignalStrengthUpdated
+      file: ./src/radio-core-registry.ts
+
+  - kind: ethereum
+    name: RadioToken
+    network: base
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace with deployed address
+      abi: RadioToken
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Tip
+        - Subscription
+      abis:
+        - name: RadioToken
+          file: ./abis/RadioToken.json
+      eventHandlers:
+        - event: Tipped(indexed address,indexed address,uint256)
+          handler: handleTipped
+        - event: Subscribed(indexed address,indexed uint256,uint256)
+          handler: handleSubscribed
+      file: ./src/radio-token.ts
+
+  - kind: ethereum
+    name: VibesToken
+    network: base
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace with deployed address
+      abi: VibesToken
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - MoodReaction
+      abis:
+        - name: VibesToken
+          file: ./abis/VibesToken.json
+      eventHandlers:
+        - event: Reaction(indexed address,indexed uint256,uint8)
+          handler: handleReaction
+        - event: MoodRingUpdated(indexed uint256,uint8)
+          handler: handleMoodRingUpdated
+      file: ./src/vibes-token.ts
+
+  - kind: ethereum
+    name: SessionNFTFactory
+    network: base
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace with deployed address
+      abi: SessionNFTFactory
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Session
+        - SessionNFT
+      abis:
+        - name: SessionNFTFactory
+          file: ./abis/SessionNFTFactory.json
+      eventHandlers:
+        - event: SessionCreated(indexed uint256,indexed uint256)
+          handler: handleSessionCreated
+        - event: SessionNFTClaimed(indexed uint256,indexed address)
+          handler: handleSessionNFTClaimed
+        - event: SessionClosed(indexed uint256,uint256)
+          handler: handleSessionClosed
+      file: ./src/session-nft-factory.ts

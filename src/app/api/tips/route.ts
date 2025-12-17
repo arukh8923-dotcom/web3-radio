@@ -32,35 +32,56 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ tips: data });
 }
 
-// POST /api/tips - Record a tip (after on-chain tx)
+// POST /api/tips - Record a tip (off-chain for MVP, on-chain later)
 export async function POST(request: NextRequest) {
   const supabase = createServerSupabase();
   const body = await request.json();
   const { 
-    station_id, 
+    station_id,
+    station_name,
     tipper_address, 
     dj_address, 
     amount, 
     token_address,
-    tx_hash 
+    tx_hash,
+    message,
   } = body;
 
-  if (!station_id || !tipper_address || !dj_address || !amount || !tx_hash) {
+  // For MVP off-chain, we only require tipper and amount
+  if (!tipper_address || !amount) {
     return NextResponse.json(
-      { error: 'Missing required fields' },
+      { error: 'tipper_address and amount required' },
       { status: 400 }
     );
+  }
+
+  // Get or create user
+  const { data: user } = await supabase
+    .from('users')
+    .select('id')
+    .eq('wallet_address', tipper_address.toLowerCase())
+    .single();
+
+  let userId = user?.id;
+  if (!userId) {
+    const { data: newUser } = await supabase
+      .from('users')
+      .insert({ wallet_address: tipper_address.toLowerCase() })
+      .select('id')
+      .single();
+    userId = newUser?.id;
   }
 
   const { data, error } = await supabase
     .from('tips')
     .insert({
-      station_id,
-      tipper_address,
-      dj_address,
+      station_id: station_id || null,
+      tipper_address: tipper_address.toLowerCase(),
+      dj_address: dj_address?.toLowerCase() || null,
       amount,
-      token_address: token_address || 'RADIO',
-      tx_hash,
+      token_address: token_address || 'ETH',
+      tx_hash: tx_hash || `pending-${Date.now()}`, // Placeholder for off-chain
+      message: message || null,
     })
     .select()
     .single();
@@ -69,5 +90,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ tip: data }, { status: 201 });
+  return NextResponse.json({ tip: data, message: 'Tip recorded (off-chain MVP)' }, { status: 201 });
 }

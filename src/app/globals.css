@@ -7,12 +7,38 @@
   --brass: #D4AF37;
   --nixie-orange: #FF6D00;
   --pilot-amber: #FFB300;
+  --bg-primary: #1a1a1a;
+  --text-primary: #F5E6D3;
+}
+
+/* Light Mode Variables */
+.light {
+  --cabinet-wood: #A1887F;
+  --bg-primary: #F5F5F5;
+  --text-primary: #3E2723;
+}
+
+/* Dark Mode Variables */
+.dark {
+  --cabinet-wood: #5D4037;
+  --bg-primary: #1a1a1a;
+  --text-primary: #F5E6D3;
+}
+
+/* Base body styles */
+body {
+  @apply bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300;
 }
 
 /* Retro Radio Base Styles */
 .radio-cabinet {
-  @apply bg-cabinet-wood rounded-3xl shadow-cabinet;
+  @apply rounded-3xl shadow-cabinet;
   background: linear-gradient(145deg, #6D4C41 0%, #5D4037 50%, #4E342E 100%);
+}
+
+/* Light mode radio cabinet */
+.light .radio-cabinet {
+  background: linear-gradient(145deg, #BCAAA4 0%, #A1887F 50%, #8D6E63 100%);
 }
 
 .speaker-grille {
@@ -32,6 +58,12 @@
     0 0 10px rgba(255, 109, 0, 0.8),
     0 0 20px rgba(255, 109, 0, 0.5),
     0 0 30px rgba(255, 109, 0, 0.3);
+}
+
+.light .nixie-tube {
+  text-shadow: 
+    0 0 5px rgba(255, 109, 0, 0.5),
+    0 0 10px rgba(255, 109, 0, 0.3);
 }
 
 /* Dial Glow */
@@ -67,12 +99,17 @@
 
 /* Preset Button */
 .preset-button {
-  @apply px-4 py-2 rounded-lg font-dial text-sm uppercase tracking-wider;
+  @apply px-4 py-2 rounded-lg font-dial text-sm uppercase tracking-wider text-dial-cream;
   background: linear-gradient(180deg, #8D6E63 0%, #6D4C41 100%);
   border: 2px solid #D4AF37;
   box-shadow: 
     inset 0 1px 0 rgba(255,255,255,0.2),
     0 2px 4px rgba(0,0,0,0.3);
+}
+
+.light .preset-button {
+  @apply text-cabinet-dark;
+  background: linear-gradient(180deg, #D7CCC8 0%, #BCAAA4 100%);
 }
 
 .preset-button:active {
@@ -116,3 +153,64 @@
 .mood-melancholy { @apply bg-melancholy; }
 .mood-euphoric { @apply bg-euphoric; }
 .mood-zen { @apply bg-zen; }
+
+
+/* Ensure minimum touch targets (44px) for accessibility */
+button, 
+[role="button"],
+a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Exception for inline text buttons */
+.inline-button {
+  min-height: auto;
+  min-width: auto;
+}
+
+/* Safe area for mobile devices */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Loading indicator */
+.loading-spinner {
+  @apply w-5 h-5 border-2 border-brass/30 border-t-brass rounded-full animate-spin;
+}
+
+/* Smooth page transitions */
+.page-transition {
+  @apply transition-opacity duration-200;
+}
+
+
+/* Hide scrollbar but allow scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mini app optimizations */
+@media (max-width: 400px) {
+  .preset-button {
+    @apply px-2 py-1.5 text-xs;
+    min-height: 36px;
+  }
+  
+  .radio-cabinet {
+    @apply p-3;
+  }
+  
+  .nixie-tube {
+    font-size: 0.875rem;
+  }
+}
+
+/* Ensure readable text on small screens */
+.text-readable {
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+}

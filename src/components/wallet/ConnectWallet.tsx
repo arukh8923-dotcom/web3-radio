@@ -116,10 +116,10 @@ export function ConnectWallet() {
                   {fcProfile?.username ? (
                     <>
                       <p className="text-dial-cream font-dial">@{fcProfile.username}</p>
-                      <p className="text-dial-cream/50 text-xs">FID: {fcProfile.fid}</p>
+                      <p className="text-dial-cream/50 text-xs">ID: {fcProfile.fid}</p>
                     </>
                   ) : (
-                    <p className="text-dial-cream/60 text-xs">No Farcaster linked</p>
+                    <p className="text-dial-cream/60 text-xs">No profile linked</p>
                   )}
                 </div>
               </div>
