@@ -40,8 +40,13 @@ export function StationCreator({ isOpen, onClose, onCreated }: StationCreatorPro
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          ownerAddress: address,
+          name: formData.name,
+          description: formData.description,
+          category: formData.category,
+          frequency: formData.frequency,
+          is_premium: formData.isPremium,
+          subscription_fee: formData.subscriptionFee,
+          owner_address: address,
         }),
       });
 
