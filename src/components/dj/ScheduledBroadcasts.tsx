@@ -81,9 +81,15 @@ export default function ScheduledBroadcasts({
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    contentType: 'audio' | 'visual' | 'generative';
+    contentHash: string;
+    scheduledDate: string;
+    scheduledTime: string;
+  }>({
     title: '',
-    contentType: 'audio' as const,
+    contentType: 'audio',
     contentHash: '',
     scheduledDate: '',
     scheduledTime: '',
