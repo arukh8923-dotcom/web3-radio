@@ -70,13 +70,13 @@ export function ConnectWallet() {
   if (isConnected && address) {
     const displayName = fcProfile?.username 
       ? `@${fcProfile.username}` 
-      : `${address.slice(0, 4)}...${address.slice(-3)}`;
+      : address; // Full address, no truncation
 
     return (
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="preset-button text-xs flex items-center gap-2"
+          className="preset-button text-xs flex items-center gap-2 max-w-[200px]"
         >
           {fcProfile?.pfp ? (
             <Image
@@ -84,17 +84,19 @@ export function ConnectWallet() {
               alt="PFP"
               width={20}
               height={20}
-              className="rounded-full"
+              className="rounded-full flex-shrink-0"
             />
           ) : (
-            <span className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
           )}
-          {loadingProfile ? '...' : displayName}
-          <span>▼</span>
+          <span className="truncate">
+            {loadingProfile ? 'Loading...' : displayName}
+          </span>
+          <span className="flex-shrink-0">▼</span>
         </button>
         
         {isOpen && (
-          <div className="absolute right-0 top-full mt-2 bg-cabinet-dark border border-brass rounded-lg shadow-xl z-50 min-w-[200px]">
+          <div className="absolute right-0 top-full mt-2 bg-cabinet-dark border border-brass rounded-lg shadow-xl z-50 min-w-[280px]">
             <div className="p-3 border-b border-brass/30">
               <div className="flex items-center gap-3">
                 {fcProfile?.pfp ? (
@@ -103,14 +105,14 @@ export function ConnectWallet() {
                     alt="PFP"
                     width={40}
                     height={40}
-                    className="rounded-full"
+                    className="rounded-full flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-brass/30 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-brass/30 flex items-center justify-center flex-shrink-0">
                     <span className="text-brass">?</span>
                   </div>
                 )}
-                <div>
+                <div className="min-w-0">
                   {fcProfile?.username ? (
                     <>
                       <p className="text-dial-cream font-dial">@{fcProfile.username}</p>
@@ -121,8 +123,8 @@ export function ConnectWallet() {
                   )}
                 </div>
               </div>
-              <p className="text-dial-cream/40 text-xs mt-2 font-mono">
-                {address.slice(0, 10)}...{address.slice(-8)}
+              <p className="text-dial-cream/40 text-xs mt-2 font-mono break-all">
+                {address}
               </p>
             </div>
             <button

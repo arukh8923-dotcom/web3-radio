@@ -28,23 +28,28 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Fetch from Neynar API (free tier)
+    // Fetch from Neynar API
+    const apiKey = process.env.NEYNAR_API_KEY || 'NEYNAR_API_DOCS';
     const neynarRes = await fetch(
-      `https://api.neynar.com/v2/farcaster/user/by_verification?address=${address}`,
+      `https://api.neynar.com/v2/farcaster/user/bulk-by-address?addresses=${address}`,
       {
         headers: {
-          'api_key': process.env.NEYNAR_API_KEY || 'NEYNAR_API_DOCS',
+          'accept': 'application/json',
+          'api_key': apiKey,
         },
       }
     );
 
     if (!neynarRes.ok) {
-      // No Farcaster account found for this address
+      console.error('Neynar API error:', neynarRes.status, await neynarRes.text());
       return NextResponse.json({ fid: null, username: null, pfp: null });
     }
 
     const neynarData = await neynarRes.json();
-    const user = neynarData.user;
+    
+    // Response format: { [address]: [users] }
+    const users = neynarData[address.toLowerCase()] || neynarData[address];
+    const user = users?.[0];
 
     if (!user) {
       return NextResponse.json({ fid: null, username: null, pfp: null });
