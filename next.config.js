@@ -2,8 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['ipfs.io', 'gateway.pinata.cloud'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'ipfs.io' },
+      { protocol: 'https', hostname: 'gateway.pinata.cloud' },
+    ],
   },
+  // Enable Turbopack for Next.js 16
+  turbopack: {},
+  // Webpack config for fallback (used when not using Turbopack)
   webpack: (config) => {
     config.resolve.fallback = { 
       fs: false, 
