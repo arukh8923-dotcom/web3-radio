@@ -31,6 +31,7 @@ export const CONTRACTS = {
   REQUEST_LINE: '' as Address,
   
   // External (Base mainnet)
-  CHAINLINK_VRF: '0x...' as Address,
+  // Chainlink VRF Coordinator on Base - Phase 2
+  CHAINLINK_VRF: '' as Address, // Will be configured when Community Drops feature is ready
   EAS_CONTRACT: '0x4200000000000000000000000000000000000021' as Address,
 } as const;

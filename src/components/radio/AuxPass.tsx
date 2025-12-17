@@ -312,7 +312,7 @@ export function AuxPass({ stationId, frequency, isOpen, onClose, onBroadcast }: 
                       Need {(auxState?.min_vibes_required || 0) - userVibes} more VIBES to join
                     </p>
                     <p className="text-dial-cream/40 text-xs mt-1">
-                      Earn VIBES by reacting and participating!
+                      $VIBES rewards coming soon!
                     </p>
                   </div>
                 )}

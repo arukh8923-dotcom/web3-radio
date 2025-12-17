@@ -100,7 +100,7 @@ export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          alert('🎉 Referral code applied! You and your referrer will earn bonus VIBES!');
+          alert('🎉 Referral code applied! Rewards will be distributed when $VIBES launches.');
           setHasReferrer(true);
           setApplyCode('');
         } else {
@@ -128,7 +128,7 @@ export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
           <div>
             <h3 className="nixie-tube text-lg">🔗 REFERRAL PROGRAM</h3>
             <p className="text-dial-cream/50 text-xs">
-              Earn VIBES for every friend you bring
+              Invite friends • $VIBES rewards coming soon
             </p>
           </div>
           <button onClick={onClose} className="text-dial-cream/60 hover:text-dial-cream text-2xl">
@@ -163,13 +163,13 @@ export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
                     <p className="text-brass text-2xl font-bold">{stats.active_referrals}</p>
                     <p className="text-dial-cream/50 text-xs">Active Users</p>
                   </div>
-                  <div className="bg-black/30 rounded-lg p-3 text-center">
-                    <p className="text-green-400 text-2xl font-bold">{stats.total_vibes_earned}</p>
-                    <p className="text-dial-cream/50 text-xs">VIBES Earned</p>
+                  <div className="bg-black/30 rounded-lg p-3 text-center opacity-50">
+                    <p className="text-green-400/50 text-lg font-bold">--</p>
+                    <p className="text-dial-cream/30 text-xs">VIBES (Soon)</p>
                   </div>
-                  <div className="bg-black/30 rounded-lg p-3 text-center">
-                    <p className="text-amber-400 text-2xl font-bold">{stats.pending_vibes}</p>
-                    <p className="text-dial-cream/50 text-xs">Pending VIBES</p>
+                  <div className="bg-black/30 rounded-lg p-3 text-center opacity-50">
+                    <p className="text-amber-400/50 text-lg font-bold">--</p>
+                    <p className="text-dial-cream/30 text-xs">Pending (Soon)</p>
                   </div>
                 </div>
               </div>

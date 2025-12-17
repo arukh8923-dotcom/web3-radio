@@ -55,18 +55,20 @@ export const RADIO_TOKEN_ABI = parseAbi([
   'event Subscribed(address indexed listener, uint256 indexed frequency, uint256 expiry)',
 ]);
 
-// VibesToken ABI (for reactions)
+// VibesToken ABI (for reactions) - Phase 2
+// Note: $VIBES will be deployed via Clanker with 100B fixed supply
+// These functions will be in VibesWrapper contract, not the base token
 export const VIBES_TOKEN_ABI = parseAbi([
   'function name() view returns (string)',
   'function symbol() view returns (string)',
   'function decimals() view returns (uint8)',
   'function balanceOf(address owner) view returns (uint256)',
   'function transfer(address to, uint256 amount) returns (bool)',
-  'function react(uint256 frequency, uint8 mood) external',
-  'function getMoodRing(uint256 frequency) view returns (uint8)',
-  'function spendVibes(uint256 amount, string action) external',
-  'event Reaction(address indexed listener, uint256 indexed frequency, uint8 mood)',
-  'event VibesSpent(address indexed user, uint256 amount, string action)',
+  // Phase 2 wrapper functions (Coming Soon)
+  // 'function react(uint256 frequency, uint8 mood) external',
+  // 'function getMoodRing(uint256 frequency) view returns (uint8)',
+  // 'function spendVibes(uint256 amount, string action) external',
+  'event Transfer(address indexed from, address indexed to, uint256 value)',
 ]);
 
 // StationNFT ABI

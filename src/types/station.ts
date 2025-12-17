@@ -17,7 +17,11 @@ export const StationMetadataSchema = z.object({
   description: z.string().max(500),
   category: z.nativeEnum(StationCategory),
   imageUrl: z.string().url().optional(),
-  frequency: z.number().min(88).max(108), // FM range simulation
+  // FM range 88-108, plus special 420 zone (419-421)
+  frequency: z.number().refine(
+    (f) => (f >= 88 && f <= 108) || (f >= 419 && f <= 421),
+    { message: 'Frequency must be 88-108 FM or 419-421 (420 Zone)' }
+  ),
   owner: z.string(), // Address
   djs: z.array(z.string()), // Array of addresses
   isPremium: z.boolean(),
@@ -35,6 +39,7 @@ export interface StationState {
   signalStrength: number;
   isLive: boolean;
   currentBroadcastHash: string | null;
+  streamUrl?: string; // Audio stream URL
 }
 
 // Signal Strength calculation factors

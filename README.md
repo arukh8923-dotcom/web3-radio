@@ -336,7 +336,7 @@ File manifest ada di `public/.well-known/farcaster.json`
 | Token | Fungsi |
 |-------|--------|
 | **$RADIO** | Governance, tip DJ, create station |
-| **$VIBES** | Earned dari reactions, special access |
+| **$VIBES** | Social features, special access (Coming Soon) |
 
 ---
 

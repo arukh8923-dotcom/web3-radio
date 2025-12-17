@@ -20,10 +20,10 @@ interface ProfilePanelProps {
 export function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { radio, vibes, isLoading: balancesLoading } = useTokenBalances();
+  const { radio, isLoading: balancesLoading } = useTokenBalances();
   const [profile, setProfile] = useState<FarcasterProfile | null>(null);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({ reactions: 0, messages: 0, achievements: 0 });
+  const [stats, setStats] = useState({ achievements: 0 });
   const [showAchievements, setShowAchievements] = useState(false);
 
   useEffect(() => {
@@ -58,8 +58,8 @@ export function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
-    // Other stats - placeholder for now
-    setStats(prev => ({ ...prev, reactions: 42, messages: 15 }));
+    // TODO: Fetch real stats from database
+    // Reactions and messages stats will be available in Phase 2 with $VIBES
   };
 
   const handleDisconnect = () => {
@@ -142,23 +142,26 @@ export function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                     {balancesLoading ? '...' : parseFloat(radio).toFixed(2)}
                   </p>
                 </div>
-                <div className="bg-black/30 rounded-lg p-3 text-center">
+                {/* $VIBES - Phase 2 */}
+                <div className="bg-black/30 rounded-lg p-3 text-center opacity-50">
                   <p className="text-dial-cream/50 text-xs">$VIBES</p>
-                  <p className="text-brass font-dial text-lg">
-                    {balancesLoading ? '...' : parseFloat(vibes).toFixed(2)}
+                  <p className="text-dial-cream/40 font-dial text-sm">
+                    Coming Soon
                   </p>
                 </div>
               </div>
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="bg-black/30 rounded-lg p-3 text-center">
+                {/* Reactions - Coming Soon with $VIBES */}
+                <div className="bg-black/30 rounded-lg p-3 text-center opacity-50">
                   <p className="text-dial-cream/50 text-xs">Reactions</p>
-                  <p className="text-dial-cream font-dial">{stats.reactions}</p>
+                  <p className="text-dial-cream/40 text-[10px]">Soon</p>
                 </div>
-                <div className="bg-black/30 rounded-lg p-3 text-center">
+                {/* Messages */}
+                <div className="bg-black/30 rounded-lg p-3 text-center opacity-50">
                   <p className="text-dial-cream/50 text-xs">Messages</p>
-                  <p className="text-dial-cream font-dial">{stats.messages}</p>
+                  <p className="text-dial-cream/40 text-[10px]">Soon</p>
                 </div>
                 <div 
                   className="bg-black/30 rounded-lg p-3 text-center cursor-pointer hover:bg-black/40 transition-colors"

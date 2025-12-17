@@ -21,7 +21,7 @@ const miniAppEmbed = {
 
 export const metadata: Metadata = {
   title: 'Web3 Radio - Decentralized Radio on Base',
-  description: 'Full on-chain radio experience with retro vibes. Tune in, tip DJs, earn $VIBES.',
+  description: 'Full on-chain radio experience with retro vibes. Tune in, tip DJs with $RADIO.',
   openGraph: {
     title: 'Web3 Radio',
     description: 'Decentralized radio on Base mainnet',

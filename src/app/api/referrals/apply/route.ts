@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Referral code applied successfully! You and your referrer will earn 50 VIBES each.',
+      message: 'Referral code applied successfully! Rewards will be distributed when $VIBES launches.',
       referrer_address: referrer.wallet_address,
     });
   } catch (error) {

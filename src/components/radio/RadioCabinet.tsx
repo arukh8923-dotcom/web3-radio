@@ -260,9 +260,14 @@ export function RadioCabinet() {
             </div>
           </div>
 
-          {/* Mood Ring */}
-          {currentStation && moodRing && (
-            <MoodRingDisplay moodRing={moodRing} stationId={currentStation.id} />
+          {/* Mood Ring - Coming Soon (Phase 2 with $VIBES) */}
+          {currentStation && (
+            <div className="mt-3 p-2 bg-purple-900/10 border border-purple-500/20 rounded-lg opacity-60">
+              <div className="flex items-center justify-between">
+                <span className="text-purple-400/60 text-xs">💜 Mood Ring</span>
+                <span className="text-purple-400/40 text-[10px]">Coming Soon with $VIBES</span>
+              </div>
+            </div>
           )}
 
           {/* Chat & Info Row - Always visible */}
@@ -296,37 +301,47 @@ export function RadioCabinet() {
             </div>
           </div>
 
-          {/* Smoke Signals (420 Zone) */}
+          {/* Smoke Signals (420 Zone) - Coming Soon (Phase 2 with $VIBES) */}
           {currentStation && in420Zone && (
-            <SmokeSignals stationId={currentStation.id} />
+            <div className="mt-3 p-2 bg-green-900/10 border border-green-500/20 rounded-lg opacity-60">
+              <div className="flex items-center justify-between">
+                <span className="text-green-400/60 text-xs">💨 Smoke Signals</span>
+                <span className="text-green-400/40 text-[10px]">Coming Soon with $VIBES</span>
+              </div>
+            </div>
           )}
 
-          {/* 420 Zone Features */}
+          {/* 420 Zone Features - Coming Soon (Phase 2 with $VIBES) */}
           {currentStation && in420Zone && (
-            <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-              <p className="text-green-400 text-xs font-bold mb-2">🌿 420 ZONE FEATURES</p>
+            <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg opacity-60">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-green-400 text-xs font-bold">🌿 420 ZONE FEATURES</p>
+                <span className="text-green-400/60 text-[10px] bg-green-900/50 px-2 py-0.5 rounded">
+                  Coming Soon with $VIBES
+                </span>
+              </div>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setSessionsOpen(true)}
-                  className="preset-button text-xs bg-green-900/50 hover:bg-green-800/50"
+                  disabled
+                  className="preset-button text-xs bg-green-900/30 cursor-not-allowed opacity-50"
                 >
                   🎫 Sessions
                 </button>
                 <button
-                  onClick={() => setAuxPassOpen(true)}
-                  className="preset-button text-xs bg-green-900/50 hover:bg-green-800/50"
+                  disabled
+                  className="preset-button text-xs bg-green-900/30 cursor-not-allowed opacity-50"
                 >
                   🎧 Aux Pass
                 </button>
                 <button
-                  onClick={() => setHotboxOpen(true)}
-                  className="preset-button text-xs bg-green-900/50 hover:bg-green-800/50"
+                  disabled
+                  className="preset-button text-xs bg-green-900/30 cursor-not-allowed opacity-50"
                 >
                   🚪 Hotbox
                 </button>
                 <button
-                  onClick={() => setDropsOpen(true)}
-                  className="preset-button text-xs bg-green-900/50 hover:bg-green-800/50"
+                  disabled
+                  className="preset-button text-xs bg-green-900/30 cursor-not-allowed opacity-50"
                 >
                   🎁 Drops
                 </button>

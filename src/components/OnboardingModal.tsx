@@ -20,7 +20,7 @@ const slides = [
   {
     icon: '💜',
     title: 'React with Vibes',
-    description: 'Send reactions to show your mood. Earn $VIBES tokens by participating in the community.',
+    description: 'Send reactions to show your mood. $VIBES token rewards coming in Phase 2.',
   },
   {
     icon: '💬',

@@ -78,7 +78,7 @@ export function DJStudioPanel({ isOpen, onClose }: DJStudioPanelProps) {
               {activeTab === 'create' && (
                 <StationCreator
                   onClose={() => setActiveTab('broadcast')}
-                  onSuccess={(stationId) => {
+                  onSuccess={(stationId: string) => {
                     setMyStationId(stationId);
                     setActiveTab('broadcast');
                   }}
