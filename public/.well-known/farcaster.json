@@ -1,0 +1,27 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Web3 Radio",
+    "iconUrl": "https://your-domain.com/icon.png",
+    "homeUrl": "https://your-domain.com",
+    "imageUrl": "https://your-domain.com/og-image.png",
+    "buttonTitle": "🎵 Tune In",
+    "splashImageUrl": "https://your-domain.com/splash.png",
+    "splashBackgroundColor": "#5D4037",
+    "subtitle": "Full On-Chain Radio on Base",
+    "description": "A decentralized radio platform where every tune, tip, and vibe is on-chain. Discover stations, tip DJs with $RADIO, earn $VIBES, and join the 420 community.",
+    "primaryCategory": "entertainment",
+    "tags": ["radio", "music", "web3", "base", "420", "defi"],
+    "requiredChains": ["eip155:8453"],
+    "requiredCapabilities": [
+      "actions.signIn",
+      "wallet.getEthereumProvider",
+      "actions.composeCast"
+    ]
+  }
+}

@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cabinet-wood: #5D4037;
+  --brass: #D4AF37;
+  --nixie-orange: #FF6D00;
+  --pilot-amber: #FFB300;
+}
+
+/* Retro Radio Base Styles */
+.radio-cabinet {
+  @apply bg-cabinet-wood rounded-3xl shadow-cabinet;
+  background: linear-gradient(145deg, #6D4C41 0%, #5D4037 50%, #4E342E 100%);
+}
+
+.speaker-grille {
+  background: repeating-linear-gradient(
+    0deg,
+    #212121 0px,
+    #212121 2px,
+    #2a2a2a 2px,
+    #2a2a2a 4px
+  );
+}
+
+/* Nixie Tube Effect */
+.nixie-tube {
+  @apply font-nixie text-nixie-orange;
+  text-shadow: 
+    0 0 10px rgba(255, 109, 0, 0.8),
+    0 0 20px rgba(255, 109, 0, 0.5),
+    0 0 30px rgba(255, 109, 0, 0.3);
+}
+
+/* Dial Glow */
+.dial-glow {
+  @apply animate-dial-glow;
+  box-shadow: 0 0 20px rgba(255, 109, 0, 0.5);
+}
+
+/* Pilot Light */
+.pilot-light {
+  @apply w-3 h-3 rounded-full bg-pilot-amber animate-pilot-pulse;
+}
+
+/* VU Meter Needle */
+.vu-needle {
+  transform-origin: bottom center;
+  transition: transform 0.1s ease-out;
+}
+
+/* Knob Styles */
+.radio-knob {
+  @apply rounded-full shadow-knob cursor-pointer;
+  background: linear-gradient(145deg, #4E342E 0%, #3E2723 100%);
+}
+
+.radio-knob::before {
+  content: '';
+  @apply absolute w-1 h-3 bg-brass rounded-full;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Preset Button */
+.preset-button {
+  @apply px-4 py-2 rounded-lg font-dial text-sm uppercase tracking-wider;
+  background: linear-gradient(180deg, #8D6E63 0%, #6D4C41 100%);
+  border: 2px solid #D4AF37;
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    0 2px 4px rgba(0,0,0,0.3);
+}
+
+.preset-button:active {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 2px 4px rgba(0,0,0,0.3),
+    0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* 420 Zone Theme */
+.zone-420 {
+  background: linear-gradient(
+    135deg,
+    rgba(123, 31, 162, 0.3) 0%,
+    rgba(171, 71, 188, 0.2) 50%,
+    rgba(123, 31, 162, 0.3) 100%
+  );
+  animation: zone-420-pulse 4s ease-in-out infinite;
+}
+
+@keyframes zone-420-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* Oscilloscope */
+.oscilloscope {
+  @apply bg-black rounded-lg overflow-hidden;
+  box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.1);
+}
+
+.oscilloscope-line {
+  stroke: #00ff00;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 3px #00ff00);
+}
+
+/* Mood Ring Colors */
+.mood-chill { @apply bg-chill; }
+.mood-hype { @apply bg-hype; }
+.mood-melancholy { @apply bg-melancholy; }
+.mood-euphoric { @apply bg-euphoric; }
+.mood-zen { @apply bg-zen; }
