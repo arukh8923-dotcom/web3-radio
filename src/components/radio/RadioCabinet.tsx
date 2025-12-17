@@ -24,6 +24,10 @@ import { RecordingDVR } from './RecordingDVR';
 import { RequestLine } from './RequestLine';
 import { ReceptionQuality } from './ReceptionQuality';
 import { StereoToggle } from './StereoToggle';
+import { SessionNFT } from './SessionNFT';
+import { AuxPass } from './AuxPass';
+import { HotboxRoom } from './HotboxRoom';
+import { CommunityDrops } from './CommunityDrops';
 import { is420Zone } from '@/constants/frequencies';
 import { useRadio } from '@/hooks/useRadio';
 
@@ -79,6 +83,11 @@ export function RadioCabinet() {
   const [subscriptionOpen, setSubscriptionOpen] = useState(false);
   const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
   const [currentBand, setCurrentBand] = useState('all');
+  // 420 Zone features
+  const [sessionsOpen, setSessionsOpen] = useState(false);
+  const [auxPassOpen, setAuxPassOpen] = useState(false);
+  const [hotboxOpen, setHotboxOpen] = useState(false);
+  const [dropsOpen, setDropsOpen] = useState(false);
   
   const in420Zone = is420Zone(frequency);
   const activePreset = presets?.find(p => p.frequency === frequency)?.slot;
@@ -291,6 +300,39 @@ export function RadioCabinet() {
           {currentStation && in420Zone && (
             <SmokeSignals stationId={currentStation.id} />
           )}
+
+          {/* 420 Zone Features */}
+          {currentStation && in420Zone && (
+            <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+              <p className="text-green-400 text-xs font-bold mb-2">🌿 420 ZONE FEATURES</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSessionsOpen(true)}
+                  className="preset-button text-xs bg-green-900/50 hover:bg-green-800/50"
+                >
+                  🎫 Sessions
+                </button>
+                <button
+                  onClick={() => setAuxPassOpen(true)}
+                  className="preset-button text-xs bg-green-900/50 hover:bg-green-800/50"
+                >
+                  🎧 Aux Pass
+                </button>
+                <button
+                  onClick={() => setHotboxOpen(true)}
+                  className="preset-button text-xs bg-green-900/50 hover:bg-green-800/50"
+                >
+                  🚪 Hotbox
+                </button>
+                <button
+                  onClick={() => setDropsOpen(true)}
+                  className="preset-button text-xs bg-green-900/50 hover:bg-green-800/50"
+                >
+                  🎁 Drops
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -323,6 +365,32 @@ export function RadioCabinet() {
         onClose={() => setSubscriptionOpen(false)}
         stationName={currentStation?.name || 'Unknown Station'}
         stationAddress={currentStation?.owner_address}
+      />
+
+      {/* 420 Zone Modals */}
+      <SessionNFT
+        stationId={currentStation?.id}
+        frequency={frequency}
+        isOpen={sessionsOpen}
+        onClose={() => setSessionsOpen(false)}
+      />
+
+      <AuxPass
+        stationId={currentStation?.id}
+        isOpen={auxPassOpen}
+        onClose={() => setAuxPassOpen(false)}
+      />
+
+      <HotboxRoom
+        stationId={currentStation?.id}
+        isOpen={hotboxOpen}
+        onClose={() => setHotboxOpen(false)}
+      />
+
+      <CommunityDrops
+        stationId={currentStation?.id}
+        isOpen={dropsOpen}
+        onClose={() => setDropsOpen(false)}
       />
     </div>
   );
