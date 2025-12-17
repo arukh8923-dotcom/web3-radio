@@ -4,9 +4,9 @@ import { supabase } from '@/lib/supabase';
 // GET /api/hotbox/[roomId] - Get room details, members, and chat
 export async function GET(
   request: NextRequest,
-  { params }: { params: { roomId: string } }
+  { params }: { params: Promise<{ roomId: string }> }
 ) {
-  const { roomId } = params;
+  const { roomId } = await params;
   const { searchParams } = new URL(request.url);
   const walletAddress = searchParams.get('wallet');
 
