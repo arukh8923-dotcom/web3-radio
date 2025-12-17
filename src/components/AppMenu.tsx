@@ -48,7 +48,7 @@ export function AppMenu({ onOpenDiscover, onOpenProfile, onOpenSettings, onOpenH
             <button
               key={index}
               onClick={() => {
-                item.action();
+                item.action?.();
                 setIsOpen(false);
               }}
               className="w-full px-4 py-3 text-left text-sm text-dial-cream hover:bg-black/30 transition-colors flex items-center gap-3 min-h-[48px]"
