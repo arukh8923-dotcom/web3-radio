@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1410"/>
+      <stop offset="100%" style="stop-color:#2d1f1a"/>
+    </linearGradient>
+    <linearGradient id="cabinet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5D4037"/>
+      <stop offset="100%" style="stop-color:#3E2723"/>
+    </linearGradient>
+    <linearGradient id="dial" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD54F"/>
+      <stop offset="100%" style="stop-color:#FF8F00"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Radio Cabinet -->
+  <rect x="350" y="100" width="500" height="430" rx="30" fill="url(#cabinet)"/>
+  <!-- Dial area -->
+  <rect x="390" y="140" width="420" height="150" rx="10" fill="#1a1410"/>
+  <!-- Frequency numbers -->
+  <text x="420" y="200" fill="#FFD54F" font-family="Arial" font-size="24">88</text>
+  <text x="500" y="200" fill="#FFD54F" font-family="Arial" font-size="24">92</text>
+  <text x="580" y="200" fill="#FFD54F" font-family="Arial" font-size="24">96</text>
+  <text x="660" y="200" fill="#FFD54F" font-family="Arial" font-size="24">100</text>
+  <text x="740" y="200" fill="#FFD54F" font-family="Arial" font-size="24">108</text>
+  <!-- Dial line -->
+  <line x1="400" y1="220" x2="800" y2="220" stroke="#3E2723" stroke-width="2"/>
+  <!-- Tuning indicator -->
+  <line x1="600" y1="180" x2="600" y2="260" stroke="#FF5722" stroke-width="4"/>
+  <!-- FM label -->
+  <text x="600" y="270" text-anchor="middle" fill="#FFD54F" font-family="Arial" font-size="28" font-weight="bold">FM</text>
+  <!-- Speaker grille -->
+  <rect x="390" y="320" width="420" height="180" rx="10" fill="#1a1410"/>
+  <g stroke="#3E2723" stroke-width="4">
+    <line x1="410" y1="340" x2="790" y2="340"/>
+    <line x1="410" y1="365" x2="790" y2="365"/>
+    <line x1="410" y1="390" x2="790" y2="390"/>
+    <line x1="410" y1="415" x2="790" y2="415"/>
+    <line x1="410" y1="440" x2="790" y2="440"/>
+    <line x1="410" y1="465" x2="790" y2="465"/>
+    <line x1="410" y1="490" x2="790" y2="490"/>
+  </g>
+  <!-- Title -->
+  <text x="600" y="580" text-anchor="middle" fill="#FFD54F" font-family="Arial" font-size="48" font-weight="bold">WEB3 RADIO</text>
+  <!-- Subtitle -->
+  <text x="600" y="610" text-anchor="middle" fill="#BCAAA4" font-family="Arial" font-size="20">Full On-Chain Radio on Base</text>
+  <!-- Pilot light -->
+  <circle cx="820" cy="160" r="10" fill="#FF5722"/>
+</svg>

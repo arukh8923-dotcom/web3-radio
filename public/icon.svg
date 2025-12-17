@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="cabinet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5D4037"/>
+      <stop offset="100%" style="stop-color:#3E2723"/>
+    </linearGradient>
+    <linearGradient id="dial" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD54F"/>
+      <stop offset="100%" style="stop-color:#FF8F00"/>
+    </linearGradient>
+  </defs>
+  <!-- Cabinet -->
+  <rect x="10" y="10" width="180" height="180" rx="20" fill="url(#cabinet)"/>
+  <!-- Speaker grille -->
+  <rect x="30" y="110" width="140" height="60" rx="5" fill="#1a1410"/>
+  <line x1="40" y1="120" x2="160" y2="120" stroke="#3E2723" stroke-width="3"/>
+  <line x1="40" y1="130" x2="160" y2="130" stroke="#3E2723" stroke-width="3"/>
+  <line x1="40" y1="140" x2="160" y2="140" stroke="#3E2723" stroke-width="3"/>
+  <line x1="40" y1="150" x2="160" y2="150" stroke="#3E2723" stroke-width="3"/>
+  <line x1="40" y1="160" x2="160" y2="160" stroke="#3E2723" stroke-width="3"/>
+  <!-- Dial area -->
+  <rect x="30" y="30" width="140" height="65" rx="5" fill="#1a1410"/>
+  <!-- Frequency dial -->
+  <circle cx="100" cy="62" r="25" fill="none" stroke="url(#dial)" stroke-width="4"/>
+  <!-- Dial indicator -->
+  <line x1="100" y1="42" x2="100" y2="52" stroke="#FF5722" stroke-width="3"/>
+  <!-- FM text -->
+  <text x="100" y="68" text-anchor="middle" fill="#FFD54F" font-family="Arial" font-size="12" font-weight="bold">FM</text>
+  <!-- Pilot light -->
+  <circle cx="160" cy="45" r="5" fill="#FF5722">
+    <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>
