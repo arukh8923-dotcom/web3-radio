@@ -18,12 +18,12 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Use frequency as chat room ID if no station
-  const chatRoomId = stationId || `freq-${frequency.toFixed(1)}`;
+  // Only use valid station ID for chat
+  const chatRoomId = stationId;
 
   // Load initial messages
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !chatRoomId) return;
 
     async function loadMessages() {
       try {
@@ -41,7 +41,7 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
 
   // Subscribe to real-time updates
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !chatRoomId) return;
 
     const channel = subscribeToChat(chatRoomId, (message) => {
       setMessages((prev) => [...prev, message]);
@@ -91,7 +91,7 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
           <div>
             <h3 className="nixie-tube text-lg">💬 LIVE CHAT</h3>
             <p className="text-dial-cream/50 text-xs">
-              {stationId ? 'Station Chat' : `${frequency.toFixed(1)} FM`}
+              {stationId ? `${frequency.toFixed(1)} FM` : 'No station - tune to a station first'}
             </p>
           </div>
           <button
@@ -104,7 +104,11 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {messages.length === 0 ? (
+          {!chatRoomId ? (
+            <p className="text-dial-cream/50 text-center text-sm">
+              Tune to a station (88.1, 92.5, 96.9, 101.1, 104.2, or 107.7 FM) to chat!
+            </p>
+          ) : messages.length === 0 ? (
             <p className="text-dial-cream/50 text-center text-sm">
               No messages yet. Be the first to chat!
             </p>
@@ -134,7 +138,15 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
 
         {/* Input */}
         <div className="p-4 border-t border-brass/30">
-          {address ? (
+          {!chatRoomId ? (
+            <p className="text-dial-cream/50 text-center text-sm">
+              Tune to a station to enable chat
+            </p>
+          ) : !address ? (
+            <p className="text-dial-cream/50 text-center text-sm">
+              Connect wallet to chat
+            </p>
+          ) : (
             <div className="flex gap-2">
               <input
                 type="text"
@@ -153,10 +165,6 @@ export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProp
                 {sending ? '...' : 'SEND'}
               </button>
             </div>
-          ) : (
-            <p className="text-dial-cream/50 text-center text-sm">
-              Connect wallet to chat
-            </p>
           )}
         </div>
       </div>
