@@ -12,6 +12,7 @@ import { DiscoverPanel } from '@/components/DiscoverPanel';
 import { ProfilePanel } from '@/components/ProfilePanel';
 import { HelpModal } from '@/components/HelpModal';
 import { DJLeaderboard } from '@/components/radio/DJLeaderboard';
+import { DJStudioPanel } from '@/components/DJStudioPanel';
 import { BottomNav } from '@/components/BottomNav';
 import { useAccount } from 'wagmi';
 
@@ -24,6 +25,7 @@ export default function Home() {
   const [showProfile, setShowProfile] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showDJStudio, setShowDJStudio] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -55,6 +57,7 @@ export default function Home() {
               onOpenProfile={() => setShowProfile(true)}
               onOpenSettings={() => setShowSettings(true)}
               onOpenHelp={() => setShowHelp(true)}
+              onOpenDJStudio={() => setShowDJStudio(true)}
             />
           </div>
         </div>
@@ -102,6 +105,11 @@ export default function Home() {
       <DJLeaderboard
         isOpen={showLeaderboard}
         onClose={() => setShowLeaderboard(false)}
+      />
+
+      <DJStudioPanel
+        isOpen={showDJStudio}
+        onClose={() => setShowDJStudio(false)}
       />
 
       {/* Bottom Navigation */}
