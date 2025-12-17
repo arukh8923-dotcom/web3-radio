@@ -3,48 +3,54 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAccount } from 'wagmi';
 import { supabase, subscribeToChat, type LiveChat as ChatMessage } from '@/lib/supabase';
-import { useLanguage } from '@/hooks/useLanguage';
 
 interface LiveChatProps {
-  stationId: string;
+  stationId?: string;
+  frequency: number;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function LiveChat({ stationId, isOpen, onClose }: LiveChatProps) {
-  const { t } = useLanguage();
+export function LiveChat({ stationId, frequency, isOpen, onClose }: LiveChatProps) {
   const { address } = useAccount();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Use frequency as chat room ID if no station
+  const chatRoomId = stationId || `freq-${frequency.toFixed(1)}`;
+
   // Load initial messages
   useEffect(() => {
-    if (!stationId || !isOpen) return;
+    if (!isOpen) return;
 
     async function loadMessages() {
-      const res = await fetch(`/api/chat?station_id=${stationId}&limit=50`);
-      const data = await res.json();
-      if (data.messages) {
-        setMessages(data.messages);
+      try {
+        const res = await fetch(`/api/chat?station_id=${chatRoomId}&limit=50`);
+        const data = await res.json();
+        if (data.messages) {
+          setMessages(data.messages);
+        }
+      } catch (error) {
+        console.error('Failed to load messages:', error);
       }
     }
     loadMessages();
-  }, [stationId, isOpen]);
+  }, [chatRoomId, isOpen]);
 
   // Subscribe to real-time updates
   useEffect(() => {
-    if (!stationId || !isOpen) return;
+    if (!isOpen) return;
 
-    const channel = subscribeToChat(stationId, (message) => {
+    const channel = subscribeToChat(chatRoomId, (message) => {
       setMessages((prev) => [...prev, message]);
     });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [stationId, isOpen]);
+  }, [chatRoomId, isOpen]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -60,7 +66,7 @@ export function LiveChat({ stationId, isOpen, onClose }: LiveChatProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          station_id: stationId,
+          station_id: chatRoomId,
           wallet_address: address,
           message: newMessage.trim(),
         }),
@@ -77,13 +83,17 @@ export function LiveChat({ stationId, isOpen, onClose }: LiveChatProps) {
 
   if (!isOpen) return null;
 
-
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <div className="bg-cabinet-dark border-2 border-brass rounded-xl w-full max-w-md h-[70vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-brass/30">
-          <h3 className="nixie-tube text-lg">💬 LIVE CHAT</h3>
+          <div>
+            <h3 className="nixie-tube text-lg">💬 LIVE CHAT</h3>
+            <p className="text-dial-cream/50 text-xs">
+              {stationId ? 'Station Chat' : `${frequency.toFixed(1)} FM`}
+            </p>
+          </div>
           <button
             onClick={onClose}
             className="text-dial-cream/60 hover:text-dial-cream text-2xl"

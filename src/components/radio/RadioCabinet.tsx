@@ -58,7 +58,7 @@ export function RadioCabinet() {
   const [chatOpen, setChatOpen] = useState(false);
   
   const in420Zone = is420Zone(frequency);
-  const activePreset = presets.find(p => p.frequency === frequency)?.slot;
+  const activePreset = presets?.find(p => p.frequency === frequency)?.slot;
 
   return (
     <div className={`radio-cabinet w-full max-w-4xl p-6 md:p-8 ${in420Zone ? 'zone-420' : ''}`}>
@@ -176,26 +176,30 @@ export function RadioCabinet() {
             <MoodRingDisplay moodRing={moodRing} stationId={currentStation.id} />
           )}
 
-          {/* Listener Count & Chat Button */}
-          {currentStation && (
-            <div className="mt-3 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-dial-cream/60 text-sm">
-                <span className="w-2 h-2 rounded-full bg-tuning-red animate-pulse" />
-                <span>{currentStation.listener_count} listeners</span>
-                {currentStation.is_live && (
-                  <span className="ml-2 px-2 py-0.5 bg-tuning-red/20 text-tuning-red text-xs rounded">
-                    LIVE
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => setChatOpen(true)}
-                className="preset-button text-xs"
-              >
-                💬 CHAT
-              </button>
+          {/* Chat & Info Row - Always visible */}
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-dial-cream/60 text-sm">
+              {currentStation ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-tuning-red animate-pulse" />
+                  <span>{currentStation.listener_count} listeners</span>
+                  {currentStation.is_live && (
+                    <span className="ml-2 px-2 py-0.5 bg-tuning-red/20 text-tuning-red text-xs rounded">
+                      LIVE
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span>Tune to find stations</span>
+              )}
             </div>
-          )}
+            <button
+              onClick={() => setChatOpen(true)}
+              className="preset-button text-xs"
+            >
+              💬 CHAT
+            </button>
+          </div>
 
           {/* Smoke Signals (420 Zone) */}
           {currentStation && in420Zone && (
@@ -205,13 +209,12 @@ export function RadioCabinet() {
       )}
 
       {/* Live Chat Modal */}
-      {currentStation && (
-        <LiveChat
-          stationId={currentStation.id}
-          isOpen={chatOpen}
-          onClose={() => setChatOpen(false)}
-        />
-      )}
+      <LiveChat
+        stationId={currentStation?.id}
+        frequency={frequency}
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
     </div>
   );
 }
