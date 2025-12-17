@@ -1,17 +1,20 @@
 import type { Address } from 'viem';
 
 // Base Mainnet Chain ID
-export const BASE_CHAIN_ID = 8453;
+export const BASE_CHAIN_ID = Number(process.env.NEXT_PUBLIC_BASE_CHAIN_ID) || 8453;
 
-// Contract Addresses (to be updated after deployment)
+// Base RPC URL
+export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org';
+
+// Contract Addresses (loaded from env vars)
 export const CONTRACTS = {
   // Core Tokens (Clanker-deployed)
-  RADIO_TOKEN: '' as Address,
-  VIBES_TOKEN: '' as Address,
+  RADIO_TOKEN: (process.env.NEXT_PUBLIC_RADIO_TOKEN_ADDRESS || '') as Address,
+  VIBES_TOKEN: (process.env.NEXT_PUBLIC_VIBES_TOKEN_ADDRESS || '') as Address,
   
   // Core Contracts
-  STATION_NFT: '' as Address,
-  RADIO_REGISTRY: '' as Address,
+  STATION_NFT: (process.env.NEXT_PUBLIC_STATION_NFT_ADDRESS || '') as Address,
+  RADIO_REGISTRY: (process.env.NEXT_PUBLIC_RADIO_REGISTRY_ADDRESS || '') as Address,
   STATION_FACTORY: '' as Address,
   SUBSCRIPTION_MANAGER: '' as Address,
   
@@ -27,16 +30,7 @@ export const CONTRACTS = {
   DJ_ATTESTATION_MANAGER: '' as Address,
   REQUEST_LINE: '' as Address,
   
-  // External
-  CHAINLINK_VRF: '0x...' as Address, // Base mainnet VRF
-  EAS_CONTRACT: '0x4200000000000000000000000000000000000021' as Address, // Base EAS
+  // External (Base mainnet)
+  CHAINLINK_VRF: '0x...' as Address,
+  EAS_CONTRACT: '0x4200000000000000000000000000000000000021' as Address,
 } as const;
-
-// Supabase Configuration
-export const SUPABASE = {
-  URL: 'https://uqctttvdzrvutrjcmrom.supabase.co',
-  ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxY3R0dHZkenJ2dXRyamNtcm9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5NDQ5ODcsImV4cCI6MjA4MTUyMDk4N30.4gKlecjCDmwPS_Vmkci4a2xmTQEE9ttyYuD1rKCuOng',
-} as const;
-
-// Base RPC
-export const BASE_RPC_URL = 'https://mainnet.base.org';

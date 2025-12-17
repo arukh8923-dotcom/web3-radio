@@ -14,7 +14,7 @@ const config = createConfig({
     coinbaseWallet({ appName: 'Web3 Radio' }),
   ],
   transports: {
-    [base.id]: http(),
+    [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'),
   },
 });
 
