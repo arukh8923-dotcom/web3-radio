@@ -10,11 +10,12 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
       {/* Header */}
       <header className="w-full max-w-4xl flex justify-between items-center mb-8">
-        <h1 className="font-dial text-2xl md:text-3xl text-brass tracking-wider">
+        <h1 className="font-dial text-xl md:text-3xl text-brass tracking-wider">
           WEB3 RADIO
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <LanguageSelector />
+          <HelpGuide />
           <ConnectWallet />
         </div>
       </header>
@@ -26,9 +27,6 @@ export default function Home() {
       <footer className="mt-8 text-center text-dial-cream/50 text-sm">
         <p>Full on-chain radio on Base • Powered by $RADIO & $VIBES</p>
       </footer>
-
-      {/* Help Guide */}
-      <HelpGuide />
     </main>
   );
 }
