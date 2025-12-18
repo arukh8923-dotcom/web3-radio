@@ -128,7 +128,7 @@ export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
           <div>
             <h3 className="nixie-tube text-lg">🔗 REFERRAL PROGRAM</h3>
             <p className="text-dial-cream/50 text-xs">
-              Invite friends • $VIBES rewards coming soon
+              Invite friends • Earn VIBES rewards on-chain
             </p>
           </div>
           <button onClick={onClose} className="text-dial-cream/60 hover:text-dial-cream text-2xl">
@@ -305,7 +305,7 @@ export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
                 <p>• You earn <span className="text-green-400">50 VIBES</span> when someone uses your code</p>
                 <p>• Your friend also gets <span className="text-green-400">50 VIBES</span> bonus</p>
                 <p>• Earn <span className="text-green-400">10 VIBES</span> for each hour they listen</p>
-                <p>• <span className="text-amber-400">On-chain tracking coming soon!</span></p>
+                <p>• <span className="text-purple-400">Rewards tracked on Base L2</span></p>
               </div>
             </div>
           </>

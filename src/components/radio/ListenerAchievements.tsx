@@ -149,7 +149,7 @@ export function ListenerAchievements({ isOpen, onClose }: ListenerAchievementsPr
       }
     } catch (error) {
       console.error('Failed to load friends:', error);
-      // Mock data for placeholder
+      // No friends yet
       setFriends([]);
     }
     setLoadingFriends(false);
@@ -201,7 +201,7 @@ export function ListenerAchievements({ isOpen, onClose }: ListenerAchievementsPr
       });
 
       if (res.ok) {
-        alert('🎉 Achievement NFT minting initiated!\n\nNote: On-chain minting coming soon!');
+        alert('🎉 Achievement NFT minting initiated!\n\nMinting on Base L2...');
         await loadAchievements();
       }
     } catch (error) {

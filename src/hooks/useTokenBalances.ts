@@ -1,12 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
-import { 
-  getRadioBalance, 
-  getVibesBalance, 
-  isContractsDeployed 
-} from '@/lib/contracts';
+import { getRadioBalance, getVibesBalance } from '@/lib/contracts';
 import { formatUnits } from 'viem';
 
 interface TokenBalances {
@@ -15,7 +11,6 @@ interface TokenBalances {
   radioRaw: bigint;
   vibesRaw: bigint;
   isLoading: boolean;
-  isContractsReady: boolean;
   refetch: () => Promise<void>;
 }
 
@@ -24,9 +19,8 @@ export function useTokenBalances(): TokenBalances {
   const [radioRaw, setRadioRaw] = useState<bigint>(BigInt(0));
   const [vibesRaw, setVibesRaw] = useState<bigint>(BigInt(0));
   const [isLoading, setIsLoading] = useState(false);
-  const [isContractsReady, setIsContractsReady] = useState(false);
 
-  const fetchBalances = async () => {
+  const fetchBalances = useCallback(async () => {
     if (!address) {
       setRadioRaw(BigInt(0));
       setVibesRaw(BigInt(0));
@@ -45,20 +39,16 @@ export function useTokenBalances(): TokenBalances {
       console.error('Failed to fetch token balances:', error);
     }
     setIsLoading(false);
-  };
+  }, [address]);
 
   useEffect(() => {
-    setIsContractsReady(isContractsDeployed());
-  }, []);
-
-  useEffect(() => {
-    if (isContractsReady && address) {
+    if (address) {
       fetchBalances();
-      // Refresh every 30 seconds
-      const interval = setInterval(fetchBalances, 30000);
+      // Refresh every 15 seconds for real-time balance updates
+      const interval = setInterval(fetchBalances, 15000);
       return () => clearInterval(interval);
     }
-  }, [address, isContractsReady]);
+  }, [address, fetchBalances]);
 
   return {
     radio: formatUnits(radioRaw, 18),
@@ -66,7 +56,6 @@ export function useTokenBalances(): TokenBalances {
     radioRaw,
     vibesRaw,
     isLoading,
-    isContractsReady,
     refetch: fetchBalances,
   };
 }

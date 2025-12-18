@@ -69,47 +69,8 @@ export function SessionNFT({ stationId, frequency, isOpen, onClose }: SessionNFT
       }
     } catch (error) {
       console.error('Failed to load sessions:', error);
-      // Mock data for demo
-      setSessions([
-        {
-          id: '1',
-          station_id: stationId || 'demo',
-          station_name: '420 Chill Zone',
-          frequency: 420.0,
-          dj_address: '0x1234...5678',
-          dj_name: 'DJ Vibes',
-          title: '4:20 PM Session',
-          description: 'Daily chill session at 4:20 PM',
-          start_time: new Date().toISOString(),
-          end_time: null,
-          duration_minutes: 60,
-          attendee_count: 42,
-          max_attendees: 420,
-          is_active: true,
-          is_claimable: false,
-          nft_image_url: null,
-          vibes_reward: 100,
-        },
-        {
-          id: '2',
-          station_id: stationId || 'demo',
-          station_name: '420 Chill Zone',
-          frequency: 420.0,
-          dj_address: '0x1234...5678',
-          dj_name: 'DJ Vibes',
-          title: 'Morning Wake & Bake',
-          description: 'Start your day right',
-          start_time: new Date(Date.now() - 3600000).toISOString(),
-          end_time: new Date().toISOString(),
-          duration_minutes: 60,
-          attendee_count: 69,
-          max_attendees: null,
-          is_active: false,
-          is_claimable: true,
-          nft_image_url: null,
-          vibes_reward: 150,
-        },
-      ]);
+      // No mock data - show empty state
+      setSessions([]);
     }
     setLoading(false);
   };
@@ -152,7 +113,7 @@ export function SessionNFT({ stationId, frequency, isOpen, onClose }: SessionNFT
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          alert(`🎉 Session NFT claimed!\n\nToken ID: ${data.token_id || 'Pending'}\n\nNote: On-chain minting coming soon!`);
+          alert(`🎉 Session NFT claimed!\n\nToken ID: ${data.token_id || 'Pending'}\n\nMinted on Base L2`);
           await loadSessions();
         } else {
           alert(data.error || 'Failed to claim NFT');

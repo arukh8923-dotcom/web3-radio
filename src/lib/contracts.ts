@@ -1,24 +1,23 @@
 // Contract Integration Layer
-// Placeholder addresses - fill in .env after deploying via Clanker
+// On-chain integration with Clanker-deployed tokens on Base
 
-import { createPublicClient, http, parseAbi } from 'viem';
+import { createPublicClient, http, parseAbi, type Address } from 'viem';
 import { base } from 'viem/chains';
 
-// Contract Addresses from env
+// Clanker-deployed Token Addresses on Base Mainnet
+export const RADIO_TOKEN_ADDRESS = '0xaF0741FB82633a190683c5cFb4b8546123E93B07' as Address;
+export const VIBES_TOKEN_ADDRESS = '0xCD6387AfA893C1Ad070c9870B5e9C4c0B5D56b07' as Address;
+
+// Contract Addresses
 export const CONTRACT_ADDRESSES = {
-  RADIO_TOKEN: process.env.NEXT_PUBLIC_RADIO_TOKEN_ADDRESS || '',
-  VIBES_TOKEN: process.env.NEXT_PUBLIC_VIBES_TOKEN_ADDRESS || '',
-  STATION_NFT: process.env.NEXT_PUBLIC_STATION_NFT_ADDRESS || '',
-  RADIO_REGISTRY: process.env.NEXT_PUBLIC_RADIO_REGISTRY_ADDRESS || '',
+  RADIO_TOKEN: RADIO_TOKEN_ADDRESS,
+  VIBES_TOKEN: VIBES_TOKEN_ADDRESS,
+  STATION_NFT: (process.env.NEXT_PUBLIC_STATION_NFT_ADDRESS || '') as Address,
+  RADIO_REGISTRY: (process.env.NEXT_PUBLIC_RADIO_REGISTRY_ADDRESS || '') as Address,
 } as const;
 
-// Check if contracts are deployed
-export const isContractsDeployed = () => {
-  return Boolean(
-    CONTRACT_ADDRESSES.RADIO_TOKEN &&
-    CONTRACT_ADDRESSES.VIBES_TOKEN
-  );
-};
+// Tokens are deployed via Clanker - always ready
+export const isContractsDeployed = () => true;
 
 // Public client for reading contract state
 export const publicClient = createPublicClient({
