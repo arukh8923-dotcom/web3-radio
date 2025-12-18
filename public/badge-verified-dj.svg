@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" shape-rendering="crispEdges">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle (pixel approximation) -->
+  <rect x="24" y="4" width="32" height="4" fill="#00d4ff"/>
+  <rect x="16" y="8" width="48" height="4" fill="#00d4ff"/>
+  <rect x="12" y="12" width="56" height="4" fill="#00d4ff"/>
+  <rect x="8" y="16" width="64" height="4" fill="#00d4ff"/>
+  <rect x="4" y="20" width="72" height="4" fill="#00d4ff"/>
+  <rect x="4" y="24" width="72" height="32" fill="#00d4ff"/>
+  <rect x="4" y="56" width="72" height="4" fill="#00d4ff"/>
+  <rect x="8" y="60" width="64" height="4" fill="#00d4ff"/>
+  <rect x="12" y="64" width="56" height="4" fill="#00d4ff"/>
+  <rect x="16" y="68" width="48" height="4" fill="#00d4ff"/>
+  <rect x="24" y="72" width="32" height="4" fill="#00d4ff"/>
+  
+  <!-- Inner circle -->
+  <rect x="28" y="12" width="24" height="4" fill="#0a1a2e"/>
+  <rect x="20" y="16" width="40" height="4" fill="#0a1a2e"/>
+  <rect x="16" y="20" width="48" height="4" fill="#0a1a2e"/>
+  <rect x="12" y="24" width="56" height="32" fill="#0a1a2e"/>
+  <rect x="16" y="56" width="48" height="4" fill="#0a1a2e"/>
+  <rect x="20" y="60" width="40" height="4" fill="#0a1a2e"/>
+  <rect x="28" y="64" width="24" height="4" fill="#0a1a2e"/>
+  
+  <!-- Checkmark (pixel art) -->
+  <g fill="#00ff88" filter="url(#glow)">
+    <rect x="24" y="40" width="4" height="4"/>
+    <rect x="28" y="44" width="4" height="4"/>
+    <rect x="32" y="48" width="4" height="4"/>
+    <rect x="36" y="44" width="4" height="4"/>
+    <rect x="40" y="40" width="4" height="4"/>
+    <rect x="44" y="36" width="4" height="4"/>
+    <rect x="48" y="32" width="4" height="4"/>
+    <rect x="52" y="28" width="4" height="4"/>
+  </g>
+  
+  <!-- DJ text -->
+  <text x="40" y="72" fill="#00d4ff" font-family="monospace" font-size="8" text-anchor="middle" font-weight="bold">DJ</text>
+</svg>

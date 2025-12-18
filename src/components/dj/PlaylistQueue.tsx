@@ -18,9 +18,9 @@ interface QueueItem {
 async function getQueue(stationId: string): Promise<QueueItem[]> {
   await new Promise(resolve => setTimeout(resolve, 500));
   return [
-    { id: '1', title: 'Sunset Vibes', artist: 'DJ Chill', contentHash: 'ipfs://...', duration: 245, addedBy: '0x123...', position: 0, status: 'playing' },
-    { id: '2', title: 'Night Drive', artist: 'LoFi Master', contentHash: 'ipfs://...', duration: 312, addedBy: '0x456...', position: 1, status: 'queued' },
-    { id: '3', title: 'Morning Coffee', artist: 'Ambient Soul', contentHash: 'ipfs://...', duration: 198, addedBy: '0x789...', position: 2, status: 'queued' },
+    { id: '1', title: 'Sunset Vibes', artist: 'DJ Chill', contentHash: 'ipfs://QmExampleHash1', duration: 245, addedBy: 'djchill.base', position: 0, status: 'playing' },
+    { id: '2', title: 'Night Drive', artist: 'LoFi Master', contentHash: 'ipfs://QmExampleHash2', duration: 312, addedBy: 'lofimaster.base', position: 1, status: 'queued' },
+    { id: '3', title: 'Morning Coffee', artist: 'Ambient Soul', contentHash: 'ipfs://QmExampleHash3', duration: 198, addedBy: 'ambientsoul.base', position: 2, status: 'queued' },
   ];
 }
 

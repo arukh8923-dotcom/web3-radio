@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" shape-rendering="crispEdges">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="#0f0f23"/>
+  
+  <!-- Animated scan lines effect (static representation) -->
+  <g fill="#1a1a2e" opacity="0.3">
+    <rect x="0" y="0" width="400" height="4"/>
+    <rect x="0" y="8" width="400" height="4"/>
+    <rect x="0" y="16" width="400" height="4"/>
+    <rect x="0" y="24" width="400" height="4"/>
+    <rect x="0" y="32" width="400" height="4"/>
+    <rect x="0" y="40" width="400" height="4"/>
+    <rect x="0" y="48" width="400" height="4"/>
+    <rect x="0" y="56" width="400" height="4"/>
+  </g>
+  
+  <!-- Main radio icon (pixel art - larger) -->
+  <g>
+    <!-- Radio body -->
+    <rect x="100" y="120" width="200" height="160" fill="#2d2d44"/>
+    <rect x="108" y="128" width="184" height="144" fill="#1a1a2e"/>
+    
+    <!-- Speaker grille -->
+    <rect x="120" y="200" width="160" height="60" fill="#0a0a1a"/>
+    <g fill="#2d2d44">
+      <rect x="128" y="208" width="144" height="4"/>
+      <rect x="128" y="220" width="144" height="4"/>
+      <rect x="128" y="232" width="144" height="4"/>
+      <rect x="128" y="244" width="144" height="4"/>
+    </g>
+    
+    <!-- Dial display -->
+    <rect x="120" y="140" width="160" height="48" fill="#0a0a1a"/>
+    <rect x="124" y="144" width="152" height="40" fill="#001a00"/>
+    
+    <!-- Frequency numbers -->
+    <g fill="#00ff41" font-family="monospace" font-size="10" filter="url(#glow)">
+      <text x="140" y="165">88</text>
+      <text x="170" y="165">96</text>
+      <text x="200" y="165">104</text>
+      <text x="236" y="165">108</text>
+    </g>
+    
+    <!-- Tuning needle -->
+    <rect x="196" y="148" width="8" height="32" fill="#e94560"/>
+    
+    <!-- Power LED -->
+    <rect x="276" y="136" width="12" height="12" fill="#00ff41" filter="url(#glow)"/>
+    
+    <!-- Knobs -->
+    <rect x="132" y="268" width="24" height="24" fill="#3d3d5c"/>
+    <rect x="136" y="272" width="16" height="16" fill="#4d4d6c"/>
+    <rect x="244" y="268" width="24" height="24" fill="#3d3d5c"/>
+    <rect x="248" y="272" width="16" height="16" fill="#4d4d6c"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="320" fill="#e94560" font-family="monospace" font-size="28" text-anchor="middle" font-weight="bold" filter="url(#glow)">WEB3 RADIO</text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="345" fill="#00d4ff" font-family="monospace" font-size="12" text-anchor="middle">FULL ON-CHAIN • BASE MAINNET</text>
+  
+  <!-- Loading indicator -->
+  <g fill="#e94560">
+    <rect x="160" y="370" width="8" height="8"/>
+    <rect x="176" y="370" width="8" height="8" opacity="0.7"/>
+    <rect x="192" y="370" width="8" height="8" opacity="0.5"/>
+    <rect x="208" y="370" width="8" height="8" opacity="0.3"/>
+    <rect x="224" y="370" width="8" height="8" opacity="0.2"/>
+  </g>
+  
+  <!-- Version -->
+  <text x="200" y="395" fill="#444" font-family="monospace" font-size="8" text-anchor="middle">v1.0.0</text>
+</svg>

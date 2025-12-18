@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { shareStation, viewProfile, isInMiniApp } from '@/lib/farcaster';
+import { useTokenPrice } from '@/hooks/useTokenPrice';
 
 interface FarcasterUser {
   fid: number;
@@ -32,11 +33,13 @@ export function FarcasterShare({
   onClose,
 }: FarcasterShareProps) {
   const { address } = useAccount();
+  const { radioToUsd, formatRadioAmount } = useTokenPrice();
   const [listeners, setListeners] = useState<FarcasterUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [shareType, setShareType] = useState<'station' | 'tip' | 'achievement'>('station');
   const [tipAmount, setTipAmount] = useState(0);
+  const [tipUsd, setTipUsd] = useState(0);
   const [inMiniApp, setInMiniApp] = useState(false);
 
   useEffect(() => {
@@ -78,10 +81,11 @@ export function FarcasterShare({
     setSharing(false);
   };
 
-  const handleShareTip = async () => {
+  const handleShareTip = async (amount: number) => {
     setSharing(true);
+    const usdValue = radioToUsd(amount);
     try {
-      const text = `🎁 Just tipped ${tipAmount} $RADIO to the DJ at ${stationName} (${frequency.toFixed(1)} FM)! Support your favorite DJs on Web3 Radio 📻`;
+      const text = `🎁 Just tipped $${usdValue.toFixed(2)} (${formatRadioAmount(amount)} $RADIO) to the DJ at ${stationName} (${frequency.toFixed(1)} FM)! Support your favorite DJs on Web3 Radio 📻`;
       
       if (inMiniApp) {
         const { sdk } = await import('@farcaster/miniapp-sdk');

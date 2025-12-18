@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" shape-rendering="crispEdges">
+  <defs>
+    <filter id="goldGlow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background hexagon shape (pixel approximation) -->
+  <rect x="28" y="4" width="24" height="4" fill="#ffd700"/>
+  <rect x="20" y="8" width="40" height="4" fill="#ffd700"/>
+  <rect x="12" y="12" width="56" height="4" fill="#ffd700"/>
+  <rect x="8" y="16" width="64" height="4" fill="#ffd700"/>
+  <rect x="4" y="20" width="72" height="40" fill="#ffd700"/>
+  <rect x="8" y="60" width="64" height="4" fill="#ffd700"/>
+  <rect x="12" y="64" width="56" height="4" fill="#ffd700"/>
+  <rect x="20" y="68" width="40" height="4" fill="#ffd700"/>
+  <rect x="28" y="72" width="24" height="4" fill="#ffd700"/>
+  
+  <!-- Inner area -->
+  <rect x="32" y="12" width="16" height="4" fill="#1a1510"/>
+  <rect x="24" y="16" width="32" height="4" fill="#1a1510"/>
+  <rect x="16" y="20" width="48" height="4" fill="#1a1510"/>
+  <rect x="12" y="24" width="56" height="32" fill="#1a1510"/>
+  <rect x="16" y="56" width="48" height="4" fill="#1a1510"/>
+  <rect x="24" y="60" width="32" height="4" fill="#1a1510"/>
+  <rect x="32" y="64" width="16" height="4" fill="#1a1510"/>
+  
+  <!-- Star icon (pixel art) -->
+  <g fill="#ffd700" filter="url(#goldGlow)">
+    <!-- Star center -->
+    <rect x="36" y="28" width="8" height="4"/>
+    <rect x="32" y="32" width="16" height="4"/>
+    <rect x="28" y="36" width="24" height="4"/>
+    <rect x="24" y="40" width="32" height="4"/>
+    <rect x="28" y="44" width="24" height="4"/>
+    <rect x="28" y="48" width="8" height="4"/>
+    <rect x="44" y="48" width="8" height="4"/>
+    <rect x="24" y="52" width="8" height="4"/>
+    <rect x="48" y="52" width="8" height="4"/>
+    <!-- Star top point -->
+    <rect x="36" y="20" width="8" height="8"/>
+  </g>
+  
+  <!-- PRO text -->
+  <text x="40" y="72" fill="#ffd700" font-family="monospace" font-size="8" text-anchor="middle" font-weight="bold">PRO</text>
+</svg>

@@ -1,27 +1,112 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+interface QualityMetric {
+  timestamp: number;
+  signalStrength: number;
+  quality: 'excellent' | 'good' | 'fair' | 'poor';
+}
 
 interface ReceptionQualityProps {
   signalStrength: number; // 0-100
   isLive?: boolean;
+  onReconnect?: () => void;
+  backupSources?: string[];
 }
 
-export function ReceptionQuality({ signalStrength, isLive }: ReceptionQualityProps) {
+// Max metrics to store (last 30 minutes at 1 per minute)
+const MAX_METRICS = 30;
+
+export function ReceptionQuality({ signalStrength, isLive, onReconnect, backupSources = [] }: ReceptionQualityProps) {
   const [quality, setQuality] = useState<'excellent' | 'good' | 'fair' | 'poor'>('good');
   const [showDetails, setShowDetails] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [metrics, setMetrics] = useState<QualityMetric[]>([]);
+  const [currentSourceIndex, setCurrentSourceIndex] = useState(0);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Calculate quality from signal strength
   useEffect(() => {
+    let newQuality: 'excellent' | 'good' | 'fair' | 'poor';
     if (signalStrength >= 80) {
-      setQuality('excellent');
+      newQuality = 'excellent';
     } else if (signalStrength >= 60) {
-      setQuality('good');
+      newQuality = 'good';
     } else if (signalStrength >= 40) {
-      setQuality('fair');
+      newQuality = 'fair';
     } else {
-      setQuality('poor');
+      newQuality = 'poor';
     }
+    setQuality(newQuality);
+
+    // Record metric
+    setMetrics((prev) => {
+      const newMetric: QualityMetric = {
+        timestamp: Date.now(),
+        signalStrength,
+        quality: newQuality,
+      };
+      const updated = [...prev, newMetric].slice(-MAX_METRICS);
+      return updated;
+    });
   }, [signalStrength]);
+
+  // Auto-reconnect on poor signal
+  useEffect(() => {
+    if (quality === 'poor' && !isReconnecting && reconnectAttempts < 3) {
+      reconnectTimeoutRef.current = setTimeout(() => {
+        handleReconnect();
+      }, 5000); // Wait 5 seconds before auto-reconnect
+    }
+
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, [quality, isReconnecting, reconnectAttempts]);
+
+  // Reset reconnect attempts when signal improves
+  useEffect(() => {
+    if (quality !== 'poor') {
+      setReconnectAttempts(0);
+    }
+  }, [quality]);
+
+  const handleReconnect = useCallback(async () => {
+    setIsReconnecting(true);
+    setReconnectAttempts((prev) => prev + 1);
+
+    try {
+      // Try backup source if available
+      if (backupSources.length > 0 && currentSourceIndex < backupSources.length - 1) {
+        setCurrentSourceIndex((prev) => prev + 1);
+      }
+
+      // Call parent reconnect handler
+      if (onReconnect) {
+        await onReconnect();
+      }
+    } finally {
+      setIsReconnecting(false);
+    }
+  }, [onReconnect, backupSources, currentSourceIndex]);
+
+  // Calculate average quality over time
+  const getAverageSignal = () => {
+    if (metrics.length === 0) return 0;
+    const sum = metrics.reduce((acc, m) => acc + m.signalStrength, 0);
+    return Math.round(sum / metrics.length);
+  };
+
+  // Get quality distribution
+  const getQualityDistribution = () => {
+    const dist = { excellent: 0, good: 0, fair: 0, poor: 0 };
+    metrics.forEach((m) => dist[m.quality]++);
+    return dist;
+  };
 
   const getQualityColor = () => {
     switch (quality) {
@@ -93,10 +178,55 @@ export function ReceptionQuality({ signalStrength, isLive }: ReceptionQualityPro
                 </div>
               </div>
 
+              {/* Historical Metrics */}
+              {metrics.length > 5 && (
+                <div className="mt-3 pt-2 border-t border-brass/20">
+                  <p className="text-dial-cream/50 text-[10px] mb-1">Last {metrics.length} readings</p>
+                  <div className="flex items-end gap-0.5 h-8">
+                    {metrics.slice(-20).map((m, i) => (
+                      <div
+                        key={i}
+                        className={`flex-1 rounded-t transition-all ${
+                          m.quality === 'excellent' ? 'bg-vu-green' :
+                          m.quality === 'good' ? 'bg-brass' :
+                          m.quality === 'fair' ? 'bg-vu-yellow' : 'bg-tuning-red'
+                        }`}
+                        style={{ height: `${m.signalStrength}%` }}
+                        title={`${m.signalStrength}%`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-[10px] text-dial-cream/40 mt-1">
+                    <span>Avg: {getAverageSignal()}%</span>
+                    <span>{metrics.length} samples</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Reconnect Controls */}
               {quality === 'poor' && (
-                <p className="text-tuning-red/80 text-xs mt-2">
-                  ⚠️ Weak signal. Try adjusting frequency.
-                </p>
+                <div className="mt-3 pt-2 border-t border-tuning-red/30">
+                  <p className="text-tuning-red/80 text-xs mb-2">
+                    ⚠️ Weak signal detected
+                  </p>
+                  <button
+                    onClick={handleReconnect}
+                    disabled={isReconnecting}
+                    className="w-full py-1.5 bg-tuning-red/20 border border-tuning-red/50 rounded text-tuning-red text-xs hover:bg-tuning-red/30 disabled:opacity-50"
+                  >
+                    {isReconnecting ? '🔄 Reconnecting...' : '🔄 Reconnect'}
+                  </button>
+                  {reconnectAttempts > 0 && (
+                    <p className="text-dial-cream/40 text-[10px] mt-1 text-center">
+                      Attempts: {reconnectAttempts}/3
+                    </p>
+                  )}
+                  {backupSources.length > 1 && (
+                    <p className="text-dial-cream/40 text-[10px] mt-1 text-center">
+                      Source: {currentSourceIndex + 1}/{backupSources.length}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           </div>

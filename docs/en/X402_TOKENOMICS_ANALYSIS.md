@@ -7,40 +7,75 @@
 - **Total Supply**: 100,000,000,000 (100B)
 - **Creator Vault (Dev)**: 30% = 30,000,000,000 (30B) - unlocked after 7 days
 - **Liquidity Pool**: 70% = 70,000,000,000 (70B) - locked forever in Uniswap V4
+- **Current Price**: ~$0.00000028 (dynamic, fetched from GeckoTerminal/DexScreener)
+- **FDV**: ~$28,000
 
 ### $VIBES Token  
 - **Contract**: `0xCD6387AfA893C1Ad070c9870B5e9C4c0B5D56b07`
 - **Total Supply**: 100,000,000,000 (100B)
 - **Creator Vault (Dev)**: 30% = 30,000,000,000 (30B) - unlocked after 7 days
 - **Liquidity Pool**: 70% = 70,000,000,000 (70B) - locked forever in Uniswap V4
+- **Current Price**: ~$0.00000028 (dynamic, fetched from GeckoTerminal/DexScreener)
+- **FDV**: ~$28,000
+
+### Price Data Sources
+Prices are fetched dynamically from multiple sources with fallback:
+1. **GeckoTerminal** (primary) - `api.geckoterminal.com`
+2. **DexScreener** (fallback) - `api.dexscreener.com`
+3. **Fallback** - $0.0000003 if all APIs fail
+
+---
+
+## Dynamic USD-Based Pricing
+
+All prices in Web3 Radio are set in **USD** and converted to token amounts dynamically based on current market price. This ensures:
+- Consistent pricing regardless of token volatility
+- Fair value for users
+- Predictable revenue for DJs and platform
+
+### API Endpoint
+```
+GET /api/token/price
+
+Response:
+{
+  "radio_usd": 0.00000028,
+  "vibes_usd": 0.00000028,
+  "eth_usd": 3500,
+  "source": "geckoterminal",
+  "timestamp": 1734567890000
+}
+```
 
 ---
 
 ## Project Features Analysis
 
 ### Features Using $RADIO (Utility/Payment Token)
-| Feature | Description | Token Usage |
-|---------|-------------|-------------|
-| **Tips** | Tip DJs for good content | User pays RADIO |
-| **Subscriptions** | Premium station access | User pays RADIO |
-| **Station Creation** | Create new radio station | User pays RADIO (one-time) |
-| **Governance** | Vote on platform decisions | User stakes RADIO |
-| **Premium Content** | Access exclusive broadcasts | User pays RADIO |
-| **Ad Sponsorship** | Buy ad slots on stations | User pays RADIO |
+| Feature | Description | USD Price | Token Amount (at $0.00000028) |
+|---------|-------------|-----------|-------------------------------|
+| **Subscription Basic** | Ad-free listening | $1/month | ~3.57M RADIO |
+| **Subscription Premium** | Premium features | $5/month | ~17.86M RADIO |
+| **Subscription VIP** | All features + VIP | $20/month | ~71.43M RADIO |
+| **Tip Small** | Small tip to DJ | $0.10 | ~357K RADIO |
+| **Tip Medium** | Medium tip | $1 | ~3.57M RADIO |
+| **Tip Large** | Large tip | $5 | ~17.86M RADIO |
+| **Station Creation** | Create basic station | $5 | ~17.86M RADIO |
+| **Frequency NFT** | Mint frequency ownership | $10 | ~35.71M RADIO |
+| **Recording NFT** | Mint recording | $5 | ~17.86M RADIO |
 
 ### Features Using $VIBES (Social/Reward Token)
-| Feature | Description | Token Usage |
-|---------|-------------|-------------|
-| **Smoke Signals** | Ephemeral messages | User pays VIBES |
-| **Request Line** | Request songs (stake) | User stakes VIBES |
-| **Mood Ring** | Send vibes/reactions | Earn VIBES |
-| **Session NFT** | Attendance rewards | Earn VIBES |
-| **Aux Pass** | Queue for guest DJ | Requires VIBES balance |
-| **Backstage Room** | Token-gated VIP rooms | Requires VIBES balance |
-| **Community Drops** | Random rewards at Golden Hour | Earn VIBES |
-| **Achievements** | Unlock badges | Earn VIBES |
-| **Referrals** | Invite new users | Earn VIBES |
-| **Listening Rewards** | Passive listening rewards | Earn VIBES |
+| Feature | Description | USD Equivalent | Token Amount |
+|---------|-------------|----------------|--------------|
+| **Smoke Signal 5min** | Ephemeral message | $0.05 | ~178K VIBES |
+| **Smoke Signal 10min** | Longer message | $0.10 | ~357K VIBES |
+| **Request Line Stake** | Song request | $0.20 | ~714K VIBES |
+| **Hotbox Entry** | VIP room access | $5 balance | ~17.86M VIBES |
+| **Aux Pass Join** | DJ queue | $0.50 | ~1.78M VIBES |
+| **Mood Reaction** | Send reaction | FREE | Earn 100 VIBES |
+| **Tune-in Bonus** | Daily bonus | - | Earn 1K VIBES |
+| **Listening Reward** | Per 10 min | - | Earn 500 VIBES |
+| **Golden Hour** | 4:20 bonus | - | Earn 5K VIBES |
 
 ---
 
@@ -52,28 +87,29 @@
 - **Total User Sessions**: 3,000/month (100 × 30)
 - **Average Session**: 30 minutes
 - **Active Engagement Rate**: 40% (users who interact beyond listening)
+- **Token Price**: $0.00000028 per RADIO/VIBES
 
 ---
 
 ## $VIBES Distribution (Rewards - Platform Pays Out)
 
-### Daily VIBES Rewards Per User
-| Activity | VIBES/Action | Actions/User/Day | Daily Total |
-|----------|--------------|------------------|-------------|
-| Tune-in Bonus | 88 | 1 | 88 |
-| Listening (per 10 min) | 10 | 3 | 30 |
-| Send Mood/Vibe | 5 | 2 | 10 |
-| Golden Hour Bonus | 98 | 0.2 (20% chance) | 19.6 |
-| Achievement Unlock | 50 | 0.1 | 5 |
-| Referral Bonus | 500 | 0.05 | 25 |
-| **Daily Total/User** | | | **~178 VIBES** |
+### Daily VIBES Rewards Per User (Updated)
+| Activity | VIBES/Action | Actions/User/Day | Daily Total | USD Value |
+|----------|--------------|------------------|-------------|-----------|
+| Tune-in Bonus | 1,000 | 1 | 1,000 | $0.00028 |
+| Listening (per 10 min) | 500 | 3 | 1,500 | $0.00042 |
+| Send Mood/Vibe | 100 | 2 | 200 | $0.000056 |
+| Golden Hour Bonus | 5,000 | 0.2 (20% chance) | 1,000 | $0.00028 |
+| Achievement Unlock | 10,000 | 0.1 | 1,000 | $0.00028 |
+| Referral Bonus | 50,000 | 0.05 | 2,500 | $0.0007 |
+| **Daily Total/User** | | | **~7,200 VIBES** | **~$0.002** |
 
 ### Monthly VIBES Outflow (Platform Pays)
 ```
-Daily: 100 users × 178 VIBES = 17,800 VIBES
-Monthly: 17,800 × 30 = 534,000 VIBES
+Daily: 100 users × 7,200 VIBES = 720,000 VIBES (~$0.20)
+Monthly: 720,000 × 30 = 21,600,000 VIBES (~$6.05)
 
-With 2x buffer for special events: ~1,000,000 VIBES/month
+With 2x buffer for special events: ~50,000,000 VIBES/month (~$14)
 ```
 
 ---
@@ -81,50 +117,50 @@ With 2x buffer for special events: ~1,000,000 VIBES/month
 ## $VIBES Consumption (Users Spend - Platform Receives Back)
 
 ### Daily VIBES Spending Per Active User (40% engagement)
-| Activity | VIBES/Action | Actions/User/Day | Daily Total |
-|----------|--------------|------------------|-------------|
-| Smoke Signal (5 min) | 5 | 1 | 5 |
-| Smoke Signal (10 min) | 10 | 0.5 | 5 |
-| Request Line Stake | 20 | 0.3 | 6 |
-| Backstage Entry | 100 | 0.1 | 10 |
-| **Daily Total/Active User** | | | **~26 VIBES** |
+| Activity | VIBES/Action | Actions/User/Day | Daily Total | USD Value |
+|----------|--------------|------------------|-------------|-----------|
+| Smoke Signal (5 min) | 178,000 | 0.5 | 89,000 | $0.025 |
+| Smoke Signal (10 min) | 357,000 | 0.2 | 71,400 | $0.02 |
+| Request Line Stake | 714,000 | 0.1 | 71,400 | $0.02 |
+| Aux Pass Join | 1,780,000 | 0.05 | 89,000 | $0.025 |
+| **Daily Total/Active User** | | | **~320,800 VIBES** | **~$0.09** |
 
 ### Monthly VIBES Inflow (Platform Receives)
 ```
 Active users: 100 × 40% = 40 users
-Daily: 40 users × 26 VIBES = 1,040 VIBES
-Monthly: 1,040 × 30 = 31,200 VIBES
+Daily: 40 users × 320,800 VIBES = 12,832,000 VIBES (~$3.59)
+Monthly: 12,832,000 × 30 = 384,960,000 VIBES (~$107.79)
 ```
 
 ### Net VIBES Flow
 ```
-Outflow: 1,000,000 VIBES/month
-Inflow:     31,200 VIBES/month
-Net Cost:  968,800 VIBES/month (~1M VIBES)
+Outflow: 50,000,000 VIBES/month (~$14)
+Inflow:  384,960,000 VIBES/month (~$107.79)
+Net:     +334,960,000 VIBES/month (POSITIVE - sustainable!)
 ```
 
 ---
 
-## $RADIO Flow Analysis
+## $RADIO Flow Analysis (USD-Based Pricing)
 
 ### $RADIO is NOT distributed by platform
 Users must BUY $RADIO from Uniswap pool to use features.
 
-### Estimated $RADIO Usage Per Active User
-| Activity | RADIO/Action | Frequency/Month | Monthly Total |
-|----------|--------------|-----------------|---------------|
-| Tip DJ (small) | 100 | 5 | 500 |
-| Tip DJ (medium) | 500 | 2 | 1,000 |
-| Subscription | 1,000 | 1 | 1,000 |
-| Station Creation | 10,000 | 0.1 | 1,000 |
-| **Monthly/Active User** | | | **~3,500 RADIO** |
+### Estimated $RADIO Usage Per Active User (USD-Based)
+| Activity | USD Price | RADIO Amount | Frequency/Month | Monthly USD |
+|----------|-----------|--------------|-----------------|-------------|
+| Tip DJ (small) | $0.10 | ~357K | 5 | $0.50 |
+| Tip DJ (medium) | $1.00 | ~3.57M | 2 | $2.00 |
+| Subscription Basic | $1.00 | ~3.57M | 1 | $1.00 |
+| Station Creation | $5.00 | ~17.86M | 0.1 | $0.50 |
+| **Monthly/Active User** | | | | **~$4.00** |
 
 ### Platform $RADIO Revenue (Fees)
 If platform takes 5% fee on transactions:
 ```
 Active users: 40
-Monthly volume: 40 × 3,500 = 140,000 RADIO
-Platform fee (5%): 7,000 RADIO/month
+Monthly volume: 40 × $4.00 = $160 USD
+Platform fee (5%): $8 USD/month
 ```
 
 ---
@@ -156,13 +192,31 @@ This is extremely sustainable!
 
 ## x402 Integration Strategy
 
-### x402 Micropayment Use Cases
-| Feature | Payment Amount | Token |
-|---------|---------------|-------|
-| Premium Stream Access | 0.1 RADIO/minute | RADIO |
-| Ad-Free Listening | 1 RADIO/hour | RADIO |
-| Priority Request | 10-100 VIBES | VIBES |
-| Exclusive Content | 50-500 RADIO | RADIO |
+x402 enables micropayments in **USDC** directly via HTTP 402 protocol. This provides:
+- Stable USD pricing (no token volatility)
+- Instant settlement on Base
+- No wallet popup needed (server-managed wallets)
+- AI agent compatible
+
+### x402 Micropayment Use Cases (USDC)
+| Feature | Payment Amount | Description |
+|---------|---------------|-------------|
+| Premium Stream | $0.001/minute | Pay-per-minute premium content |
+| Ad-Free Hour | $0.01/hour | Skip ads for 1 hour |
+| NFT High-Res | $0.01 | Download high-res NFT image |
+| Recording Download | $0.05 | Download DVR recording |
+| DJ Direct Tip | $0.10+ | Tip DJ via x402 |
+| Exclusive Content | $0.50+ | Access exclusive broadcasts |
+
+### x402 Revenue Flow
+```
+User Request → 402 Payment Required → User Signs → CDP Facilitator → USDC to Recipient
+
+Revenue Split:
+- DJ Tips: 95% to DJ, 5% platform
+- Premium Content: 80% to DJ, 20% platform
+- NFT Downloads: 100% to platform
+```
 | DJ Direct Message | 5 VIBES | VIBES |
 
 ### x402 Revenue Model

@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase';
+import { CONTRACTS, PAYMENT_TOKENS } from '@/constants/addresses';
+
+// Valid payment tokens (RADIO and VIBES only - NO ETH/USDC)
+const VALID_TOKEN_ADDRESSES = [
+  CONTRACTS.RADIO_TOKEN.toLowerCase(),
+  CONTRACTS.VIBES_TOKEN.toLowerCase(),
+];
 
 // GET /api/tips - Get tips for station or DJ
 export async function GET(request: NextRequest) {
@@ -47,10 +54,18 @@ export async function POST(request: NextRequest) {
     message,
   } = body;
 
-  // For MVP off-chain, we only require tipper and amount
-  if (!tipper_address || !amount) {
+  // Validate required fields
+  if (!tipper_address || !amount || !token_address) {
     return NextResponse.json(
-      { error: 'tipper_address and amount required' },
+      { error: 'tipper_address, amount, and token_address required' },
+      { status: 400 }
+    );
+  }
+
+  // Enforce RADIO/VIBES only - NO ETH or USDC
+  if (!VALID_TOKEN_ADDRESSES.includes(token_address.toLowerCase())) {
+    return NextResponse.json(
+      { error: 'Invalid token. Only $RADIO and $VIBES are accepted for tips.' },
       { status: 400 }
     );
   }
@@ -79,8 +94,8 @@ export async function POST(request: NextRequest) {
       tipper_address: tipper_address.toLowerCase(),
       dj_address: dj_address?.toLowerCase() || null,
       amount,
-      token_address: token_address || 'ETH',
-      tx_hash: tx_hash || `pending-${Date.now()}`, // Placeholder for off-chain
+      token_address: token_address.toLowerCase(), // Must be RADIO or VIBES
+      tx_hash: tx_hash || `pending-${Date.now()}`,
       message: message || null,
     })
     .select()

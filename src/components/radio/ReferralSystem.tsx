@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { useTokenPrice } from '@/hooks/useTokenPrice';
 
 interface ReferralStats {
   referral_code: string;
@@ -26,8 +27,13 @@ interface ReferralSystemProps {
   onClose: () => void;
 }
 
+// Referral rewards in USD (converted to VIBES dynamically)
+const REFERRAL_REWARD_USD = 0.10; // $0.10 worth of VIBES per referral
+const LISTENING_REWARD_USD = 0.02; // $0.02 worth of VIBES per hour listened
+
 export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
   const { address } = useAccount();
+  const { prices, usdToVibes, vibesToUsd, formatVibesAmount } = useTokenPrice();
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,6 +41,10 @@ export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
   const [applyCode, setApplyCode] = useState('');
   const [applying, setApplying] = useState(false);
   const [hasReferrer, setHasReferrer] = useState(false);
+  
+  // Calculate dynamic rewards
+  const referralRewardVibes = usdToVibes(REFERRAL_REWARD_USD);
+  const listeningRewardVibes = usdToVibes(LISTENING_REWARD_USD);
 
   useEffect(() => {
     if (isOpen && address) {
@@ -255,7 +265,7 @@ export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
                   </button>
                 </div>
                 <p className="text-dial-cream/40 text-xs mt-1">
-                  Both you and your referrer earn 50 VIBES!
+                  Both you and your referrer earn {formatVibesAmount(referralRewardVibes)} VIBES (~${REFERRAL_REWARD_USD.toFixed(2)})!
                 </p>
               </div>
             )}
@@ -302,11 +312,16 @@ export function ReferralSystem({ isOpen, onClose }: ReferralSystemProps) {
             <div className="p-4 border-t border-brass/20 bg-black/20">
               <p className="text-brass text-xs font-bold mb-2">🎁 REFERRAL REWARDS</p>
               <div className="space-y-1 text-dial-cream/60 text-xs">
-                <p>• You earn <span className="text-green-400">50 VIBES</span> when someone uses your code</p>
-                <p>• Your friend also gets <span className="text-green-400">50 VIBES</span> bonus</p>
-                <p>• Earn <span className="text-green-400">10 VIBES</span> for each hour they listen</p>
+                <p>• You earn <span className="text-green-400">{formatVibesAmount(referralRewardVibes)} VIBES</span> (~${REFERRAL_REWARD_USD.toFixed(2)}) when someone uses your code</p>
+                <p>• Your friend also gets <span className="text-green-400">{formatVibesAmount(referralRewardVibes)} VIBES</span> bonus</p>
+                <p>• Earn <span className="text-green-400">{formatVibesAmount(listeningRewardVibes)} VIBES</span> (~${LISTENING_REWARD_USD.toFixed(2)}) for each hour they listen</p>
                 <p>• <span className="text-purple-400">Rewards tracked on Base L2</span></p>
               </div>
+              {prices && prices.vibes_usd > 0 && (
+                <p className="text-dial-cream/30 text-xs mt-2">
+                  1 VIBES ≈ ${prices.vibes_usd.toFixed(8)} USD
+                </p>
+              )}
             </div>
           </>
         )}

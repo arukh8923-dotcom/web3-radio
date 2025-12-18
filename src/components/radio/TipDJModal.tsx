@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
 import { useTokenBalances } from '@/hooks/useTokenBalances';
+import { useTokenPrice } from '@/hooks/useTokenPrice';
 import { RADIO_TOKEN_ADDRESS, ERC20_ABI } from '@/lib/contracts';
 
 interface TipDJModalProps {
@@ -13,28 +14,38 @@ interface TipDJModalProps {
   djAddress?: string;
 }
 
-// Tip amounts in RADIO tokens
-const TIP_AMOUNTS = [
-  { amount: 100, label: '☕ 100 RADIO' },
-  { amount: 500, label: '🍕 500 RADIO' },
-  { amount: 1000, label: '🎵 1K RADIO' },
-  { amount: 5000, label: '🔥 5K RADIO' },
+// Tip amounts in USD (will be converted to RADIO dynamically)
+const TIP_AMOUNTS_USD = [
+  { usd: 0.50, label: '☕', emoji: '☕' },
+  { usd: 1.00, label: '🍕', emoji: '🍕' },
+  { usd: 2.50, label: '🎵', emoji: '🎵' },
+  { usd: 5.00, label: '🔥', emoji: '🔥' },
 ];
 
 export function TipDJModal({ isOpen, onClose, stationName, djAddress }: TipDJModalProps) {
   const { address } = useAccount();
   const { radio, radioRaw, refetch } = useTokenBalances();
-  const [selectedAmount, setSelectedAmount] = useState(100);
-  const [customAmount, setCustomAmount] = useState('');
+  const { prices, usdToRadio, radioToUsd, formatRadioAmount, loading: priceLoading } = useTokenPrice();
+  const [selectedUsd, setSelectedUsd] = useState(1.00);
+  const [customUsd, setCustomUsd] = useState('');
   const [message, setMessage] = useState('');
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
+  // Calculate tip amounts dynamically based on USD price
+  const tipAmounts = useMemo(() => {
+    return TIP_AMOUNTS_USD.map(tip => ({
+      ...tip,
+      radioAmount: usdToRadio(tip.usd),
+    }));
+  }, [prices, usdToRadio]);
+
   if (!isOpen) return null;
 
-  const tipAmount = customAmount ? parseFloat(customAmount) : selectedAmount;
-  const tipAmountWei = parseUnits(tipAmount.toString(), 18);
+  const tipUsd = customUsd ? parseFloat(customUsd) : selectedUsd;
+  const tipAmount = usdToRadio(tipUsd);
+  const tipAmountWei = parseUnits(Math.floor(tipAmount).toString(), 18);
   const hasEnoughBalance = radioRaw >= tipAmountWei;
 
   const handleTip = async () => {
@@ -49,6 +60,13 @@ export function TipDJModal({ isOpen, onClose, stationName, djAddress }: TipDJMod
     }
 
     try {
+      // Direct transfer to DJ (simple approach)
+      // Note: For proper revenue split, use SubscriptionManager.tip() which handles:
+      // - 60/40 split for Free DJs
+      // - 70/30 split for Verified DJs
+      // - 80/20 split for Premium DJs
+      // This requires approval first, then calling the contract
+      
       writeContract({
         address: RADIO_TOKEN_ADDRESS,
         abi: ERC20_ABI,
@@ -62,7 +80,7 @@ export function TipDJModal({ isOpen, onClose, stationName, djAddress }: TipDJMod
 
   // Handle success
   if (isSuccess && hash) {
-    // Record tip in database
+    // Record tip in database - use token address for validation
     fetch('/api/tips', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -71,7 +89,7 @@ export function TipDJModal({ isOpen, onClose, stationName, djAddress }: TipDJMod
         tipper_address: address,
         dj_address: djAddress,
         amount: tipAmount.toString(),
-        token: 'RADIO',
+        token_address: RADIO_TOKEN_ADDRESS, // Use address for API validation
         message,
         tx_hash: hash,
       }),
@@ -133,46 +151,64 @@ export function TipDJModal({ isOpen, onClose, stationName, djAddress }: TipDJMod
             <div className="px-4 pt-4">
               <div className="flex items-center justify-between bg-black/30 rounded-lg p-2">
                 <span className="text-dial-cream/60 text-xs">Your Balance:</span>
-                <span className="text-brass font-bold">{formatBalance(radio)} RADIO</span>
+                <div className="text-right">
+                  <span className="text-brass font-bold">{formatRadioAmount(parseFloat(radio))} RADIO</span>
+                  <span className="text-dial-cream/50 text-xs ml-2">(~${radioToUsd(parseFloat(radio)).toFixed(2)})</span>
+                </div>
               </div>
+              {priceLoading && (
+                <p className="text-dial-cream/40 text-xs mt-1 text-center">Loading prices...</p>
+              )}
             </div>
 
             {/* Content */}
             <div className="p-4 space-y-4">
-              {/* Preset Amounts */}
+              {/* Preset Amounts - USD based */}
               <div className="grid grid-cols-2 gap-2">
-                {TIP_AMOUNTS.map((tip) => (
+                {tipAmounts.map((tip) => (
                   <button
-                    key={tip.amount}
+                    key={tip.usd}
                     onClick={() => {
-                      setSelectedAmount(tip.amount);
-                      setCustomAmount('');
+                      setSelectedUsd(tip.usd);
+                      setCustomUsd('');
                     }}
                     className={`p-3 rounded-lg text-sm transition-all ${
-                      selectedAmount === tip.amount && !customAmount
+                      selectedUsd === tip.usd && !customUsd
                         ? 'bg-brass text-cabinet-dark'
                         : 'bg-black/30 text-dial-cream hover:bg-black/50'
                     }`}
                   >
-                    {tip.label}
+                    <div className="text-lg">{tip.emoji}</div>
+                    <div className="font-bold">${tip.usd.toFixed(2)}</div>
+                    <div className="text-xs opacity-70">{formatRadioAmount(tip.radioAmount)}</div>
                   </button>
                 ))}
               </div>
 
-              {/* Custom Amount */}
+              {/* Custom Amount in USD */}
               <div>
                 <label className="text-dial-cream/60 text-xs block mb-1">
-                  Or enter custom amount (RADIO)
+                  Or enter custom amount (USD)
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  placeholder="0"
-                  className="w-full bg-black/30 border border-brass/30 rounded-lg px-3 py-2 text-dial-cream text-sm placeholder:text-dial-cream/40 focus:outline-none focus:border-brass"
-                />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dial-cream/50">$</span>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={customUsd}
+                      onChange={(e) => setCustomUsd(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full bg-black/30 border border-brass/30 rounded-lg pl-7 pr-3 py-2 text-dial-cream text-sm placeholder:text-dial-cream/40 focus:outline-none focus:border-brass"
+                    />
+                  </div>
+                  {customUsd && (
+                    <div className="flex items-center text-dial-cream/60 text-xs">
+                      ≈ {formatRadioAmount(usdToRadio(parseFloat(customUsd) || 0))} RADIO
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Message */}
@@ -201,6 +237,11 @@ export function TipDJModal({ isOpen, onClose, stationName, djAddress }: TipDJMod
               <p className="text-dial-cream/40 text-xs text-center">
                 📻 Tips are sent directly on-chain via Base L2
               </p>
+              {prices && prices.radio_usd > 0 && (
+                <p className="text-dial-cream/30 text-xs text-center">
+                  1 RADIO ≈ ${prices.radio_usd.toFixed(8)} USD
+                </p>
+              )}
             </div>
 
             {/* Footer */}
@@ -216,6 +257,9 @@ export function TipDJModal({ isOpen, onClose, stationName, djAddress }: TipDJMod
               ) : !hasEnoughBalance ? (
                 <div className="text-center">
                   <p className="text-red-400 text-sm mb-2">Insufficient RADIO balance</p>
+                  <p className="text-dial-cream/50 text-xs mb-2">
+                    Need {formatRadioAmount(tipAmount)} RADIO (~${tipUsd.toFixed(2)})
+                  </p>
                   <a
                     href={`https://app.uniswap.org/swap?outputCurrency=${RADIO_TOKEN_ADDRESS}&chain=base`}
                     target="_blank"
@@ -228,10 +272,10 @@ export function TipDJModal({ isOpen, onClose, stationName, djAddress }: TipDJMod
               ) : (
                 <button
                   onClick={handleTip}
-                  disabled={isPending || isConfirming}
+                  disabled={isPending || isConfirming || priceLoading}
                   className="w-full preset-button py-3 disabled:opacity-50"
                 >
-                  {isPending ? 'CONFIRM IN WALLET...' : isConfirming ? 'CONFIRMING...' : `TIP ${tipAmount} RADIO`}
+                  {isPending ? 'CONFIRM IN WALLET...' : isConfirming ? 'CONFIRMING...' : `TIP $${tipUsd.toFixed(2)} (${formatRadioAmount(tipAmount)} RADIO)`}
                 </button>
               )}
             </div>

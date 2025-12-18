@@ -42,6 +42,16 @@ coverage/
 contracts/out/
 contracts/cache/
 contracts/lib/
+contracts/broadcast/
+
+# Subgraph
+subgraph/build/
+subgraph/generated/
+subgraph/node_modules/
+
+# Test results
+test-results/
+playwright-report/
 
 # Vercel
 .vercel

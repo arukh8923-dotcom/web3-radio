@@ -25,9 +25,9 @@ interface SimulcastSession {
 async function getAvailableStations(excludeId: string): Promise<Station[]> {
   await new Promise(resolve => setTimeout(resolve, 500));
   return [
-    { id: '2', name: 'Chill FM', frequency: 92.5, listenerCount: 45, owner: '0x456...' },
-    { id: '3', name: 'Bass Station', frequency: 95.0, listenerCount: 78, owner: '0x789...' },
-    { id: '4', name: '420 Radio', frequency: 104.2, listenerCount: 120, owner: '0xabc...' },
+    { id: '2', name: 'Chill FM', frequency: 92.5, listenerCount: 45, owner: 'chillfm.base' },
+    { id: '3', name: 'Bass Station', frequency: 95.0, listenerCount: 78, owner: 'bassmaster.base' },
+    { id: '4', name: '420 Radio', frequency: 104.2, listenerCount: 120, owner: 'vibes420.base' },
   ];
 }
 

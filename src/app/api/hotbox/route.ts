@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { CONTRACTS } from '@/constants/addresses';
 
 // GET /api/hotbox - Get hotbox rooms list
 export async function GET(request: NextRequest) {
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
         description,
         station_id,
         creator_address: creator_address.toLowerCase(),
-        token_gate_address: '0xVIBES', // Placeholder
+        token_gate_address: CONTRACTS.VIBES_TOKEN, // Default to VIBES token
         min_balance: min_balance || 0,
         max_members,
         is_private: is_private || false,

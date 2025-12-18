@@ -1,101 +1,98 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
-// POST /api/referrals/apply - Apply a referral code
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+// Referral reward in VIBES (will be distributed when claimed)
+const REFERRAL_REWARD_VIBES = 10; // Both referrer and referred get this
+
+// POST - Apply referral code
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { wallet_address, referral_code } = body;
 
     if (!wallet_address || !referral_code) {
-      return NextResponse.json(
-        { error: 'Wallet address and referral code required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const normalizedAddress = wallet_address.toLowerCase();
-    const normalizedCode = referral_code.toUpperCase().trim();
+    const walletLower = wallet_address.toLowerCase();
+    const codeUpper = referral_code.toUpperCase();
 
     // Check if user already has a referrer
-    const { data: existingRelation } = await supabase
-      .from('referral_relationships')
+    const { data: existingReferral } = await supabase
+      .from('referrals')
       .select('id')
-      .eq('referred_address', normalizedAddress)
+      .eq('referred_address', walletLower)
       .single();
 
-    if (existingRelation) {
-      return NextResponse.json(
-        { success: false, error: 'You already have a referrer' },
-        { status: 400 }
-      );
+    if (existingReferral) {
+      return NextResponse.json({ success: false, error: 'You already have a referrer' });
     }
 
     // Find referrer by code
     const { data: referrer } = await supabase
-      .from('user_referrals')
-      .select('wallet_address')
-      .eq('referral_code', normalizedCode)
+      .from('referrers')
+      .select('*')
+      .eq('referral_code', codeUpper)
       .single();
 
     if (!referrer) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid referral code' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid referral code' });
     }
 
     // Can't refer yourself
-    if (referrer.wallet_address === normalizedAddress) {
-      return NextResponse.json(
-        { success: false, error: 'Cannot use your own referral code' },
-        { status: 400 }
-      );
+    if (referrer.wallet_address === walletLower) {
+      return NextResponse.json({ success: false, error: 'Cannot use your own referral code' });
     }
 
-    // Create relationship
-    const { error: relationError } = await supabase
-      .from('referral_relationships')
-      .insert({
-        referrer_address: referrer.wallet_address,
-        referred_address: normalizedAddress,
-        joined_at: new Date().toISOString(),
-        is_active: true,
-        vibes_earned: 0,
-      });
+    // Get user info if available
+    const { data: userData } = await supabase
+      .from('users')
+      .select('base_name, farcaster_username')
+      .eq('wallet_address', walletLower)
+      .single();
 
-    if (relationError) {
-      console.error('Error creating relationship:', relationError);
-      return NextResponse.json(
-        { success: false, error: 'Failed to apply referral code' },
-        { status: 500 }
-      );
+    const referredName = userData?.base_name || userData?.farcaster_username || null;
+
+    // Create referral record
+    const { error: insertError } = await supabase.from('referrals').insert({
+      referrer_address: referrer.wallet_address,
+      referred_address: walletLower,
+      referred_name: referredName,
+      referral_code: codeUpper,
+      is_active: true,
+      vibes_earned: 0,
+      referrer_reward: REFERRAL_REWARD_VIBES,
+      referred_reward: REFERRAL_REWARD_VIBES,
+      reward_claimed: false,
+    });
+
+    if (insertError) {
+      console.error('Error creating referral:', insertError);
+      return NextResponse.json({ success: false, error: 'Failed to apply referral' });
     }
 
     // Update referrer stats
     await supabase
-      .from('user_referrals')
+      .from('referrers')
       .update({
-        total_referrals: supabase.rpc('increment', { x: 1 }),
-        active_referrals: supabase.rpc('increment', { x: 1 }),
-        pending_vibes: supabase.rpc('increment', { x: 50 }), // Signup bonus
+        total_referrals: (referrer.total_referrals || 0) + 1,
+        active_referrals: (referrer.active_referrals || 0) + 1,
+        pending_vibes: (referrer.pending_vibes || 0) + REFERRAL_REWARD_VIBES,
       })
       .eq('wallet_address', referrer.wallet_address);
 
-    // TODO: Award VIBES tokens on-chain
-    // For now, just track in database
-    // Both referrer and referred should get 50 VIBES
-
     return NextResponse.json({
       success: true,
-      message: 'Referral code applied successfully! Rewards will be distributed when $VIBES launches.',
-      referrer_address: referrer.wallet_address,
+      message: `Referral applied! You and your referrer will each receive ${REFERRAL_REWARD_VIBES} VIBES.`,
+      reward: REFERRAL_REWARD_VIBES,
     });
   } catch (error) {
-    console.error('Error applying referral code:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to apply referral code' },
-      { status: 500 }
-    );
+    console.error('Error in POST /api/referrals/apply:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

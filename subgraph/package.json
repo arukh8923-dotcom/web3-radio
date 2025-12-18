@@ -1,0 +1,21 @@
+{
+  "name": "web3-radio-subgraph",
+  "version": "1.0.0",
+  "description": "The Graph subgraph for Web3 Radio on Base",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy:studio": "graph deploy --studio web3-radio",
+    "deploy:hosted": "graph deploy --product hosted-service ukhy89/web3-radio",
+    "create:local": "graph create --node http://localhost:8020/ web3-radio",
+    "deploy:local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 web3-radio",
+    "test": "graph test"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.68.0",
+    "@graphprotocol/graph-ts": "^0.32.0"
+  },
+  "devDependencies": {
+    "matchstick-as": "^0.6.0"
+  }
+}

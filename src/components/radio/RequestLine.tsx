@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
 import { useTokenBalances } from '@/hooks/useTokenBalances';
 import { VIBES_TOKEN_ADDRESS, ERC20_ABI } from '@/lib/contracts';
+import { TREASURY_ADDRESS } from '@/constants/addresses';
 
-// Platform treasury for VIBES stakes (can be refunded if request fulfilled)
-const TREASURY_ADDRESS = '0x000000000000000000000000000000000000dEaD' as const;
+// Request expiry time (2 hours)
+const REQUEST_EXPIRY_MS = 2 * 60 * 60 * 1000;
 
 interface Request {
   id: string;
@@ -16,8 +17,10 @@ interface Request {
   artist?: string;
   vibesStaked: number;
   timestamp: number;
-  status: 'pending' | 'fulfilled' | 'expired';
+  status: 'pending' | 'fulfilled' | 'expired' | 'refunded';
   txHash?: string;
+  fulfilledBy?: string;
+  refundTxHash?: string;
 }
 
 interface RequestLineProps {
@@ -108,9 +111,89 @@ export function RequestLine({ stationId, disabled }: RequestLineProps) {
     }
   };
 
+  // Check for expired requests and auto-refund
+  useEffect(() => {
+    const checkExpired = async () => {
+      const now = Date.now();
+      const expiredRequests = requests.filter(
+        (r) => r.status === 'pending' && now - r.timestamp > REQUEST_EXPIRY_MS
+      );
+      
+      for (const req of expiredRequests) {
+        // Mark as expired in API (triggers refund)
+        try {
+          await fetch(`/api/requests/${req.id}/expire`, { method: 'POST' });
+        } catch (e) {
+          console.error('Failed to expire request:', e);
+        }
+      }
+      
+      if (expiredRequests.length > 0) {
+        // Reload requests
+        const res = await fetch(`/api/requests?station_id=${stationId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setRequests(data.requests || []);
+        }
+      }
+    };
+    
+    if (isOpen && stationId) {
+      checkExpired();
+      const interval = setInterval(checkExpired, 60000); // Check every minute
+      return () => clearInterval(interval);
+    }
+  }, [isOpen, stationId, requests]);
+
+  // Fulfill request (DJ only)
+  const handleFulfill = useCallback(async (requestId: string) => {
+    if (!address) return;
+    
+    try {
+      const res = await fetch(`/api/requests/${requestId}/fulfill`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fulfilled_by: address }),
+      });
+      
+      if (res.ok) {
+        setRequests((prev) =>
+          prev.map((r) => (r.id === requestId ? { ...r, status: 'fulfilled' as const, fulfilledBy: address } : r))
+        );
+      }
+    } catch (error) {
+      console.error('Failed to fulfill request:', error);
+    }
+  }, [address]);
+
+  // Request refund (requester only, for expired requests)
+  const handleRefund = useCallback(async (requestId: string) => {
+    if (!address) return;
+    
+    try {
+      const res = await fetch(`/api/requests/${requestId}/refund`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wallet_address: address }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setRequests((prev) =>
+          prev.map((r) => (r.id === requestId ? { ...r, status: 'refunded' as const, refundTxHash: data.refund_tx_hash } : r))
+        );
+        refetch();
+      }
+    } catch (error) {
+      console.error('Failed to refund request:', error);
+    }
+  }, [address, refetch]);
+
   const sortedRequests = [...requests]
     .filter((r) => r.status === 'pending')
     .sort((a, b) => b.vibesStaked - a.vibesStaked);
+
+  const expiredRequests = requests.filter((r) => r.status === 'expired' && r.walletAddress.toLowerCase() === address?.toLowerCase());
 
   const formatTime = (timestamp: number) => {
     const mins = Math.floor((Date.now() - timestamp) / 60000);
@@ -119,9 +202,19 @@ export function RequestLine({ stationId, disabled }: RequestLineProps) {
     return `${Math.floor(mins / 60)}h ago`;
   };
 
+  const getTimeRemaining = (timestamp: number) => {
+    const remaining = REQUEST_EXPIRY_MS - (Date.now() - timestamp);
+    if (remaining <= 0) return 'Expired';
+    const mins = Math.floor(remaining / 60000);
+    if (mins < 60) return `${mins}m left`;
+    return `${Math.floor(mins / 60)}h ${mins % 60}m left`;
+  };
+
   const truncateAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
+
+  const isDJ = false; // TODO: Check if current user is DJ of this station
 
   return (
     <div className="relative">
@@ -195,6 +288,27 @@ export function RequestLine({ stationId, disabled }: RequestLineProps) {
               </p>
             )}
 
+            {/* Expired Requests (Refundable) */}
+            {expiredRequests.length > 0 && (
+              <div className="p-2 bg-red-500/10 border-b border-red-500/30">
+                <p className="text-red-400 text-xs font-medium mb-2">⏰ Expired Requests (Refundable)</p>
+                {expiredRequests.map((request) => (
+                  <div key={request.id} className="flex items-center justify-between py-1">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-dial-cream text-xs truncate">{request.songTitle}</p>
+                      <p className="text-purple-400 text-xs">{request.vibesStaked} VIBES</p>
+                    </div>
+                    <button
+                      onClick={() => handleRefund(request.id)}
+                      className="px-2 py-1 bg-green-500/20 border border-green-500/50 rounded text-green-400 text-xs hover:bg-green-500/30"
+                    >
+                      Refund
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Request Queue */}
             <div className="max-h-48 overflow-y-auto">
               {sortedRequests.length === 0 ? (
@@ -212,10 +326,19 @@ export function RequestLine({ stationId, disabled }: RequestLineProps) {
                         <p className="text-dial-cream/30 text-xs mt-0.5">
                           {truncateAddress(request.walletAddress)} • {formatTime(request.timestamp)}
                         </p>
+                        <p className="text-amber-400/60 text-[10px]">{getTimeRemaining(request.timestamp)}</p>
                       </div>
                       <div className="text-right ml-2">
                         <span className="text-purple-400 text-sm font-dial">{request.vibesStaked}</span>
                         <p className="text-dial-cream/40 text-[10px]">VIBES</p>
+                        {isDJ && (
+                          <button
+                            onClick={() => handleFulfill(request.id)}
+                            className="mt-1 px-2 py-0.5 bg-green-500/20 border border-green-500/50 rounded text-green-400 text-[10px] hover:bg-green-500/30"
+                          >
+                            ✓ Play
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -223,7 +346,7 @@ export function RequestLine({ stationId, disabled }: RequestLineProps) {
               )}
             </div>
 
-            <p className="p-2 text-dial-cream/30 text-[10px] text-center">Higher stakes = higher priority • On-chain</p>
+            <p className="p-2 text-dial-cream/30 text-[10px] text-center">Higher stakes = higher priority • Expires in 2h • On-chain</p>
           </div>
         </>
       )}

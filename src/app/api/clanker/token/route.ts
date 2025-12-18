@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
 
     const token = mockTokens[stationId] || null;
     const holders = token ? [
-      { wallet_address: '0x1234...', display_name: 'DJ Vibes', balance: '100000', percentage: 10 },
-      { wallet_address: '0x5678...', display_name: 'ChillMaster', balance: '50000', percentage: 5 },
+      { wallet_address: 'djvibes.base', display_name: 'DJ Vibes', balance: '100000', percentage: 10 },
+      { wallet_address: 'chillmaster.base', display_name: 'ChillMaster', balance: '50000', percentage: 5 },
     ] : [];
 
     return NextResponse.json({ token, holders });

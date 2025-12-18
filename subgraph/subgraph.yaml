@@ -6,9 +6,9 @@ dataSources:
     name: RadioCoreRegistry
     network: base
     source:
-      address: "0x0000000000000000000000000000000000000000" # Replace with deployed address
+      address: "0x716D07766eE2B6e62337B052B3501e66d12B8563"
       abi: RadioCoreRegistry
-      startBlock: 1
+      startBlock: 23500000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -16,6 +16,7 @@ dataSources:
       entities:
         - Station
         - Listener
+        - GlobalStats
       abis:
         - name: RadioCoreRegistry
           file: ./abis/RadioCoreRegistry.json
@@ -31,12 +32,12 @@ dataSources:
       file: ./src/radio-core-registry.ts
 
   - kind: ethereum
-    name: RadioToken
+    name: SubscriptionManager
     network: base
     source:
-      address: "0x0000000000000000000000000000000000000000" # Replace with deployed address
-      abi: RadioToken
-      startBlock: 1
+      address: "0xc39d19eb191714Dde7dc069CA86059Fb5c5C935E"
+      abi: SubscriptionManager
+      startBlock: 23500000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -44,46 +45,26 @@ dataSources:
       entities:
         - Tip
         - Subscription
+        - Listener
+        - Station
+        - GlobalStats
       abis:
-        - name: RadioToken
-          file: ./abis/RadioToken.json
+        - name: SubscriptionManager
+          file: ./abis/SubscriptionManager.json
       eventHandlers:
-        - event: Tipped(indexed address,indexed address,uint256)
-          handler: handleTipped
-        - event: Subscribed(indexed address,indexed uint256,uint256)
-          handler: handleSubscribed
-      file: ./src/radio-token.ts
-
-  - kind: ethereum
-    name: VibesToken
-    network: base
-    source:
-      address: "0x0000000000000000000000000000000000000000" # Replace with deployed address
-      abi: VibesToken
-      startBlock: 1
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - MoodReaction
-      abis:
-        - name: VibesToken
-          file: ./abis/VibesToken.json
-      eventHandlers:
-        - event: Reaction(indexed address,indexed uint256,uint8)
-          handler: handleReaction
-        - event: MoodRingUpdated(indexed uint256,uint8)
-          handler: handleMoodRingUpdated
-      file: ./src/vibes-token.ts
+        - event: TipSent(indexed address,indexed address,indexed address,uint256,string)
+          handler: handleTipSent
+        - event: SubscriptionCreated(indexed address,indexed address,uint8,uint256,uint256)
+          handler: handleSubscriptionCreated
+      file: ./src/subscription-manager.ts
 
   - kind: ethereum
     name: SessionNFTFactory
     network: base
     source:
-      address: "0x0000000000000000000000000000000000000000" # Replace with deployed address
+      address: "0xBDbFf9019678D42791D4bc2CA795B56b3Dc0F542"
       abi: SessionNFTFactory
-      startBlock: 1
+      startBlock: 23500000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -91,14 +72,43 @@ dataSources:
       entities:
         - Session
         - SessionNFT
+        - Station
       abis:
         - name: SessionNFTFactory
           file: ./abis/SessionNFTFactory.json
       eventHandlers:
-        - event: SessionCreated(indexed uint256,indexed uint256)
+        - event: SessionCreated(indexed uint256,uint256,indexed address,string)
           handler: handleSessionCreated
-        - event: SessionNFTClaimed(indexed uint256,indexed address)
-          handler: handleSessionNFTClaimed
-        - event: SessionClosed(indexed uint256,uint256)
-          handler: handleSessionClosed
+        - event: AttendeeJoined(indexed uint256,indexed address)
+          handler: handleAttendeeJoined
+        - event: SessionEnded(indexed uint256,uint256)
+          handler: handleSessionEnded
       file: ./src/session-nft-factory.ts
+
+  - kind: ethereum
+    name: Zone420
+    network: base
+    source:
+      address: "0x6D4aad448235C1f0275aa06F940dC67695BD0496"
+      abi: Zone420
+      startBlock: 23500000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - MoodReaction
+        - Station
+        - Listener
+        - GlobalStats
+      abis:
+        - name: Zone420
+          file: ./abis/Zone420.json
+      eventHandlers:
+        - event: MoodChanged(indexed address,uint8)
+          handler: handleMoodChanged
+        - event: VibesEarned(indexed address,uint256,bool)
+          handler: handleVibesEarned
+        - event: JoinedZone420(indexed address,uint256)
+          handler: handleJoinedZone420
+      file: ./src/zone420.ts

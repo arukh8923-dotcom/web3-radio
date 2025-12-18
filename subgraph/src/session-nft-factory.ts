@@ -1,6 +1,10 @@
-import { BigInt } from "@graphprotocol/graph-ts";
-import { SessionCreated, SessionNFTClaimed, SessionClosed } from "../generated/SessionNFTFactory/SessionNFTFactory";
-import { Session, SessionNFT } from "../generated/schema";
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import {
+  SessionCreated,
+  AttendeeJoined,
+  SessionEnded,
+} from "../generated/SessionNFTFactory/SessionNFTFactory";
+import { Session, SessionNFT, Station } from "../generated/schema";
 
 export function handleSessionCreated(event: SessionCreated): void {
   let session = new Session(event.params.sessionId.toString());
@@ -9,17 +13,32 @@ export function handleSessionCreated(event: SessionCreated): void {
   session.endTime = BigInt.fromI32(0);
   session.attendeeCount = BigInt.fromI32(0);
   session.mintingClosed = false;
+
+  // Get or create station by frequency
+  let stationId = event.params.frequency.toString();
+  let station = Station.load(stationId);
+  if (!station) {
+    station = new Station(stationId);
+    station.frequency = event.params.frequency;
+    station.owner = Bytes.fromHexString("0x0000000000000000000000000000000000000000");
+    station.name = "Station " + stationId;
+    station.category = "music";
+    station.isPremium = false;
+    station.listenerCount = BigInt.fromI32(0);
+    station.totalTips = BigInt.fromI32(0);
+    station.signalStrength = BigInt.fromI32(100);
+    station.createdAt = event.block.timestamp;
+    station.updatedAt = event.block.timestamp;
+    station.save();
+  }
+  session.station = station.id;
+
+  // DJ/Host is from event params
+  session.dj = event.params.host;
   session.save();
 }
 
-export function handleSessionNFTClaimed(event: SessionNFTClaimed): void {
-  let nftId = event.params.sessionId.toString() + "-" + event.params.attendee.toHexString();
-  let nft = new SessionNFT(nftId);
-  nft.tokenId = event.params.sessionId;
-  nft.attendee = event.params.attendee;
-  nft.mintedAt = event.block.timestamp;
-  nft.save();
-
+export function handleAttendeeJoined(event: AttendeeJoined): void {
   // Update session attendee count
   let session = Session.load(event.params.sessionId.toString());
   if (session) {
@@ -28,7 +47,7 @@ export function handleSessionNFTClaimed(event: SessionNFTClaimed): void {
   }
 }
 
-export function handleSessionClosed(event: SessionClosed): void {
+export function handleSessionEnded(event: SessionEnded): void {
   let session = Session.load(event.params.sessionId.toString());
   if (session) {
     session.endTime = event.block.timestamp;

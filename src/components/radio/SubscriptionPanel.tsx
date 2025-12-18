@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
 import { useTokenBalances } from '@/hooks/useTokenBalances';
 import { RADIO_TOKEN_ADDRESS, ERC20_ABI } from '@/lib/contracts';
+import { useTokenPrice, USD_PRICING } from '@/hooks/useTokenPrice';
 
 interface SubscriptionTier {
   id: string;
   name: string;
-  price: number; // in RADIO tokens
+  priceUsd: number; // Price in USD
+  priceRadio: number; // Calculated RADIO amount
   duration: number; // days
   benefits: string[];
   icon: string;
@@ -35,12 +37,12 @@ interface SubscriptionPanelProps {
   stationAddress?: string;
 }
 
-// Subscription tiers priced in RADIO tokens
-const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
+// Base tier definitions (USD-based)
+const TIER_DEFINITIONS = [
   {
     id: 'basic',
     name: 'Basic',
-    price: 500, // 500 RADIO/month
+    priceUsd: USD_PRICING.subscription.basic, // $1/month
     duration: 30,
     benefits: ['Ad-free listening', 'Basic chat access'],
     icon: '📻',
@@ -48,7 +50,7 @@ const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
   {
     id: 'premium',
     name: 'Premium',
-    price: 1500, // 1,500 RADIO/month
+    priceUsd: USD_PRICING.subscription.premium, // $5/month
     duration: 30,
     benefits: ['Ad-free listening', 'Premium chat badge', 'Request priority', 'Exclusive content'],
     icon: '⭐',
@@ -56,7 +58,7 @@ const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
   {
     id: 'vip',
     name: 'VIP',
-    price: 5000, // 5,000 RADIO/month
+    priceUsd: USD_PRICING.subscription.vip, // $20/month
     duration: 30,
     benefits: ['All Premium benefits', 'Direct DJ access', 'VIP room access', 'NFT airdrops', 'Governance voting'],
     icon: '👑',
@@ -66,6 +68,7 @@ const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
 export function SubscriptionPanel({ isOpen, onClose, stationName, stationAddress }: SubscriptionPanelProps) {
   const { address } = useAccount();
   const { radio, radioRaw, refetch } = useTokenBalances();
+  const { usdToRadio, radioToUsd, formatRadioAmount, loading: priceLoading } = useTokenPrice();
   const [activeSubscription, setActiveSubscription] = useState<Subscription | null>(null);
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier | null>(null);
   const [loading, setLoading] = useState(false);
@@ -74,6 +77,14 @@ export function SubscriptionPanel({ isOpen, onClose, stationName, stationAddress
 
   const { writeContract, data: hash, isPending, reset } = useWriteContract();
   const { isSuccess, isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+
+  // Calculate RADIO prices dynamically based on current market price
+  const SUBSCRIPTION_TIERS: SubscriptionTier[] = useMemo(() => {
+    return TIER_DEFINITIONS.map(tier => ({
+      ...tier,
+      priceRadio: usdToRadio(tier.priceUsd),
+    }));
+  }, [usdToRadio]);
 
   useEffect(() => {
     if (isOpen && address) {
@@ -96,7 +107,8 @@ export function SubscriptionPanel({ isOpen, onClose, stationName, stationAddress
           tier_id: pendingTier.id,
           tier_name: pendingTier.name,
           subscriber_address: address,
-          price: pendingTier.price.toString(),
+          price: pendingTier.priceRadio.toString(),
+          price_usd: pendingTier.priceUsd,
           token: 'RADIO',
           duration_days: pendingTier.duration,
           start_date: startDate.toISOString(),
@@ -139,9 +151,9 @@ export function SubscriptionPanel({ isOpen, onClose, stationName, stationAddress
   const handlePurchase = async (tier: SubscriptionTier) => {
     if (!address || !stationAddress) return;
 
-    const priceWei = parseUnits(tier.price.toString(), 18);
+    const priceWei = parseUnits(tier.priceRadio.toString(), 18);
     if (radioRaw < priceWei) {
-      alert(`Insufficient RADIO. You need ${tier.price} RADIO but have ${parseFloat(radio).toFixed(2)}`);
+      alert(`Insufficient RADIO. You need ${formatRadioAmount(tier.priceRadio)} RADIO (~$${tier.priceUsd}) but have ${parseFloat(radio).toFixed(2)}`);
       return;
     }
 
@@ -329,8 +341,12 @@ export function SubscriptionPanel({ isOpen, onClose, stationName, stationAddress
             <div className="space-y-3">
               <p className="text-dial-cream/60 text-sm text-center">Subscribe for premium access to {stationName}</p>
 
-              {SUBSCRIPTION_TIERS.map((tier) => {
-                const priceWei = parseUnits(tier.price.toString(), 18);
+              {priceLoading ? (
+                <div className="text-center py-4">
+                  <p className="text-dial-cream/60 text-sm">Loading prices...</p>
+                </div>
+              ) : SUBSCRIPTION_TIERS.map((tier) => {
+                const priceWei = parseUnits(tier.priceRadio.toString(), 18);
                 const canAfford = radioRaw >= priceWei;
 
                 return (
@@ -350,7 +366,10 @@ export function SubscriptionPanel({ isOpen, onClose, stationName, stationAddress
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`font-bold ${canAfford ? 'text-brass' : 'text-red-400'}`}>{tier.price.toLocaleString()} RADIO</p>
+                        <p className="text-green-400 font-bold text-lg">${tier.priceUsd}</p>
+                        <p className={`text-xs ${canAfford ? 'text-brass' : 'text-red-400'}`}>
+                          ≈ {formatRadioAmount(tier.priceRadio)} RADIO
+                        </p>
                       </div>
                     </div>
 
@@ -377,7 +396,7 @@ export function SubscriptionPanel({ isOpen, onClose, stationName, stationAddress
                           ? 'Confirm in wallet...'
                           : isConfirming
                           ? 'Processing...'
-                          : `Subscribe for ${tier.price.toLocaleString()} RADIO`}
+                          : `Pay $${tier.priceUsd} (≈ ${formatRadioAmount(tier.priceRadio)} RADIO)`}
                       </button>
                     )}
                   </div>
