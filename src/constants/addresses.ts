@@ -18,10 +18,10 @@ export const CONTRACTS = {
   STATION_FACTORY: '' as Address,
   SUBSCRIPTION_MANAGER: '' as Address,
   
-  // 420 Culture Contracts
+  // Social/VIBES Feature Contracts
   SESSION_NFT_FACTORY: '' as Address,
   SMOKE_SIGNALS: '' as Address,
-  HOTBOX_MANAGER: '' as Address,
+  BACKSTAGE_MANAGER: '' as Address, // Formerly Hotbox
   AUX_PASS_CONTROLLER: '' as Address,
   COMMUNITY_DROPS: '' as Address,
   

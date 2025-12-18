@@ -9,9 +9,10 @@ const helpItems = [
   { icon: '🎚️', title: 'Tuning', desc: 'Drag the dial or use +/- to find stations' },
   { icon: '📻', title: 'Presets', desc: 'Tap to load, hold to save current station' },
   { icon: '🔊', title: 'Controls', desc: 'Adjust volume, bass, and treble knobs' },
-  { icon: '💜', title: 'Vibes', desc: 'React to show your mood (Coming Soon)' },
+  { icon: '🎵', title: 'Vibes', desc: 'React to show your mood and earn $VIBES' },
   { icon: '💬', title: 'Chat', desc: 'Join live chat with other listeners' },
   { icon: '🎁', title: 'Tips', desc: 'Support DJs with $RADIO tips' },
+  { icon: '✨', title: 'Golden Hour', desc: 'Special events at peak listening times (6-8 PM)' },
 ];
 
 export function HelpModal({ isOpen, onClose }: HelpModalProps) {

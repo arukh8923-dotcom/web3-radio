@@ -39,7 +39,7 @@ export interface Station {
   frequency: number;
   name: string;
   description: string | null;
-  category: 'music' | 'talk' | 'news' | 'sports' | '420' | 'ambient';
+  category: 'music' | 'talk' | 'news' | 'sports' | 'lofi' | 'ambient';
   owner_address: string;
   image_url: string | null;
   stream_url: string | null;

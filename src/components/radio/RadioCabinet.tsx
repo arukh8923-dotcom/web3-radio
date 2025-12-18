@@ -260,13 +260,13 @@ export function RadioCabinet() {
             </div>
           </div>
 
-          {/* Mood Ring - Coming Soon (Phase 2 with $VIBES) */}
+          {/* Mood Ring - Station Vibe Meter */}
           {currentStation && (
-            <div className="mt-3 p-2 bg-purple-900/10 border border-purple-500/20 rounded-lg opacity-60">
-              <div className="flex items-center justify-between">
-                <span className="text-purple-400/60 text-xs">💜 Mood Ring</span>
-                <span className="text-purple-400/40 text-[10px]">Coming Soon with $VIBES</span>
-              </div>
+            <div className="mt-3">
+              <MoodRingDisplay 
+                stationId={currentStation.id}
+                moodRing={moodRing}
+              />
             </div>
           )}
 
@@ -301,47 +301,45 @@ export function RadioCabinet() {
             </div>
           </div>
 
-          {/* Smoke Signals (420 Zone) - Coming Soon (Phase 2 with $VIBES) */}
-          {currentStation && in420Zone && (
-            <div className="mt-3 p-2 bg-green-900/10 border border-green-500/20 rounded-lg opacity-60">
-              <div className="flex items-center justify-between">
-                <span className="text-green-400/60 text-xs">💨 Smoke Signals</span>
-                <span className="text-green-400/40 text-[10px]">Coming Soon with $VIBES</span>
-              </div>
-            </div>
+          {/* Smoke Signals - Ephemeral Messages */}
+          {currentStation && (
+            <SmokeSignals
+              stationId={currentStation.id}
+              frequency={frequency}
+            />
           )}
 
-          {/* 420 Zone Features - Coming Soon (Phase 2 with $VIBES) */}
+          {/* Golden Hour Zone Features - Special Event Zone */}
           {currentStation && in420Zone && (
-            <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg opacity-60">
+            <div className="mt-4 p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-green-400 text-xs font-bold">🌿 420 ZONE FEATURES</p>
-                <span className="text-green-400/60 text-[10px] bg-green-900/50 px-2 py-0.5 rounded">
-                  Coming Soon with $VIBES
+                <p className="text-purple-400 text-xs font-bold">🎵 GOLDEN HOUR ZONE</p>
+                <span className="text-purple-400/60 text-[10px] bg-purple-900/50 px-2 py-0.5 rounded">
+                  Special Features
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
-                  disabled
-                  className="preset-button text-xs bg-green-900/30 cursor-not-allowed opacity-50"
+                  onClick={() => setSessionsOpen(true)}
+                  className="preset-button text-xs bg-purple-900/30 hover:bg-purple-900/50"
                 >
                   🎫 Sessions
                 </button>
                 <button
-                  disabled
-                  className="preset-button text-xs bg-green-900/30 cursor-not-allowed opacity-50"
+                  onClick={() => setAuxPassOpen(true)}
+                  className="preset-button text-xs bg-purple-900/30 hover:bg-purple-900/50"
                 >
                   🎧 Aux Pass
                 </button>
                 <button
-                  disabled
-                  className="preset-button text-xs bg-green-900/30 cursor-not-allowed opacity-50"
+                  onClick={() => setHotboxOpen(true)}
+                  className="preset-button text-xs bg-purple-900/30 hover:bg-purple-900/50"
                 >
-                  🚪 Hotbox
+                  🚪 Backstage
                 </button>
                 <button
-                  disabled
-                  className="preset-button text-xs bg-green-900/30 cursor-not-allowed opacity-50"
+                  onClick={() => setDropsOpen(true)}
+                  className="preset-button text-xs bg-purple-900/30 hover:bg-purple-900/50"
                 >
                   🎁 Drops
                 </button>

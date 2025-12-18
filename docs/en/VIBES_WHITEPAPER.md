@@ -2,13 +2,13 @@
 
 ## Web3 Radio Social & Engagement Token
 
-**Version 1.0 | December 2025**
+**Version 1.1 | December 2025**
 
 ---
 
 ## Executive Summary
 
-$VIBES is the social and engagement token for the Web3 Radio ecosystem. Unlike $RADIO which focuses on governance and utility, $VIBES is designed to drive engagement, social interaction, and 420 culture community. This token can be earned through activities and spent on social features.
+$VIBES is the social and engagement token for the Web3 Radio ecosystem. Unlike $RADIO which focuses on governance and utility, $VIBES is designed to drive engagement, social interaction, and music community building. This token can be earned through activities and spent on social features.
 
 ---
 
@@ -16,7 +16,7 @@ $VIBES is the social and engagement token for the Web3 Radio ecosystem. Unlike $
 
 ### 1.1 Vision
 
-$VIBES creates a social economy where engagement is rewarded and communities can interact in fun and meaningful ways. Inspired by 420 culture, $VIBES brings elements of community, chill vibes, and social bonding to Web3 Radio.
+$VIBES creates a social economy where engagement is rewarded and communities can interact in fun and meaningful ways. Inspired by music culture and the universal language of beats, $VIBES brings elements of community, shared experiences, and social bonding to Web3 Radio.
 
 ### 1.2 Why $VIBES?
 
@@ -30,13 +30,14 @@ Web3 Radio needs a dual-token system because:
 | **Target Users** | Investors, DJs | Active Listeners |
 | **Spending** | Subscriptions, Tips | Social Features |
 
-### 1.3 420 Culture Integration
+### 1.3 Music/Beat Theme Integration
 
-$VIBES integrates 420 culture with:
-- Special events at 4:20 AM/PM
-- 420.0 FM frequency zone
-- Community-based vibes
-- Chill and inclusive atmosphere
+$VIBES integrates music culture with:
+- BPM-based reward multipliers
+- Genre zones across the FM dial
+- Golden Hour events (peak listening times)
+- Mood Ring collective vibe system
+- Community-driven music discovery
 
 ---
 
@@ -99,20 +100,20 @@ Clanker is a token deployment platform that creates ERC-20 tokens with built-in 
 - Team must **claim** tokens from vault (not automatically sent to wallet)
 - Creator earns **100% of LP trading fees** as passive income
 
-**420 Culture Integration:**
+**Music Theme Integration:**
 
-While Clanker's fixed 100B supply cannot be customized, the 420 culture is deeply integrated into $VIBES through:
+While Clanker's fixed 100B supply cannot be customized, the music theme is deeply integrated into $VIBES through:
 
-| Element | 420 Integration |
-|---------|-----------------|
-| **4:20 Events** | 420 VIBES bonus at 4:20 AM/PM daily |
-| **Achievement Rewards** | 420, 4,200, 42,000 VIBES milestones |
-| **Weekly Drops** | 69-420 VIBES community airdrops |
-| **Burn Amounts** | Multiples of 420 for social features |
-| **Special Events** | 420,000 VIBES for major celebrations |
-| **Mood Ring** | 420 frequency zone (420.0 FM) |
+| Element | Music Integration |
+|---------|-------------------|
+| **Golden Hour Events** | 88-108 VIBES bonus during peak hours (6-8 PM) |
+| **Achievement Rewards** | 88, 98, 108 VIBES milestones (FM range) |
+| **Weekly Drops** | 50-200 VIBES community airdrops |
+| **BPM Multipliers** | Higher BPM = higher rewards |
+| **Genre Zones** | Different rewards per genre frequency |
+| **Mood Ring** | Collective station vibe meter |
 
-*"100 Billion VIBES for infinite good vibes - with 420 culture in every interaction"*
+*"100 Billion VIBES for infinite good vibes - with music culture in every interaction"*
 
 ### 2.3 Contract Architecture
 
@@ -162,8 +163,8 @@ The 30B Creator Vault tokens will be distributed by the team:
 
 | Sub-Allocation | % of Vault | Amount | Purpose |
 |----------------|------------|--------|---------|
-| **420 Zone Rewards** | 50% | 15,000,000,000 | Listening rewards, 4:20 events |
-| **Community Rewards** | 30% | 9,000,000,000 | Airdrops, achievements, referrals |
+| **Community Rewards** | 50% | 15,000,000,000 | Listening rewards, Golden Hour events |
+| **DJ Rewards Pool** | 30% | 9,000,000,000 | Airdrops, achievements, referrals |
 | **Team** | 10% | 3,000,000,000 | Core team compensation |
 | **Treasury** | 10% | 3,000,000,000 | Development fund |
 
@@ -196,10 +197,10 @@ Earn VIBES just by listening to Web3 Radio.
 | Activity | Reward | Limit |
 |----------|--------|-------|
 | Per 10 minutes tune in | 1 VIBES | 100/day |
-| First tune-in today | 69 VIBES | 1/day |
+| First tune-in today | 88 VIBES | 1/day |
 | 1 hour continuous listening | 10 VIBES bonus | 5/day |
 
-**4:20 Multiplier:** 2x rewards during 4:20 AM/PM events
+**Golden Hour Multiplier:** 2x rewards during Golden Hour (6-8 PM)
 
 ### 4.2 Mood Reactions
 
@@ -220,32 +221,43 @@ Available Moods:
 | Match station mood | +3 VIBES bonus | - |
 | Mood streak (5 consecutive) | +10 VIBES | - |
 
-### 4.3 Special Events
+### 4.3 BPM-Based Rewards
+
+Higher tempo tracks earn more VIBES:
+
+| BPM Range | Multiplier | Tier Name |
+|-----------|------------|-----------|
+| 60-90 BPM | 1.0x | Chill |
+| 91-120 BPM | 1.2x | Groove |
+| 121-150 BPM | 1.5x | Hype |
+| 151-200 BPM | 2.0x | Drop |
+
+### 4.4 Special Events
 
 Participate in special events for bonus VIBES.
 
 | Event | Reward | Frequency |
 |-------|--------|-----------|
-| 4:20 session attendance | 420 VIBES | 2x daily |
-| Weekly community drop | 69-420 VIBES | Weekly |
+| Golden Hour attendance | 98 VIBES | Daily (6-8 PM) |
+| Weekly community drop | 50-200 VIBES | Weekly |
 | Special broadcast attendance | 100-1000 VIBES | Variable |
 | Holiday events | Variable | Seasonal |
 
-### 4.4 Achievements
+### 4.5 Achievements
 
 Unlock achievements for one-time VIBES rewards.
 
 | Achievement | Requirement | Reward |
 |-------------|-------------|--------|
-| First Tune | First station tune-in | 100 VIBES |
-| Regular Listener | 7-day streak | 420 VIBES |
+| First Tune | First station tune-in | 88 VIBES |
+| Regular Listener | 7-day streak | 108 VIBES |
 | Loyal Fan | 30-day streak | 1,000 VIBES |
 | Mood Master | Use all 5 moods | 250 VIBES |
 | Social Butterfly | 100 chat messages | 500 VIBES |
 | Tipper | First tip sent | 200 VIBES |
 | Collector | Own 5 Session NFTs | 1,000 VIBES |
 
-### 4.5 Referrals
+### 4.6 Referrals
 
 Invite friends and earn VIBES.
 
@@ -269,7 +281,7 @@ Send temporary messages that disappear after a set time.
 | 5 minutes | 10 VIBES | Entire station |
 | 15 minutes | 25 VIBES | Entire station |
 | 1 hour | 50 VIBES | Entire station |
-| 4 hours 20 minutes | 100 VIBES | Entire station |
+| 4 hours | 100 VIBES | Entire station |
 
 **Mechanism:** 100% burned (deflationary)
 
@@ -305,15 +317,15 @@ Unlock personalization options.
 | Profile frame | 150 VIBES | 30 days |
 | Username color | 100 VIBES | 30 days |
 
-### 5.5 Hotbox Room Access
+### 5.5 Backstage Room Access
 
 Enter private token-gated rooms.
 
 | Room Type | Minimum Balance | Spending |
 |-----------|-----------------|----------|
-| Public Hotbox | 100 VIBES | None (hold) |
-| Premium Hotbox | 500 VIBES | None (hold) |
-| VIP Hotbox | 1,000 VIBES | None (hold) |
+| Public Backstage | 100 VIBES | None (hold) |
+| Premium Backstage | 500 VIBES | None (hold) |
+| VIP Backstage | 1,000 VIBES | None (hold) |
 | Exclusive Event | Variable | Entry fee |
 
 ### 5.6 Aux Pass Priority
@@ -349,7 +361,7 @@ These actions move VIBES between users:
 | Action | Recipient |
 |--------|-----------|
 | Fulfilled request | DJ |
-| Hotbox entry fee | Room creator |
+| Backstage entry fee | Room creator |
 | Aux Pass priority | Station treasury |
 | Event tickets | Event organizer |
 
@@ -446,10 +458,6 @@ Matching station mood gives bonus VIBES:
 ```solidity
 contract VibesTokenWrapper {
     IERC20 public immutable vibesToken;
-    uint256 public constant MAX_SUPPLY = 420_690_000 * 1e18;
-    
-    // Minting (limited)
-    function mint(address to, uint256 amount) external onlyAuthorized;
     
     // Core functions
     function react(uint256 freq, Mood mood) external;
@@ -497,7 +505,7 @@ event SignalSent(uint256 indexed signalId, address indexed sender, uint256 expir
 ### Q2 2026: Social Features
 - [ ] Smoke Signals
 - [ ] Request Line
-- [ ] Hotbox Rooms
+- [ ] Backstage Rooms
 - [ ] Achievement system
 
 ### Q3 2026: Advanced Features
@@ -531,7 +539,7 @@ event SignalSent(uint256 indexed signalId, address indexed sender, uint256 expir
 
 ## 12. Conclusion
 
-$VIBES creates a fun and engaging social economy within Web3 Radio. By rewarding active participation and enabling social features, $VIBES ensures that the most engaged community members are recognized and rewarded. The limited inflation model provides sustainable rewards while burn mechanisms create long-term deflationary pressure.
+$VIBES creates a fun and engaging social economy within Web3 Radio. By rewarding active participation and enabling social features, $VIBES ensures that the most engaged community members are recognized and rewarded. The burn mechanisms create long-term deflationary pressure while the music-themed rewards make earning fun and intuitive.
 
 Together with $RADIO, the dual-token system creates a balanced ecosystem where both value investors and active participants can thrive.
 

@@ -2,13 +2,13 @@
 
 ## Token Sosial & Engagement Web3 Radio
 
-**Versi 1.0 | Desember 2025**
+**Versi 1.1 | Desember 2025**
 
 ---
 
 ## Ringkasan Eksekutif
 
-$VIBES adalah token sosial dan engagement untuk ekosistem Web3 Radio. Berbeda dengan $RADIO yang berfokus pada governance dan utilitas, $VIBES dirancang untuk mendorong engagement, interaksi sosial, dan komunitas 420 culture. Token ini dapat diperoleh melalui aktivitas dan dibelanjakan untuk fitur sosial.
+$VIBES adalah token sosial dan engagement untuk ekosistem Web3 Radio. Berbeda dengan $RADIO yang berfokus pada governance dan utilitas, $VIBES dirancang untuk mendorong engagement, interaksi sosial, dan pembangunan komunitas musik. Token ini dapat diperoleh melalui aktivitas dan dibelanjakan untuk fitur sosial.
 
 ---
 
@@ -16,7 +16,7 @@ $VIBES adalah token sosial dan engagement untuk ekosistem Web3 Radio. Berbeda de
 
 ### 1.1 Visi
 
-$VIBES menciptakan ekonomi sosial di mana engagement dihargai dan komunitas dapat berinteraksi dengan cara yang menyenangkan dan bermakna. Terinspirasi dari 420 culture, $VIBES membawa elemen komunitas, suasana santai, dan ikatan sosial ke dalam Web3 Radio.
+$VIBES menciptakan ekonomi sosial di mana engagement dihargai dan komunitas dapat berinteraksi dengan cara yang menyenangkan dan bermakna. Terinspirasi dari kultur musik dan bahasa universal beat, $VIBES membawa elemen komunitas, pengalaman bersama, dan ikatan sosial ke dalam Web3 Radio.
 
 ### 1.2 Mengapa $VIBES?
 
@@ -30,13 +30,14 @@ Web3 Radio membutuhkan sistem dual-token karena:
 | **Target Pengguna** | Investor, DJ | Pendengar Aktif |
 | **Pengeluaran** | Langganan, Tip | Fitur Sosial |
 
-### 1.3 Integrasi 420 Culture
+### 1.3 Integrasi Tema Musik/Beat
 
-$VIBES mengintegrasikan 420 culture dengan:
-- Event spesial di 4:20 AM/PM
-- Zona frekuensi 420.0 FM
-- Vibes berbasis komunitas
-- Suasana santai dan inklusif
+$VIBES mengintegrasikan kultur musik dengan:
+- Pengali hadiah berbasis BPM
+- Zona genre di seluruh dial FM
+- Event Golden Hour (jam puncak mendengarkan)
+- Sistem Mood Ring untuk vibe kolektif
+- Penemuan musik berbasis komunitas
 
 ---
 
@@ -99,20 +100,20 @@ Clanker adalah platform deployment token yang membuat token ERC-20 dengan likuid
 - Tim harus **klaim** token dari vault (tidak otomatis dikirim ke wallet)
 - Creator mendapat **100% LP trading fees** sebagai passive income
 
-**Integrasi Kultur 420:**
+**Integrasi Tema Musik:**
 
-Meskipun suplai tetap 100B dari Clanker tidak bisa dikustomisasi, kultur 420 terintegrasi mendalam ke dalam $VIBES melalui:
+Meskipun suplai tetap 100B dari Clanker tidak bisa dikustomisasi, tema musik terintegrasi mendalam ke dalam $VIBES melalui:
 
-| Elemen | Integrasi 420 |
-|--------|---------------|
-| **Event 4:20** | Bonus 420 VIBES setiap 4:20 AM/PM |
-| **Hadiah Achievement** | Milestone 420, 4.200, 42.000 VIBES |
-| **Drop Mingguan** | Airdrop komunitas 69-420 VIBES |
-| **Jumlah Burn** | Kelipatan 420 untuk fitur sosial |
-| **Event Spesial** | 420.000 VIBES untuk perayaan besar |
-| **Mood Ring** | Zona frekuensi 420 (420.0 FM) |
+| Elemen | Integrasi Musik |
+|--------|-----------------|
+| **Event Golden Hour** | Bonus 88-108 VIBES saat jam puncak (6-8 PM) |
+| **Hadiah Achievement** | Milestone 88, 98, 108 VIBES (range FM) |
+| **Drop Mingguan** | Airdrop komunitas 50-200 VIBES |
+| **Pengali BPM** | BPM lebih tinggi = hadiah lebih besar |
+| **Zona Genre** | Hadiah berbeda per frekuensi genre |
+| **Mood Ring** | Meter vibe kolektif station |
 
-*"100 Miliar VIBES untuk vibes baik tanpa batas - dengan kultur 420 di setiap interaksi"*
+*"100 Miliar VIBES untuk vibes baik tanpa batas - dengan kultur musik di setiap interaksi"*
 
 ### 2.3 Arsitektur Kontrak
 
@@ -162,8 +163,8 @@ Total Suplai: 100.000.000.000 VIBES (100 Miliar)
 
 | Sub-Alokasi | % dari Vault | Jumlah | Tujuan |
 |-------------|--------------|--------|--------|
-| **Hadiah Zona 420** | 50% | 15.000.000.000 | Hadiah mendengarkan, event 4:20 |
-| **Hadiah Komunitas** | 30% | 9.000.000.000 | Airdrop, achievement, referral |
+| **Hadiah Komunitas** | 50% | 15.000.000.000 | Hadiah mendengarkan, event Golden Hour |
+| **Pool Hadiah DJ** | 30% | 9.000.000.000 | Airdrop, achievement, referral |
 | **Tim** | 10% | 3.000.000.000 | Kompensasi tim inti |
 | **Treasury** | 10% | 3.000.000.000 | Dana pengembangan |
 
@@ -196,10 +197,10 @@ Dapatkan VIBES hanya dengan mendengarkan Web3 Radio.
 | Aktivitas | Hadiah | Batas |
 |-----------|--------|-------|
 | Per 10 menit tune in | 1 VIBES | 100/hari |
-| Tune-in pertama hari ini | 69 VIBES | 1/hari |
+| Tune-in pertama hari ini | 88 VIBES | 1/hari |
 | Mendengarkan 1 jam terus-menerus | 10 VIBES bonus | 5/hari |
 
-**Pengali 4:20:** Hadiah 2x selama event 4:20 AM/PM
+**Pengali Golden Hour:** Hadiah 2x selama Golden Hour (6-8 PM)
 
 ### 4.2 Reaksi Mood
 
@@ -220,32 +221,43 @@ Mood Tersedia:
 | Cocok dengan mood station | +3 VIBES bonus | - |
 | Streak mood (5 berturut-turut) | +10 VIBES | - |
 
-### 4.3 Event Spesial
+### 4.3 Hadiah Berbasis BPM
+
+Track dengan tempo lebih tinggi menghasilkan lebih banyak VIBES:
+
+| Range BPM | Pengali | Nama Tier |
+|-----------|---------|-----------|
+| 60-90 BPM | 1.0x | Chill |
+| 91-120 BPM | 1.2x | Groove |
+| 121-150 BPM | 1.5x | Hype |
+| 151-200 BPM | 2.0x | Drop |
+
+### 4.4 Event Spesial
 
 Berpartisipasi dalam event spesial untuk bonus VIBES.
 
 | Event | Hadiah | Frekuensi |
 |-------|--------|-----------|
-| Kehadiran sesi 4:20 | 420 VIBES | 2x sehari |
-| Drop komunitas mingguan | 69-420 VIBES | Mingguan |
+| Kehadiran Golden Hour | 98 VIBES | Harian (6-8 PM) |
+| Drop komunitas mingguan | 50-200 VIBES | Mingguan |
 | Kehadiran broadcast spesial | 100-1000 VIBES | Variabel |
 | Event liburan | Variabel | Musiman |
 
-### 4.4 Achievement
+### 4.5 Achievement
 
 Buka achievement untuk hadiah VIBES satu kali.
 
 | Achievement | Persyaratan | Hadiah |
 |-------------|-------------|--------|
-| Tune Pertama | Tune-in station pertama | 100 VIBES |
-| Pendengar Reguler | Streak 7 hari | 420 VIBES |
+| Tune Pertama | Tune-in station pertama | 88 VIBES |
+| Pendengar Reguler | Streak 7 hari | 108 VIBES |
 | Penggemar Setia | Streak 30 hari | 1.000 VIBES |
 | Master Mood | Gunakan semua 5 mood | 250 VIBES |
 | Kupu-kupu Sosial | 100 pesan chat | 500 VIBES |
 | Tipper | Tip pertama dikirim | 200 VIBES |
 | Kolektor | Miliki 5 Session NFT | 1.000 VIBES |
 
-### 4.5 Referral
+### 4.6 Referral
 
 Undang teman dan dapatkan VIBES.
 
@@ -269,7 +281,7 @@ Kirim pesan sementara yang menghilang setelah waktu tertentu.
 | 5 menit | 10 VIBES | Seluruh station |
 | 15 menit | 25 VIBES | Seluruh station |
 | 1 jam | 50 VIBES | Seluruh station |
-| 4 jam 20 menit | 100 VIBES | Seluruh station |
+| 4 jam | 100 VIBES | Seluruh station |
 
 **Mekanisme:** 100% dibakar (deflasi)
 
@@ -305,15 +317,15 @@ Buka opsi personalisasi.
 | Frame profil | 150 VIBES | 30 hari |
 | Warna username | 100 VIBES | 30 hari |
 
-### 5.5 Akses Hotbox Room
+### 5.5 Akses Backstage Room
 
 Masuk ruang privat dengan token-gate.
 
 | Tipe Ruang | Saldo Minimum | Pengeluaran |
 |------------|---------------|-------------|
-| Hotbox Publik | 100 VIBES | Tidak ada (tahan) |
-| Hotbox Premium | 500 VIBES | Tidak ada (tahan) |
-| Hotbox VIP | 1.000 VIBES | Tidak ada (tahan) |
+| Backstage Publik | 100 VIBES | Tidak ada (tahan) |
+| Backstage Premium | 500 VIBES | Tidak ada (tahan) |
+| Backstage VIP | 1.000 VIBES | Tidak ada (tahan) |
 | Event Eksklusif | Variabel | Biaya masuk |
 
 ### 5.6 Prioritas Aux Pass
@@ -349,7 +361,7 @@ Aksi ini memindahkan VIBES antar pengguna:
 | Aksi | Penerima |
 |------|----------|
 | Request dipenuhi | DJ |
-| Biaya masuk Hotbox | Pembuat ruang |
+| Biaya masuk Backstage | Pembuat ruang |
 | Prioritas Aux Pass | Treasury station |
 | Tiket event | Penyelenggara event |
 
@@ -446,10 +458,6 @@ Mencocokkan mood station memberikan bonus VIBES:
 ```solidity
 contract VibesTokenWrapper {
     IERC20 public immutable vibesToken;
-    uint256 public constant MAX_SUPPLY = 420_690_000 * 1e18;
-    
-    // Minting (terbatas)
-    function mint(address to, uint256 amount) external onlyAuthorized;
     
     // Fungsi inti
     function react(uint256 freq, Mood mood) external;
@@ -497,7 +505,7 @@ event SignalSent(uint256 indexed signalId, address indexed sender, uint256 expir
 ### Q2 2026: Fitur Sosial
 - [ ] Smoke Signal
 - [ ] Request Line
-- [ ] Hotbox Room
+- [ ] Backstage Room
 - [ ] Sistem achievement
 
 ### Q3 2026: Fitur Lanjutan
@@ -531,7 +539,7 @@ event SignalSent(uint256 indexed signalId, address indexed sender, uint256 expir
 
 ## 12. Kesimpulan
 
-$VIBES menciptakan ekonomi sosial yang menyenangkan dan engaging dalam Web3 Radio. Dengan menghargai partisipasi aktif dan mengaktifkan fitur sosial, $VIBES memastikan bahwa anggota komunitas yang paling engaged diakui dan dihargai. Model inflasi terbatas menyediakan hadiah berkelanjutan sementara mekanisme pembakaran menciptakan tekanan deflasi jangka panjang.
+$VIBES menciptakan ekonomi sosial yang menyenangkan dan engaging dalam Web3 Radio. Dengan menghargai partisipasi aktif dan mengaktifkan fitur sosial, $VIBES memastikan bahwa anggota komunitas yang paling engaged diakui dan dihargai. Mekanisme pembakaran menciptakan tekanan deflasi jangka panjang sementara hadiah bertema musik membuat earning menjadi menyenangkan dan intuitif.
 
 Bersama dengan $RADIO, sistem dual-token menciptakan ekosistem seimbang di mana investor nilai dan peserta aktif dapat berkembang.
 

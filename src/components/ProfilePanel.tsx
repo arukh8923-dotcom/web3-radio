@@ -142,26 +142,26 @@ export function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                     {balancesLoading ? '...' : parseFloat(radio).toFixed(2)}
                   </p>
                 </div>
-                {/* $VIBES - Phase 2 */}
-                <div className="bg-black/30 rounded-lg p-3 text-center opacity-50">
+                {/* $VIBES - Social Token */}
+                <div className="bg-black/30 rounded-lg p-3 text-center">
                   <p className="text-dial-cream/50 text-xs">$VIBES</p>
-                  <p className="text-dial-cream/40 font-dial text-sm">
-                    Coming Soon
+                  <p className="text-purple-400 font-dial text-lg">
+                    0
                   </p>
                 </div>
               </div>
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-2 mb-4">
-                {/* Reactions - Coming Soon with $VIBES */}
-                <div className="bg-black/30 rounded-lg p-3 text-center opacity-50">
+                {/* Reactions */}
+                <div className="bg-black/30 rounded-lg p-3 text-center">
                   <p className="text-dial-cream/50 text-xs">Reactions</p>
-                  <p className="text-dial-cream/40 text-[10px]">Soon</p>
+                  <p className="text-purple-400 font-dial">0 🎵</p>
                 </div>
                 {/* Messages */}
-                <div className="bg-black/30 rounded-lg p-3 text-center opacity-50">
+                <div className="bg-black/30 rounded-lg p-3 text-center">
                   <p className="text-dial-cream/50 text-xs">Messages</p>
-                  <p className="text-dial-cream/40 text-[10px]">Soon</p>
+                  <p className="text-brass font-dial">0 💬</p>
                 </div>
                 <div 
                   className="bg-black/30 rounded-lg p-3 text-center cursor-pointer hover:bg-black/40 transition-colors"

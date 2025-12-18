@@ -1,16 +1,16 @@
 import { z } from 'zod';
 import type { Address } from 'viem';
 
-// Mood Types for Vibes Token
+// Mood Types for Vibes Token - Music/Beat Theme
 export enum Mood {
-  CHILL = 'chill',
-  HYPE = 'hype',
-  MELANCHOLY = 'melancholy',
-  EUPHORIC = 'euphoric',
-  ZEN = 'zen',
+  CHILL = 'chill',       // Relaxed, peaceful vibes
+  HYPE = 'hype',         // Excited, energetic
+  MELANCHOLY = 'melancholy', // Thoughtful, emotional
+  EUPHORIC = 'euphoric', // Happy, transcendent
+  ZEN = 'zen',           // Meditative, balanced
 }
 
-// Mood Ring State
+// Mood Ring State - Collective station mood
 export interface MoodRing {
   stationFrequency: number;
   currentMood: Mood;
@@ -18,7 +18,7 @@ export interface MoodRing {
   lastUpdated: number;
 }
 
-// Vibes Reaction
+// Vibes Reaction - User mood expression
 export interface VibesReaction {
   id: bigint;
   reactor: Address;
@@ -28,7 +28,7 @@ export interface VibesReaction {
   timestamp: number;
 }
 
-// Session NFT
+// Session NFT - Proof of attendance
 export interface SessionNFT {
   tokenId: bigint;
   sessionId: bigint;
@@ -53,7 +53,7 @@ export interface SessionAttribute {
   value: string | number;
 }
 
-// Smoke Signal (Ephemeral Message)
+// Smoke Signal (Ephemeral Message) - Temporary broadcast messages
 export interface SmokeSignal {
   id: bigint;
   sender: Address;
@@ -65,8 +65,8 @@ export interface SmokeSignal {
   isExpired: boolean;
 }
 
-// Hotbox Room
-export interface HotboxRoom {
+// Backstage Room (Token-gated VIP room)
+export interface BackstageRoom {
   id: bigint;
   stationFrequency: number;
   creator: Address;
@@ -77,7 +77,7 @@ export interface HotboxRoom {
   createdAt: number;
 }
 
-// Aux Pass Queue
+// Aux Pass Queue - Guest DJ control
 export interface AuxPassQueue {
   stationFrequency: number;
   queue: Address[];
@@ -88,7 +88,7 @@ export interface AuxPassQueue {
   minTokenBalance: bigint;
 }
 
-// Community Drop
+// Community Drop - Random reward distribution
 export interface CommunityDrop {
   id: bigint;
   stationFrequency: number;
@@ -100,17 +100,17 @@ export interface CommunityDrop {
   executed: boolean;
 }
 
-// 420 Zone State
-export interface Zone420State {
+// Golden Hour State - Special event zone
+export interface GoldenHourState {
   isActive: boolean;
   currentTime: string; // "HH:MM"
-  is420Time: boolean;
+  isGoldenHour: boolean;
   moodRing: MoodRing;
   activeDrops: CommunityDrop[];
   activeSessions: bigint[];
 }
 
-// Request Line
+// Request Line - Song/content requests
 export interface SongRequest {
   id: bigint;
   requester: Address;
@@ -121,4 +121,21 @@ export interface SongRequest {
   fulfilled: boolean;
   fulfilledAt: number | null;
   expired: boolean;
+}
+
+// BPM Reward Tier
+export interface BPMRewardTier {
+  min: number;
+  max: number;
+  multiplier: number;
+  name: string;
+}
+
+// Genre Zone Info
+export interface GenreZone {
+  name: string;
+  minFreq: number;
+  maxFreq: number;
+  bpmRange: string;
+  vibesMultiplier: number;
 }

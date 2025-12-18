@@ -6,7 +6,7 @@ import { useAccount } from 'wagmi';
 interface StationFormData {
   name: string;
   description: string;
-  category: 'music' | 'talk' | 'news' | 'sports' | '420' | 'ambient';
+  category: 'music' | 'talk' | 'news' | 'sports' | 'lofi' | 'ambient';
   frequency: number;
   isPremium: boolean;
   subscriptionFee: number;
@@ -106,7 +106,7 @@ export function StationCreator({ isOpen, onClose, onCreated }: StationCreatorPro
               <option value="talk">🎙️ Talk</option>
               <option value="news">📰 News</option>
               <option value="sports">⚽ Sports</option>
-              <option value="420">🌿 420</option>
+              <option value="lofi">🎧 Lo-Fi</option>
               <option value="ambient">🌊 Ambient</option>
             </select>
           </div>

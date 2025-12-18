@@ -37,11 +37,11 @@ export function TokenBalances() {
         <span className="text-dial-cream">{formatBalance(radio)}</span>
         <span className="text-dial-cream/50">$RADIO</span>
       </div>
-      {/* $VIBES - Phase 2 */}
-      <div className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded opacity-50">
-        <span className="text-zone-420">💜</span>
-        <span className="text-dial-cream/50 text-[10px]">Coming Soon</span>
-        <span className="text-dial-cream/30">$VIBES</span>
+      {/* $VIBES - Social Token */}
+      <div className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded">
+        <span className="text-purple-400">🎵</span>
+        <span className="text-dial-cream">0</span>
+        <span className="text-dial-cream/50">$VIBES</span>
       </div>
     </div>
   );

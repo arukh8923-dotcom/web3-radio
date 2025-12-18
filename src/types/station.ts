@@ -7,7 +7,7 @@ export enum StationCategory {
   TALK = 'talk',
   NEWS = 'news',
   SPORTS = 'sports',
-  CULTURE_420 = '420',
+  LOFI = 'lofi',
   AMBIENT = 'ambient',
 }
 
@@ -17,10 +17,10 @@ export const StationMetadataSchema = z.object({
   description: z.string().max(500),
   category: z.nativeEnum(StationCategory),
   imageUrl: z.string().url().optional(),
-  // FM range 88-108, plus special 420 zone (419-421)
+  // FM range 88-110 (standard FM dial)
   frequency: z.number().refine(
-    (f) => (f >= 88 && f <= 108) || (f >= 419 && f <= 421),
-    { message: 'Frequency must be 88-108 FM or 419-421 (420 Zone)' }
+    (f) => f >= 88 && f <= 110,
+    { message: 'Frequency must be 88-110 FM' }
   ),
   owner: z.string(), // Address
   djs: z.array(z.string()), // Array of addresses

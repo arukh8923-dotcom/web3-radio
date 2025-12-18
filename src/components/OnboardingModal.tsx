@@ -18,19 +18,24 @@ const slides = [
     description: 'Use the dial to find stations. Tap preset buttons to save your favorites. Long-press to save current station.',
   },
   {
-    icon: '💜',
+    icon: '🎵',
     title: 'React with Vibes',
-    description: 'Send reactions to show your mood. $VIBES token rewards coming in Phase 2.',
+    description: 'Send reactions to show your mood and earn $VIBES tokens. Express yourself with Chill, Hype, Melancholy, Euphoric, or Zen moods.',
   },
   {
     icon: '💬',
     title: 'Chat & Connect',
-    description: 'Join live chat with other listeners. Send smoke signals in the 420 zone for ephemeral messages.',
+    description: 'Join live chat with other listeners. Send Smoke Signals for ephemeral messages that disappear over time.',
+  },
+  {
+    icon: '✨',
+    title: 'Golden Hour Events',
+    description: 'Join special events during Golden Hour (6-8 PM) for bonus rewards and exclusive drops.',
   },
   {
     icon: '🎁',
     title: 'Tip Your DJs',
-    description: 'Support your favorite DJs with tips. Build the decentralized radio community together.',
+    description: 'Support your favorite DJs with $RADIO tips. Build the decentralized radio community together.',
   },
 ];
 
