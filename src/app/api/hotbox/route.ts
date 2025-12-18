@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createServerSupabase } from '@/lib/supabase';
 import { CONTRACTS } from '@/constants/addresses';
 
 // GET /api/hotbox - Get hotbox rooms list
 export async function GET(request: NextRequest) {
+  const supabase = createServerSupabase();
   const { searchParams } = new URL(request.url);
   const stationId = searchParams.get('station_id');
   const walletAddress = searchParams.get('wallet');
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
 // POST /api/hotbox - Create a new hotbox room
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const body = await request.json();
     const { name, description, station_id, creator_address, min_balance, max_members, is_private } = body;
 

@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createServerSupabase } from '@/lib/supabase';
 
 // Generate referral code from wallet address
 function generateReferralCode(address: string): string {
@@ -14,6 +9,7 @@ function generateReferralCode(address: string): string {
 // GET - Get referral stats and list
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const { searchParams } = new URL(request.url);
     const wallet = searchParams.get('wallet');
 

@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createServerSupabase } from '@/lib/supabase';
 
 // Request expiry time (2 hours)
 const REQUEST_EXPIRY_MS = 2 * 60 * 60 * 1000;
@@ -15,6 +10,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const supabase = createServerSupabase();
     const { id } = await params;
 
     // Get request

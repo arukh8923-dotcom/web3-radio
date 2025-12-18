@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createServerSupabase } from '@/lib/supabase';
 
 // Referral reward in VIBES (will be distributed when claimed)
 const REFERRAL_REWARD_VIBES = 10; // Both referrer and referred get this
@@ -12,6 +7,7 @@ const REFERRAL_REWARD_VIBES = 10; // Both referrer and referred get this
 // POST - Apply referral code
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const body = await request.json();
     const { wallet_address, referral_code } = body;
 

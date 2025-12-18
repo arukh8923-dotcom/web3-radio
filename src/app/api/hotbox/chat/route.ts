@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createServerSupabase } from '@/lib/supabase';
 
 // POST /api/hotbox/chat - Send a chat message in hotbox room
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const body = await request.json();
     const { room_id, wallet_address, message } = body;
 

@@ -1,34 +1,59 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // ============================================
 // CLIENT-SIDE SUPABASE (Browser)
 // Uses anon key - respects RLS policies
+// Lazy-initialized to avoid build errors
 // ============================================
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+let _supabase: SupabaseClient | null = null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export function getSupabaseClient(): SupabaseClient {
+  if (!_supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error('Supabase URL and Anon Key are required');
+    }
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
+}
+
+// Legacy export for backward compatibility
+export const supabase = typeof window !== 'undefined' 
+  ? getSupabaseClient() 
+  : (null as unknown as SupabaseClient);
 
 // ============================================
 // SERVER-SIDE SUPABASE (API Routes)
 // Uses service role key - bypasses RLS
 // Only use in server components/API routes!
 // ============================================
-export function createServerSupabase() {
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
-  if (!serviceKey) {
-    // Fallback to anon key if service role not available
-    return createClient(url, process.env.SUPABASE_ANON_KEY || supabaseAnonKey);
+let _serverSupabase: SupabaseClient | null = null;
+
+export function createServerSupabase(): SupabaseClient {
+  if (!_serverSupabase) {
+    const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!url) {
+      throw new Error('Supabase URL is required');
+    }
+    
+    const key = serviceKey || anonKey;
+    if (!key) {
+      throw new Error('Supabase key is required');
+    }
+    
+    _serverSupabase = createClient(url, key, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
   }
-  
-  return createClient(url, serviceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  return _serverSupabase;
 }
 
 // ============================================

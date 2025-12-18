@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createServerSupabase } from '@/lib/supabase';
 
 // GET /api/achievements/friends - Get friends list with their achievement stats
 export async function GET(request: NextRequest) {
+  const supabase = createServerSupabase();
   const { searchParams } = new URL(request.url);
   const walletAddress = searchParams.get('wallet');
 
@@ -84,6 +85,7 @@ export async function GET(request: NextRequest) {
 // POST /api/achievements/friends - Add a friend
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const body = await request.json();
     const { wallet_address, friend_address } = body;
 
@@ -131,6 +133,7 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/achievements/friends - Remove a friend
 export async function DELETE(request: NextRequest) {
+  const supabase = createServerSupabase();
   const { searchParams } = new URL(request.url);
   const walletAddress = searchParams.get('wallet');
   const friendAddress = searchParams.get('friend');

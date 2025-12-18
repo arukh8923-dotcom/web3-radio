@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createServerSupabase } from '@/lib/supabase';
 
 // GET - Get user preferences
 export async function GET(
@@ -12,6 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ address: string }> }
 ) {
   try {
+    const supabase = createServerSupabase();
     const { address } = await params;
 
     const { data, error } = await supabase
@@ -40,6 +36,7 @@ export async function PATCH(
   { params }: { params: Promise<{ address: string }> }
 ) {
   try {
+    const supabase = createServerSupabase();
     const { address } = await params;
     const body = await request.json();
 

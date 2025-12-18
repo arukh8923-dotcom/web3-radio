@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createServerSupabase } from '@/lib/supabase';
 
 // GET /api/sessions - Get sessions list
 export async function GET(request: NextRequest) {
+  const supabase = createServerSupabase();
   const { searchParams } = new URL(request.url);
   const stationId = searchParams.get('station_id');
   const walletAddress = searchParams.get('wallet');
@@ -107,6 +108,7 @@ export async function GET(request: NextRequest) {
 // POST /api/sessions - Create a new session (DJ only)
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const body = await request.json();
     const {
       station_id,

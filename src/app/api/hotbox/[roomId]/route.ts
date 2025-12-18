@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createServerSupabase } from '@/lib/supabase';
 
 // GET /api/hotbox/[roomId] - Get room details, members, and chat
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ roomId: string }> }
 ) {
+  const supabase = createServerSupabase();
   const { roomId } = await params;
   const { searchParams } = new URL(request.url);
   const walletAddress = searchParams.get('wallet');

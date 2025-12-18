@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient | null {
+  if (!supabase && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+  }
+  return supabase;
+}
 
 // DELETE - Delete preset (owner only)
 export async function DELETE(
@@ -12,6 +19,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { address } = body;
@@ -20,8 +32,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Missing address' }, { status: 400 });
     }
 
-    // Verify ownership
-    const { data: preset } = await supabase
+    const { data: preset } = await db
       .from('eq_presets')
       .select('creator_address')
       .eq('id', id)
@@ -35,7 +46,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
 
-    const { error } = await supabase
+    const { error } = await db
       .from('eq_presets')
       .delete()
       .eq('id', id);
@@ -58,9 +69,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
+
     const { id } = await params;
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('eq_presets')
       .select('*')
       .eq('id', id)

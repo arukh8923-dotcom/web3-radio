@@ -18,17 +18,20 @@ function getSupabase(): SupabaseClient | null {
 // GET - Fetch presets (community or user's own)
 export async function GET(request: NextRequest) {
   try {
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json({ presets: [], error: 'Database not configured' });
+    }
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'community';
     const address = searchParams.get('address');
 
-    let query = supabase.from('eq_presets').select('*');
+    let query = db.from('eq_presets').select('*');
 
     if (type === 'community') {
-      // Public presets, sorted by popularity
       query = query.eq('is_public', true).order('uses_count', { ascending: false }).limit(50);
     } else if (type === 'my' && address) {
-      // User's own presets
       query = query.eq('creator_address', address.toLowerCase()).order('created_at', { ascending: false });
     } else {
       return NextResponse.json({ presets: [] });
@@ -51,6 +54,11 @@ export async function GET(request: NextRequest) {
 // POST - Create new preset
 export async function POST(request: NextRequest) {
   try {
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
+
     const body = await request.json();
     const { name, bass, mid, treble, creator_address, is_public } = body;
 
@@ -58,16 +66,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Validate values
     if (bass < 0 || bass > 100 || mid < 0 || mid > 100 || treble < 0 || treble > 100) {
       return NextResponse.json({ error: 'EQ values must be between 0-100' }, { status: 400 });
     }
 
-    // Generate share code
     const shareCode = nanoid(8);
 
-    // Get creator name from users table
-    const { data: userData } = await supabase
+    const { data: userData } = await db
       .from('users')
       .select('base_name, farcaster_username')
       .eq('wallet_address', creator_address.toLowerCase())
@@ -75,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     const creatorName = userData?.base_name || userData?.farcaster_username || null;
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('eq_presets')
       .insert({
         id: shareCode,
