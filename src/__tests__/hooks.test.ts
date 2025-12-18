@@ -325,7 +325,7 @@ describe('usePremiumAccess Hook', () => {
     const { result } = renderHook(() => usePremiumAccess('test-station'));
     
     expect(typeof result.current.hasBenefit).toBe('function');
-    expect(typeof result.current.isAdFree).toBe('function');
+    expect(typeof result.current.hasPremiumBadge).toBe('function');
     expect(typeof result.current.canAccessVIPRoom).toBe('function');
     expect(typeof result.current.hasRequestPriority).toBe('function');
     expect(typeof result.current.refresh).toBe('function');

@@ -44,7 +44,7 @@ const TIER_DEFINITIONS = [
     name: 'Basic',
     priceUsd: USD_PRICING.subscription.basic, // $1/month
     duration: 30,
-    benefits: ['Ad-free listening', 'Basic chat access'],
+    benefits: ['Basic chat access', 'Station presets'],
     icon: '📻',
   },
   {
@@ -52,7 +52,7 @@ const TIER_DEFINITIONS = [
     name: 'Premium',
     priceUsd: USD_PRICING.subscription.premium, // $5/month
     duration: 30,
-    benefits: ['Ad-free listening', 'Premium chat badge', 'Request priority', 'Exclusive content'],
+    benefits: ['Premium chat badge', 'Request priority', 'Exclusive content', 'Early access'],
     icon: '⭐',
   },
   {

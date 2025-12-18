@@ -1,19 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/supabase';
+import { CONTRACTS } from '@/constants/addresses';
 
 // Generate transaction data for Frame tip flow
 // This returns EIP-712 transaction data for the Frame to execute
 
-const RADIO_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000'; // Placeholder
+const RADIO_TOKEN_ADDRESS = CONTRACTS.RADIO_TOKEN;
 const RADIO_DECIMALS = 18;
 
 export async function POST(request: NextRequest) {
+  const supabase = createServerSupabase();
+  
   try {
     const { searchParams } = new URL(request.url);
     const amount = parseInt(searchParams.get('amount') || '10');
     const stationId = searchParams.get('station') || 'default';
 
-    // In production: Look up DJ wallet from station
-    const djWallet = '0x1234567890abcdef1234567890abcdef12345678'; // Placeholder
+    // Look up DJ wallet from station
+    const { data: station } = await supabase
+      .from('stations')
+      .select('owner_address')
+      .eq('id', stationId)
+      .single();
+
+    if (!station?.owner_address) {
+      return NextResponse.json({ error: 'Station not found' }, { status: 404 });
+    }
+
+    const djWallet = station.owner_address;
 
     // Calculate amount in wei
     const amountWei = BigInt(amount) * BigInt(10 ** RADIO_DECIMALS);

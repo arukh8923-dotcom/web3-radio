@@ -22,36 +22,76 @@ interface SubscriptionModalProps {
 
 const TIERS = [
   { id: 'basic', name: 'Basic', price: 10, duration: 30, features: ['Basic chat access', 'Station presets'] },
-  { id: 'premium', name: 'Premium', price: 25, duration: 30, features: ['All Basic features', 'Premium chat badge', 'Request priority', 'Exclusive content'] },
+  { id: 'premium', name: 'Premium', price: 25, duration: 30, features: ['Premium chat badge', 'Request priority', 'Exclusive content', 'Early access'] },
   { id: 'vip', name: 'VIP', price: 50, duration: 30, features: ['All Premium features', 'Direct DJ access', 'VIP room access', 'NFT airdrops', 'Governance voting'] },
 ];
 
-// Placeholder: get subscription status
+// Get subscription status from API
 async function getSubscription(stationId: string, walletAddress: string): Promise<Subscription | null> {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  // Mock: return null for no subscription
-  return null;
+  try {
+    const res = await fetch(`/api/subscriptions?subscriber=${walletAddress}&station_id=${stationId}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.subscription) {
+      return {
+        id: data.subscription.id,
+        stationId: data.subscription.station_id || stationId,
+        stationName: data.subscription.station_name,
+        expiresAt: new Date(data.subscription.expiry_date).getTime(),
+        tier: data.subscription.tier_id as 'basic' | 'premium' | 'vip',
+        autoRenew: data.subscription.auto_renew || false,
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
-// Placeholder: purchase subscription
+// Purchase subscription via API (actual payment handled by SubscriptionPanel)
 async function purchaseSubscription(params: {
   stationId: string;
   walletAddress: string;
   tier: string;
   duration: number;
 }): Promise<{ success: boolean; txHash: string; expiresAt: number }> {
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  return {
-    success: true,
-    txHash: `0x${Math.random().toString(16).slice(2, 66)}`,
-    expiresAt: Date.now() + params.duration * 24 * 60 * 60 * 1000,
-  };
+  // This is a simplified version - actual on-chain payment is in SubscriptionPanel
+  const expiresAt = Date.now() + params.duration * 24 * 60 * 60 * 1000;
+  try {
+    const res = await fetch('/api/subscriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        station_id: params.stationId,
+        subscriber_address: params.walletAddress,
+        tier_id: params.tier,
+        tier_name: params.tier,
+        duration_days: params.duration,
+        expiry_date: new Date(expiresAt).toISOString(),
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return { success: true, txHash: data.subscription?.tx_hash || 'pending', expiresAt };
+    }
+    return { success: false, txHash: '', expiresAt: 0 };
+  } catch {
+    return { success: false, txHash: '', expiresAt: 0 };
+  }
 }
 
-// Placeholder: cancel subscription
-async function cancelSubscription(subscriptionId: string): Promise<boolean> {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return true;
+// Cancel subscription via API
+async function cancelSubscription(subscriptionId: string, walletAddress: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/subscriptions', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription_id: subscriptionId, subscriber_address: walletAddress }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export function SubscriptionModal({ isOpen, onClose, stationId, stationName }: SubscriptionModalProps) {
@@ -117,7 +157,7 @@ export function SubscriptionModal({ isOpen, onClose, stationId, stationName }: S
     if (!confirm('Cancel your subscription? You will lose access when it expires.')) return;
     
     try {
-      await cancelSubscription(subscription.id);
+      await cancelSubscription(subscription.id, address);
       setSubscription(null);
     } catch (err) {
       console.error('Failed to cancel:', err);

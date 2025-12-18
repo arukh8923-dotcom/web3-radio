@@ -24,18 +24,18 @@ export function TokenBalances() {
     return `${(num / 1000000000).toFixed(1)}B`;
   };
 
-  const openDexScreener = (token: 'radio' | 'vibes') => {
+  const openGeckoTerminal = (token: 'radio' | 'vibes') => {
     const address = token === 'radio' ? RADIO_TOKEN_ADDRESS : VIBES_TOKEN_ADDRESS;
-    window.open(`https://dexscreener.com/base/${address}`, '_blank');
+    window.open(`https://www.geckoterminal.com/base/pools/${address}`, '_blank');
   };
 
   return (
     <div className="flex items-center gap-2 text-xs">
       {/* $RADIO Token */}
       <button
-        onClick={() => openDexScreener('radio')}
+        onClick={() => openGeckoTerminal('radio')}
         className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded hover:bg-black/50 transition-colors"
-        title="View $RADIO on DexScreener"
+        title="View $RADIO on GeckoTerminal"
       >
         <span className="text-brass">📻</span>
         <span className="text-dial-cream">{formatBalance(radio)}</span>
@@ -43,9 +43,9 @@ export function TokenBalances() {
       </button>
       {/* $VIBES Token */}
       <button
-        onClick={() => openDexScreener('vibes')}
+        onClick={() => openGeckoTerminal('vibes')}
         className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded hover:bg-black/50 transition-colors"
-        title="View $VIBES on DexScreener"
+        title="View $VIBES on GeckoTerminal"
       >
         <span className="text-purple-400">🎵</span>
         <span className="text-dial-cream">{formatBalance(vibes)}</span>

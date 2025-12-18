@@ -53,7 +53,7 @@ export const SUBSCRIPTION_TIERS = {
     name: 'Basic',
     price: 10_000, // 10K RADIO (~$1 USD/month)
     duration: 30, // days
-    benefits: ['Ad-free listening', 'Basic chat access'],
+    benefits: ['Basic chat access', 'Station presets'],
     icon: '📻',
   },
   premium: {
@@ -61,7 +61,7 @@ export const SUBSCRIPTION_TIERS = {
     name: 'Premium',
     price: 50_000, // 50K RADIO (~$5 USD/month)
     duration: 30,
-    benefits: ['Ad-free listening', 'Premium chat badge', 'Request priority', 'Exclusive content'],
+    benefits: ['Premium chat badge', 'Request priority', 'Exclusive content', 'Early access'],
     icon: '⭐',
   },
   vip: {

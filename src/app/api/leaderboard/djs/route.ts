@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
         id: dj.wallet_address,
         ...dj,
         rank: index + 1,
-        rank_change: Math.floor(Math.random() * 5) - 2, // Placeholder for actual rank tracking
+        rank_change: 0, // TODO: Implement actual rank tracking with historical data
       }));
 
     return NextResponse.json({ 

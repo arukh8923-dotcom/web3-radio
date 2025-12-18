@@ -1,18 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByFid } from '@/lib/neynar';
+import { createServerSupabase } from '@/lib/supabase';
 
-// Mock function - replace with actual contract call
-async function getSessionNFTData(tokenId: string) {
+// Get session NFT data from database
+async function getSessionNFTData(tokenId: string, supabase: ReturnType<typeof createServerSupabase>) {
+  // Parse token ID to get session info
+  const parts = tokenId.split('-');
+  const sessionId = parts[1] || tokenId;
+  
+  const { data: session } = await supabase
+    .from('sessions')
+    .select('*, stations:station_id(name, frequency, owner_address, users:owner_address(farcaster_fid, farcaster_username))')
+    .eq('id', sessionId)
+    .single();
+
+  if (session) {
+    const { count: attendeeCount } = await supabase
+      .from('session_attendances')
+      .select('*', { count: 'exact', head: true })
+      .eq('session_id', sessionId);
+
+    return {
+      tokenId,
+      sessionName: session.title || 'Web3 Radio Session',
+      frequency: (session.stations as any)?.frequency || 88.1,
+      djName: (session.stations as any)?.users?.farcaster_username || 'DJ',
+      djFid: (session.stations as any)?.users?.farcaster_fid || 0,
+      attendeeFid: 0, // Will be set from token metadata
+      startTime: session.start_time || new Date().toISOString(),
+      duration: session.duration_minutes || 60,
+      attendeeCount: attendeeCount || 0,
+    };
+  }
+
   return {
     tokenId,
-    sessionName: '420 Chill Session',
-    frequency: 420.0,
-    djName: 'DJ Vibes',
-    djFid: 12345,
-    attendeeFid: 250705,
-    startTime: new Date('2025-04-20T16:20:00').toISOString(),
-    duration: 120, // minutes
-    attendeeCount: 42,
+    sessionName: 'Web3 Radio Session',
+    frequency: 88.1,
+    djName: 'DJ',
+    djFid: 0,
+    attendeeFid: 0,
+    startTime: new Date().toISOString(),
+    duration: 60,
+    attendeeCount: 0,
   };
 }
 
@@ -110,7 +140,7 @@ function generateTicketStubSVG(data: {
   
   <!-- Barcode decoration -->
   <g transform="translate(320, 45)">
-    ${Array.from({length: 15}, (_, i) => `<rect x="${i*2.5}" y="0" width="${Math.random() > 0.5 ? 2 : 1}" height="20" fill="#fff"/>`).join('')}
+    ${Array.from({length: 15}, (_, i) => `<rect x="${i*2.5}" y="0" width="${i % 2 === 0 ? 2 : 1}" height="20" fill="#fff"/>`).join('')}
   </g>
 </svg>`;
 }
@@ -119,10 +149,11 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ tokenId: string }> }
 ) {
+  const supabase = createServerSupabase();
   const { tokenId } = await params;
   
   try {
-    const nftData = await getSessionNFTData(tokenId);
+    const nftData = await getSessionNFTData(tokenId, supabase);
     
     // Get attendee's Farcaster profile
     let attendeeUsername = 'unknown';

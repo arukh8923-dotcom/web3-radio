@@ -1,18 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByFid } from '@/lib/neynar';
+import { createServerSupabase } from '@/lib/supabase';
 
-// Mock function - replace with actual contract call
-async function getFrequencyNFTData(tokenId: string) {
-  // TODO: Call StationNFT contract to get real data
+// Get frequency NFT data from database
+async function getFrequencyNFTData(tokenId: string, supabase: ReturnType<typeof createServerSupabase>) {
+  // Try to get station by token ID or frequency
+  const frequency = parseFloat(tokenId) / 10; // Token ID is frequency * 10
+  
+  const { data: station } = await supabase
+    .from('stations')
+    .select('*, users:owner_address(farcaster_fid, farcaster_username)')
+    .eq('frequency', frequency)
+    .single();
+
+  if (station) {
+    return {
+      tokenId,
+      frequency: station.frequency,
+      stationName: station.name || 'Web3 Radio Station',
+      genre: station.category || 'Music',
+      ownerAddress: station.owner_address,
+      ownerFid: (station.users as any)?.farcaster_fid || 0,
+      mintedAt: station.created_at || new Date().toISOString(),
+      totalSupply: 1,
+    };
+  }
+
+  // Return default data if station not found
   return {
     tokenId,
-    frequency: 88.1,
-    stationName: 'Rock Station',
-    genre: 'Rock',
-    ownerAddress: '0x1234567890abcdef1234567890abcdef12345678',
-    ownerFid: 250705,
+    frequency: frequency || 88.1,
+    stationName: 'Web3 Radio Station',
+    genre: 'Music',
+    ownerAddress: null,
+    ownerFid: 0,
     mintedAt: new Date().toISOString(),
-    totalSupply: 100,
+    totalSupply: 1,
   };
 }
 
@@ -20,12 +43,13 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ tokenId: string }> }
 ) {
+  const supabase = createServerSupabase();
   const { tokenId } = await params;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://web3-radio-omega.vercel.app';
   
   try {
-    // Get NFT data from contract
-    const nftData = await getFrequencyNFTData(tokenId);
+    // Get NFT data from database
+    const nftData = await getFrequencyNFTData(tokenId, supabase);
     
     // Get owner's Farcaster profile
     let ownerUsername = 'unknown';

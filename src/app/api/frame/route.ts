@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/supabase';
 
 // Farcaster Frame metadata generator
 // This creates the Frame HTML for embedding in casts
@@ -45,19 +46,34 @@ function generateFrameHtml(data: FrameData, baseUrl: string): string {
 }
 
 export async function GET(request: NextRequest) {
+  const supabase = createServerSupabase();
+  
   try {
     const { searchParams } = new URL(request.url);
     const stationId = searchParams.get('station') || 'default';
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://web3radio.fm';
 
-    // Mock station data - in production, fetch from database
-    const stationData: FrameData = {
+    // Fetch station data from database
+    const { data: station } = await supabase
+      .from('stations')
+      .select('*, users:owner_address(farcaster_username)')
+      .eq('id', stationId)
+      .single();
+
+    const stationData: FrameData = station ? {
+      station_id: station.id,
+      station_name: station.name || 'Web3 Radio',
+      frequency: station.frequency || 88.1,
+      dj_name: (station.users as any)?.farcaster_username || 'DJ',
+      listener_count: station.listener_count || 0,
+      is_live: station.is_live || false,
+    } : {
       station_id: stationId,
-      station_name: '420 FM - Chill Vibes',
-      frequency: 420.0,
-      dj_name: 'DJ Vibes',
-      listener_count: 42,
-      is_live: true,
+      station_name: 'Web3 Radio',
+      frequency: 88.1,
+      dj_name: 'DJ',
+      listener_count: 0,
+      is_live: false,
     };
 
     const html = generateFrameHtml(stationData, baseUrl);

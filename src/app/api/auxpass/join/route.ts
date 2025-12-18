@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Shared state with main route (in production, use database)
-const auxQueues: Record<string, Array<{
-  wallet_address: string;
-  display_name: string | null;
-  avatar_url: string | null;
-  position: number;
-  joined_at: string;
-  vibes_balance: number;
-}>> = {};
+import { createServerSupabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
+  const supabase = createServerSupabase();
+  
   try {
     const body = await request.json();
     const { station_id, wallet_address } = body;
@@ -22,26 +15,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize queue if not exists
-    if (!auxQueues[station_id]) {
-      auxQueues[station_id] = [];
-    }
-
     // Check if already in queue
-    const existingIndex = auxQueues[station_id].findIndex(
-      m => m.wallet_address.toLowerCase() === wallet_address.toLowerCase()
-    );
+    const { data: existing } = await supabase
+      .from('aux_queue')
+      .select('id')
+      .eq('station_id', station_id)
+      .eq('wallet_address', wallet_address.toLowerCase())
+      .eq('status', 'waiting')
+      .single();
 
-    if (existingIndex !== -1) {
+    if (existing) {
       return NextResponse.json(
         { success: false, error: 'Already in queue' },
         { status: 400 }
       );
     }
 
-    // Mock vibes check (in production, check on-chain or database)
-    const userVibes = 500; // Placeholder
+    // Get user info
+    const { data: user } = await supabase
+      .from('users')
+      .select('farcaster_username, avatar_url, vibes_balance')
+      .eq('wallet_address', wallet_address.toLowerCase())
+      .single();
+
+    // Check VIBES balance (minimum 100 VIBES to join)
     const minRequired = 100;
+    const userVibes = user?.vibes_balance || 0;
 
     if (userVibes < minRequired) {
       return NextResponse.json(
@@ -50,22 +49,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Add to queue
-    const newMember = {
-      wallet_address,
-      display_name: null,
-      avatar_url: null,
-      position: auxQueues[station_id].length + 1,
-      joined_at: new Date().toISOString(),
-      vibes_balance: userVibes,
-    };
+    // Get current queue position
+    const { count } = await supabase
+      .from('aux_queue')
+      .select('*', { count: 'exact', head: true })
+      .eq('station_id', station_id)
+      .eq('status', 'waiting');
 
-    auxQueues[station_id].push(newMember);
+    const position = (count || 0) + 1;
+
+    // Add to queue
+    const { data: queueEntry, error } = await supabase
+      .from('aux_queue')
+      .insert({
+        station_id,
+        wallet_address: wallet_address.toLowerCase(),
+        display_name: user?.farcaster_username || null,
+        avatar_url: user?.avatar_url || null,
+        position,
+        status: 'waiting',
+        vibes_balance: userVibes,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to join queue:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to join queue' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      position: newMember.position,
-      message: `Joined queue at position #${newMember.position}`,
+      position,
+      message: `Joined queue at position #${position}`,
+      queue_id: queueEntry.id,
     });
   } catch (error) {
     console.error('Error joining aux queue:', error);

@@ -30,7 +30,7 @@ const TIERS: SubscriptionTier[] = [
     name: 'Basic',
     price: '10',
     duration: 30,
-    features: ['Ad-free listening', 'Basic quality audio'],
+    features: ['Basic chat access', 'Station presets'],
     icon: '🎵',
   },
   {
@@ -38,7 +38,7 @@ const TIERS: SubscriptionTier[] = [
     name: 'Premium',
     price: '25',
     duration: 30,
-    features: ['Ad-free listening', 'HD audio quality', 'Exclusive content', 'Early access'],
+    features: ['Premium chat badge', 'Request priority', 'Exclusive content', 'Early access'],
     icon: '⭐',
   },
   {
@@ -51,49 +51,74 @@ const TIERS: SubscriptionTier[] = [
   },
 ];
 
-// Placeholder: get user subscriptions
+// Get user subscriptions from API
 async function getUserSubscriptions(walletAddress: string): Promise<Subscription[]> {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  const now = Date.now();
-  return [
-    {
-      id: '1',
-      stationId: 'station-1',
-      stationName: 'Chill FM',
-      frequency: 92.5,
-      startDate: now - 15 * 24 * 60 * 60 * 1000,
-      expiryDate: now + 15 * 24 * 60 * 60 * 1000,
-      tier: 'premium',
-      price: '25',
-      autoRenew: true,
-    },
-  ];
+  try {
+    const res = await fetch(`/api/subscriptions?subscriber=${walletAddress}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.subscriptions || []).map((sub: any) => ({
+      id: sub.id,
+      stationId: sub.station_id,
+      stationName: sub.station_name || 'Unknown Station',
+      frequency: 88.1, // Default frequency
+      startDate: new Date(sub.start_date || sub.created_at).getTime(),
+      expiryDate: new Date(sub.expiry_date).getTime(),
+      tier: sub.tier_id as 'basic' | 'premium' | 'vip',
+      price: sub.price || '0',
+      autoRenew: sub.auto_renew || false,
+    }));
+  } catch {
+    return [];
+  }
 }
 
-// Placeholder: purchase subscription
+// Purchase subscription via API
 async function purchaseSubscription(params: {
   stationId: string;
   tier: string;
   walletAddress: string;
 }): Promise<{ success: boolean; txHash: string; subscriptionId: string }> {
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  return {
-    success: true,
-    txHash: `0x${Math.random().toString(16).slice(2, 66)}`,
-    subscriptionId: `sub-${Date.now()}`,
-  };
+  try {
+    const res = await fetch('/api/subscriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        station_id: params.stationId,
+        subscriber_address: params.walletAddress,
+        tier_id: params.tier,
+        tier_name: params.tier,
+        duration_days: 30,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return { success: true, txHash: data.subscription?.tx_hash || 'pending', subscriptionId: data.subscription?.id || '' };
+    }
+    return { success: false, txHash: '', subscriptionId: '' };
+  } catch {
+    return { success: false, txHash: '', subscriptionId: '' };
+  }
 }
 
-// Placeholder: cancel subscription
-async function cancelSubscription(subscriptionId: string): Promise<boolean> {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return true;
+// Cancel subscription via API
+async function cancelSubscription(subscriptionId: string, walletAddress: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/subscriptions', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription_id: subscriptionId, subscriber_address: walletAddress }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
-// Placeholder: toggle auto-renew
+// Toggle auto-renew via API (not implemented yet - placeholder)
 async function toggleAutoRenew(subscriptionId: string, enabled: boolean): Promise<boolean> {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // TODO: Implement auto-renew toggle when backend supports it
+  console.log('Auto-renew toggle not yet implemented:', subscriptionId, enabled);
   return true;
 }
 
@@ -158,10 +183,11 @@ export function SubscriptionManager({
   };
 
   const handleCancel = async (subId: string) => {
+    if (!address) return;
     if (!confirm('Cancel this subscription? You will lose access at the end of the billing period.')) return;
     
     try {
-      await cancelSubscription(subId);
+      await cancelSubscription(subId, address);
       loadSubscriptions();
     } catch (err) {
       console.error('Failed to cancel:', err);

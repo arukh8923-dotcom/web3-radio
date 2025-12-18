@@ -44,8 +44,8 @@ export function useTokenBalances(): TokenBalances {
   useEffect(() => {
     if (address) {
       fetchBalances();
-      // Refresh every 15 seconds for real-time balance updates
-      const interval = setInterval(fetchBalances, 15000);
+      // Refresh every 60 seconds to reduce RPC calls
+      const interval = setInterval(fetchBalances, 60000);
       return () => clearInterval(interval);
     }
   }, [address, fetchBalances]);

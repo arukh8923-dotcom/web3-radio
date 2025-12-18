@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Shared state with main route (in production, use database + on-chain)
-const claimedDrops: Record<string, string[]> = {};
+import { createServerSupabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
+  const supabase = createServerSupabase();
+  
   try {
     const body = await request.json();
     const { drop_id, wallet_address } = body;
@@ -15,45 +15,90 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize claimed list for this drop
-    if (!claimedDrops[drop_id]) {
-      claimedDrops[drop_id] = [];
+    // Check if drop exists and is active
+    const { data: drop, error: dropError } = await supabase
+      .from('community_drops')
+      .select('*')
+      .eq('id', drop_id)
+      .single();
+
+    if (dropError || !drop) {
+      return NextResponse.json(
+        { success: false, error: 'Drop not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if drop is still active
+    const now = new Date();
+    const endTime = new Date(drop.end_time);
+    if (endTime < now) {
+      return NextResponse.json(
+        { success: false, error: 'Drop has ended' },
+        { status: 400 }
+      );
     }
 
     // Check if already claimed
-    if (claimedDrops[drop_id].some(w => w.toLowerCase() === wallet_address.toLowerCase())) {
+    const { data: existingClaim } = await supabase
+      .from('drop_claims')
+      .select('id')
+      .eq('drop_id', drop_id)
+      .eq('wallet_address', wallet_address.toLowerCase())
+      .single();
+
+    if (existingClaim) {
       return NextResponse.json(
         { success: false, error: 'Already claimed this drop' },
         { status: 400 }
       );
     }
 
-    // Mock eligibility check (in production, verify on-chain)
-    const isEligible = true; // Placeholder - would check VRF result
+    // Check max claims
+    const { count: claimCount } = await supabase
+      .from('drop_claims')
+      .select('*', { count: 'exact', head: true })
+      .eq('drop_id', drop_id);
 
-    if (!isEligible) {
+    if (drop.max_claims && claimCount && claimCount >= drop.max_claims) {
       return NextResponse.json(
-        { success: false, error: 'Not eligible for this drop' },
-        { status: 403 }
+        { success: false, error: 'Drop is fully claimed' },
+        { status: 400 }
       );
     }
 
-    // Record claim
-    claimedDrops[drop_id].push(wallet_address);
+    // Record claim in database
+    const { data: claim, error: claimError } = await supabase
+      .from('drop_claims')
+      .insert({
+        drop_id,
+        wallet_address: wallet_address.toLowerCase(),
+        amount: drop.amount_per_claim || drop.total_amount,
+        claimed_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
-    // In production: 
-    // 1. Verify eligibility via Chainlink VRF result
-    // 2. Transfer VIBES tokens or mint NFT
-    // 3. Record on-chain
+    if (claimError) {
+      console.error('Failed to record claim:', claimError);
+      return NextResponse.json(
+        { success: false, error: 'Failed to record claim' },
+        { status: 500 }
+      );
+    }
+
+    // TODO: On-chain transfer of VIBES tokens
+    // For now, claim is recorded off-chain
 
     return NextResponse.json({
       success: true,
       message: 'Drop claimed successfully!',
       reward: {
-        type: 'vibes',
-        amount: 420,
+        type: drop.token_type || 'vibes',
+        amount: drop.amount_per_claim || drop.total_amount,
       },
-      tx_hash: '0x' + Math.random().toString(16).slice(2, 66), // Mock tx hash
+      claim_id: claim.id,
+      // tx_hash will be added when on-chain transfer is implemented
     });
   } catch (error) {
     console.error('Error claiming drop:', error);

@@ -1,19 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByFid } from '@/lib/neynar';
+import { createServerSupabase } from '@/lib/supabase';
 
-// Mock function - replace with actual contract call
-async function getRecordingNFTData(tokenId: string) {
+// Get recording NFT data from database
+async function getRecordingNFTData(tokenId: string, supabase: ReturnType<typeof createServerSupabase>) {
+  const { data: recording } = await supabase
+    .from('recordings')
+    .select('*, stations:station_id(name, frequency, owner_address, users:owner_address(farcaster_fid, farcaster_username)), users:owner_address(farcaster_fid, farcaster_username)')
+    .eq('id', tokenId)
+    .single();
+
+  if (recording) {
+    return {
+      tokenId,
+      trackTitle: recording.title || 'Web3 Radio Recording',
+      frequency: (recording.stations as any)?.frequency || 88.1,
+      stationName: (recording.stations as any)?.name || 'Web3 Radio',
+      djFid: (recording.stations as any)?.users?.farcaster_fid || 0,
+      ownerFid: (recording.users as any)?.farcaster_fid || 0,
+      recordedAt: recording.recorded_at || recording.created_at || new Date().toISOString(),
+      duration: recording.duration_seconds || 3600,
+    };
+  }
+
   return {
     tokenId,
-    trackTitle: 'Late Night Vibes Mix',
+    trackTitle: 'Web3 Radio Recording',
     frequency: 88.1,
-    stationName: 'Rock Station',
-    djFid: 12345,
-    ownerFid: 250705,
-    recordedAt: new Date('2025-12-18T23:00:00').toISOString(),
-    duration: 3600, // seconds
-    sideA: ['Track 1 - Artist A', 'Track 2 - Artist B', 'Track 3 - Artist C'],
-    sideB: ['Track 4 - Artist D', 'Track 5 - Artist E'],
+    stationName: 'Web3 Radio',
+    djFid: 0,
+    ownerFid: 0,
+    recordedAt: new Date().toISOString(),
+    duration: 3600,
   };
 }
 
@@ -142,10 +160,11 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ tokenId: string }> }
 ) {
+  const supabase = createServerSupabase();
   const { tokenId } = await params;
   
   try {
-    const nftData = await getRecordingNFTData(tokenId);
+    const nftData = await getRecordingNFTData(tokenId, supabase);
     
     let ownerUsername = 'unknown';
     let ownerFid = 0;

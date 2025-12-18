@@ -20,9 +20,9 @@ interface Subscription {
 
 const TIER_BENEFITS: Record<string, string[]> = {
   none: [],
-  basic: ['ad-free', 'basic-chat'],
-  premium: ['ad-free', 'premium-badge', 'request-priority', 'exclusive-content'],
-  vip: ['ad-free', 'premium-badge', 'request-priority', 'exclusive-content', 'dj-access', 'vip-room', 'nft-airdrops', 'governance'],
+  basic: ['basic-chat', 'station-presets'],
+  premium: ['premium-badge', 'request-priority', 'exclusive-content', 'early-access'],
+  vip: ['premium-badge', 'request-priority', 'exclusive-content', 'early-access', 'dj-access', 'vip-room', 'nft-airdrops', 'governance'],
 };
 
 export function usePremiumAccess(stationName?: string) {
@@ -110,8 +110,8 @@ export function usePremiumAccess(stationName?: string) {
     [hasBenefit]
   );
 
-  const isAdFree = useCallback(
-    () => hasBenefit('ad-free'),
+  const hasPremiumBadge = useCallback(
+    () => hasBenefit('premium-badge'),
     [hasBenefit]
   );
 
@@ -121,7 +121,7 @@ export function usePremiumAccess(stationName?: string) {
     canAccessExclusiveContent,
     canAccessVIPRoom,
     hasRequestPriority,
-    isAdFree,
+    hasPremiumBadge,
     refresh: checkAccess,
   };
 }
