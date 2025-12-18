@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const RADIO_ADDRESS = '0xaF0741FB82633a190683c5cFb4b8546123E93B07';
-const VIBES_ADDRESS = '0xCD6387AfA893C1Ad070c9870B5e9C4c0B5D56b07';
+const VIBES_ADDRESS = '0xCD6387AfA893C1Ad070c9870B5e9C4c0B7D56b07';
 
 // Fallback prices if all APIs fail
 const FALLBACK_PRICES = {
@@ -78,27 +78,36 @@ async function getTokenPrices(): Promise<TokenPrice> {
   let vibesPrice: number | null = null;
   let source = 'fallback';
 
-  // Try GeckoTerminal first
-  radioPrice = await fetchFromGeckoTerminal(RADIO_ADDRESS);
-  vibesPrice = await fetchFromGeckoTerminal(VIBES_ADDRESS);
+  // Try GeckoTerminal first (preferred)
+  const [geckoRadio, geckoVibes] = await Promise.all([
+    fetchFromGeckoTerminal(RADIO_ADDRESS),
+    fetchFromGeckoTerminal(VIBES_ADDRESS),
+  ]);
   
-  if (radioPrice && vibesPrice) {
+  radioPrice = geckoRadio;
+  vibesPrice = geckoVibes;
+  
+  if (radioPrice !== null && vibesPrice !== null) {
     source = 'geckoterminal';
   } else {
-    // Fallback to DexScreener
-    radioPrice = radioPrice || await fetchFromDexScreener(RADIO_ADDRESS);
-    vibesPrice = vibesPrice || await fetchFromDexScreener(VIBES_ADDRESS);
+    // Only fallback to DexScreener if GeckoTerminal fails
+    if (radioPrice === null) {
+      radioPrice = await fetchFromDexScreener(RADIO_ADDRESS);
+    }
+    if (vibesPrice === null) {
+      vibesPrice = await fetchFromDexScreener(VIBES_ADDRESS);
+    }
     
-    if (radioPrice || vibesPrice) {
-      source = 'dexscreener';
+    if (radioPrice !== null || vibesPrice !== null) {
+      source = radioPrice !== null && vibesPrice !== null ? 'mixed' : 'dexscreener';
     }
   }
 
   const ethPrice = await fetchEthPrice();
 
   const prices: TokenPrice = {
-    radio_usd: radioPrice || FALLBACK_PRICES.radio,
-    vibes_usd: vibesPrice || FALLBACK_PRICES.vibes,
+    radio_usd: radioPrice ?? FALLBACK_PRICES.radio,
+    vibes_usd: vibesPrice ?? FALLBACK_PRICES.vibes,
     eth_usd: ethPrice,
     source,
     timestamp: Date.now(),

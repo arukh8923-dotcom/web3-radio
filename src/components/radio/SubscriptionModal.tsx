@@ -21,9 +21,9 @@ interface SubscriptionModalProps {
 }
 
 const TIERS = [
-  { id: 'basic', name: 'Basic', price: 10, duration: 30, features: ['Ad-free listening', 'Chat access'] },
-  { id: 'premium', name: 'Premium', price: 25, duration: 30, features: ['All Basic features', 'Exclusive content', 'Early access'] },
-  { id: 'vip', name: 'VIP', price: 50, duration: 30, features: ['All Premium features', 'DJ direct line', 'NFT airdrops', 'Governance voting'] },
+  { id: 'basic', name: 'Basic', price: 10, duration: 30, features: ['Basic chat access', 'Station presets'] },
+  { id: 'premium', name: 'Premium', price: 25, duration: 30, features: ['All Basic features', 'Premium chat badge', 'Request priority', 'Exclusive content'] },
+  { id: 'vip', name: 'VIP', price: 50, duration: 30, features: ['All Premium features', 'Direct DJ access', 'VIP room access', 'NFT airdrops', 'Governance voting'] },
 ];
 
 // Placeholder: get subscription status

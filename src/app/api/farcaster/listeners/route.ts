@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/supabase';
 
-// Mock Farcaster listeners data - will integrate with Neynar API
 interface FarcasterListener {
   fid: number;
   username: string;
@@ -10,50 +10,51 @@ interface FarcasterListener {
   wallet_address: string;
 }
 
-const mockListeners: FarcasterListener[] = [
-  {
-    fid: 1234,
-    username: 'vibesmaster',
-    display_name: 'Vibes Master 🎵',
-    avatar_url: null,
-    follower_count: 2500,
-    wallet_address: '0x1234567890abcdef1234567890abcdef12345678',
-  },
-  {
-    fid: 5678,
-    username: 'djchill',
-    display_name: 'DJ Chill',
-    avatar_url: null,
-    follower_count: 8900,
-    wallet_address: '0xabcdef1234567890abcdef1234567890abcdef12',
-  },
-  {
-    fid: 9012,
-    username: 'radiohead420',
-    display_name: 'RadioHead 📻',
-    avatar_url: null,
-    follower_count: 1200,
-    wallet_address: '0x9876543210fedcba9876543210fedcba98765432',
-  },
-];
-
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const { searchParams } = new URL(request.url);
     const stationId = searchParams.get('station_id');
 
-    // In production: 
-    // 1. Get current listeners from station
-    // 2. Look up their Farcaster profiles via Neynar API
-    // 3. Return merged data
+    if (!stationId) {
+      return NextResponse.json({ listeners: [], total: 0 });
+    }
 
-    // For now, return mock data
+    // Get current listeners from tune_ins
+    const { data: tuneIns } = await supabase
+      .from('tune_ins')
+      .select('wallet_address, user_id')
+      .eq('station_id', stationId)
+      .is('tuned_out_at', null);
+
+    if (!tuneIns || tuneIns.length === 0) {
+      return NextResponse.json({ listeners: [], total: 0 });
+    }
+
+    // Get user profiles with Farcaster data
+    const walletAddresses = tuneIns.map(t => t.wallet_address).filter(Boolean);
+    const { data: users } = await supabase
+      .from('users')
+      .select('wallet_address, farcaster_fid, farcaster_username, avatar_url')
+      .in('wallet_address', walletAddresses);
+
+    const listeners: FarcasterListener[] = (users || [])
+      .filter(u => u.farcaster_fid)
+      .map(u => ({
+        fid: u.farcaster_fid!,
+        username: u.farcaster_username || '',
+        display_name: u.farcaster_username,
+        avatar_url: u.avatar_url,
+        follower_count: 0,
+        wallet_address: u.wallet_address,
+      }));
+
     return NextResponse.json({
-      listeners: mockListeners,
-      total: mockListeners.length,
+      listeners,
+      total: listeners.length,
     });
   } catch (error) {
     console.error('Error fetching Farcaster listeners:', error);
-    return NextResponse.json({ error: 'Failed to fetch listeners' }, { status: 500 });
+    return NextResponse.json({ listeners: [], total: 0 });
   }
 }

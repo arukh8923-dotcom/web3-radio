@@ -1,27 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Mock search results
-const mockResults = [
-  { address: '0x1234567890abcdef1234567890abcdef12345678', name: 'djvibes.base', avatar: null },
-  { address: '0xabcdef1234567890abcdef1234567890abcdef12', name: 'chillmaster.base', avatar: null },
-  { address: '0x9876543210fedcba9876543210fedcba98765432', name: 'radiohead.base', avatar: null },
-];
+import { createServerSupabase } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q')?.toLowerCase();
 
-    if (!query) {
+    if (!query || query.length < 2) {
       return NextResponse.json({ results: [] });
     }
 
-    // In production: Search Base Name Service
-    const results = mockResults.filter(r => r.name.includes(query));
+    // Search users with base_name in database
+    const { data: users } = await supabase
+      .from('users')
+      .select('wallet_address, base_name, avatar_url')
+      .ilike('base_name', `%${query}%`)
+      .limit(10);
+
+    const results = (users || []).map(u => ({
+      address: u.wallet_address,
+      name: u.base_name,
+      avatar: u.avatar_url,
+    }));
 
     return NextResponse.json({ results });
   } catch (error) {
     console.error('Error searching Base names:', error);
-    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
+    return NextResponse.json({ results: [] });
   }
 }

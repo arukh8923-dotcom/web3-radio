@@ -47,7 +47,12 @@ export function FrequencyDial({ frequency, onChange, disabled }: FrequencyDialPr
   // Calculate indicator position
   const minFreq = 88.0;
   const maxFreq = 108.0;
-  const indicatorPosition = ((frequency - minFreq) / (maxFreq - minFreq)) * 100;
+  // Clamp frequency to valid range for display
+  const displayFreq = Math.max(minFreq, Math.min(maxFreq, frequency));
+  const indicatorPosition = ((displayFreq - minFreq) / (maxFreq - minFreq)) * 100;
+  
+  // Check if frequency is out of valid range (stuck state)
+  const isOutOfRange = frequency < minFreq || frequency > maxFreq;
 
   return (
     <div className={`relative bg-dial-cream rounded-lg p-4 ${disabled ? 'opacity-50' : ''}`}>
@@ -97,17 +102,32 @@ export function FrequencyDial({ frequency, onChange, disabled }: FrequencyDialPr
 
       {/* Current Frequency Display + Input - separate from drag area */}
       <div className="text-center mt-4">
-        <span className="nixie-tube text-3xl">{formatFrequency(frequency)}</span>
+        <span className="nixie-tube text-3xl">{formatFrequency(displayFreq)}</span>
+        
+        {/* Recovery button if stuck at invalid frequency */}
+        {isOutOfRange && (
+          <div className="mt-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(88.1);
+              }}
+              className="px-3 py-1 text-xs bg-tuning-red text-white rounded animate-pulse"
+            >
+              ⚠️ Reset to 88.1 FM
+            </button>
+          </div>
+        )}
         
         {/* Manual Frequency Input with +/- buttons */}
         <div className="mt-3 flex items-center justify-center gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              const newFreq = Math.max(88.0, frequency - FREQUENCY_STEP);
+              const newFreq = Math.max(88.0, displayFreq - FREQUENCY_STEP);
               onChange(Math.round(newFreq * 10) / 10);
             }}
-            disabled={disabled || frequency <= 88.0}
+            disabled={disabled || displayFreq <= 88.0}
             className="w-8 h-8 flex items-center justify-center text-lg font-bold bg-dial-dark text-dial-cream border border-brass/50 rounded hover:bg-brass/30 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             −
@@ -134,10 +154,10 @@ export function FrequencyDial({ frequency, onChange, disabled }: FrequencyDialPr
           <button
             onClick={(e) => {
               e.stopPropagation();
-              const newFreq = Math.min(108.0, frequency + FREQUENCY_STEP);
+              const newFreq = Math.min(108.0, displayFreq + FREQUENCY_STEP);
               onChange(Math.round(newFreq * 10) / 10);
             }}
-            disabled={disabled || frequency >= 108.0}
+            disabled={disabled || displayFreq >= 108.0}
             className="w-8 h-8 flex items-center justify-center text-lg font-bold bg-dial-dark text-dial-cream border border-brass/50 rounded hover:bg-brass/30 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             +
@@ -146,16 +166,27 @@ export function FrequencyDial({ frequency, onChange, disabled }: FrequencyDialPr
         </div>
       </div>
 
-      {/* 420 Zone Button */}
+      {/* Golden Hour Zone Button - toggles between 98.8 (Golden Hour) and 88.1 (default) */}
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onChange(420.0);
+          // Toggle: if in Golden Hour zone (98.0-99.9), go back to default 88.1
+          // Otherwise, go to Golden Hour frequency 98.8
+          if (frequency >= 98.0 && frequency <= 99.9) {
+            onChange(88.1);
+          } else {
+            onChange(98.8);
+          }
         }}
-        className="absolute right-2 top-2 px-2 py-1 text-xs font-dial bg-zone-420 text-white rounded hover:bg-zone-420-light transition-colors"
+        className={`absolute right-2 top-2 px-2 py-1 text-xs font-dial rounded transition-colors ${
+          frequency >= 98.0 && frequency <= 99.9
+            ? 'bg-zone-420-light text-white animate-pulse'
+            : 'bg-zone-420 text-white hover:bg-zone-420-light'
+        }`}
         disabled={disabled}
+        title={frequency >= 98.0 && frequency <= 99.9 ? 'Exit Golden Hour' : 'Enter Golden Hour Zone'}
       >
-        420
+        {frequency >= 98.0 && frequency <= 99.9 ? '✕ EXIT' : '🎵 98.8'}
       </button>
     </div>
   );

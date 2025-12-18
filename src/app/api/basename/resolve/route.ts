@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Base Name Service resolution
-// In production: Use Base Name Service contracts or API
-
-const mockNames: Record<string, { name: string; avatar: string | null }> = {
-  '0x1234567890abcdef1234567890abcdef12345678': { name: 'djvibes.base', avatar: null },
-  '0xabcdef1234567890abcdef1234567890abcdef12': { name: 'chillmaster.base', avatar: null },
-};
+import { createServerSupabase } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address')?.toLowerCase();
 
@@ -17,14 +11,51 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'address required' }, { status: 400 });
     }
 
-    // In production: Call Base Name Service contract
-    // const name = await baseNameContract.getName(address);
+    // Check database first for cached base_name
+    const { data: user } = await supabase
+      .from('users')
+      .select('base_name, avatar_url')
+      .eq('wallet_address', address)
+      .single();
 
-    const data = mockNames[address] || { name: null, avatar: null };
+    if (user?.base_name) {
+      return NextResponse.json({ 
+        name: user.base_name, 
+        avatar: user.avatar_url 
+      });
+    }
 
-    return NextResponse.json(data);
+    // If not in DB, try to resolve via Base Name Service API
+    try {
+      const response = await fetch(
+        `https://api.basename.app/v1/addresses/${address}/name`,
+        { next: { revalidate: 3600 } }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.name) {
+          // Cache in database
+          await supabase
+            .from('users')
+            .upsert({ 
+              wallet_address: address, 
+              base_name: data.name 
+            }, { onConflict: 'wallet_address' });
+          
+          return NextResponse.json({ 
+            name: data.name, 
+            avatar: data.avatar || null 
+          });
+        }
+      }
+    } catch {
+      // API call failed, return null
+    }
+
+    return NextResponse.json({ name: null, avatar: null });
   } catch (error) {
     console.error('Error resolving Base name:', error);
-    return NextResponse.json({ error: 'Failed to resolve' }, { status: 500 });
+    return NextResponse.json({ name: null, avatar: null });
   }
 }

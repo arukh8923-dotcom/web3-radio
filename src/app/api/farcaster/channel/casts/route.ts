@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/supabase';
 
-// Mock casts data - will integrate with Neynar API
 interface Cast {
   hash: string;
   author: {
@@ -18,63 +18,56 @@ interface Cast {
   replies: number;
 }
 
-const mockCasts: Cast[] = [
-  {
-    hash: '0xabc123',
-    author: {
-      fid: 1234,
-      username: 'vibesmaster',
-      display_name: 'Vibes Master 🎵',
-      avatar_url: null,
-    },
-    text: '🔥 This set is incredible! Love the vibes on 420 FM right now',
-    timestamp: new Date(Date.now() - 1800000).toISOString(),
-    reactions: { likes: 12, recasts: 3 },
-    replies: 2,
-  },
-  {
-    hash: '0xdef456',
-    author: {
-      fid: 5678,
-      username: 'djchill',
-      display_name: 'DJ Chill',
-      avatar_url: null,
-    },
-    text: 'Going live in 10 minutes! Tune in to 420 FM for some chill beats 📻',
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    reactions: { likes: 45, recasts: 8 },
-    replies: 5,
-  },
-  {
-    hash: '0xghi789',
-    author: {
-      fid: 9012,
-      username: 'radiohead420',
-      display_name: 'RadioHead 📻',
-      avatar_url: null,
-    },
-    text: 'Just discovered Web3 Radio and I\'m hooked! The 420 zone is something else 🌿',
-    timestamp: new Date(Date.now() - 7200000).toISOString(),
-    reactions: { likes: 23, recasts: 5 },
-    replies: 3,
-  },
-];
-
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const { searchParams } = new URL(request.url);
     const stationId = searchParams.get('station_id');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    // In production: Fetch casts from Neynar API
-    // GET https://api.neynar.com/v2/farcaster/channel/casts?channel_id=xxx
+    if (!stationId) {
+      return NextResponse.json({ casts: [], total: 0 });
+    }
+
+    // Get recent chat messages as "casts" for now
+    const { data: messages } = await supabase
+      .from('live_chat')
+      .select(`
+        id,
+        message,
+        created_at,
+        user_id,
+        users (
+          wallet_address,
+          farcaster_fid,
+          farcaster_username,
+          avatar_url
+        )
+      `)
+      .eq('station_id', stationId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    const casts: Cast[] = (messages || []).map((msg: any) => ({
+      hash: msg.id,
+      author: {
+        fid: msg.users?.farcaster_fid || 0,
+        username: msg.users?.farcaster_username || 'anonymous',
+        display_name: msg.users?.farcaster_username || null,
+        avatar_url: msg.users?.avatar_url || null,
+      },
+      text: msg.message,
+      timestamp: msg.created_at,
+      reactions: { likes: 0, recasts: 0 },
+      replies: 0,
+    }));
 
     return NextResponse.json({
-      casts: mockCasts.slice(0, limit),
-      total: mockCasts.length,
+      casts,
+      total: casts.length,
     });
   } catch (error) {
     console.error('Error fetching casts:', error);
-    return NextResponse.json({ error: 'Failed to fetch casts' }, { status: 500 });
+    return NextResponse.json({ casts: [], total: 0 });
   }
 }

@@ -1,36 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Mock token data - will integrate with Clanker API
-interface StationToken {
-  address: string;
-  symbol: string;
-  name: string;
-  total_supply: string;
-  holder_count: number;
-  price_usd: number;
-  market_cap: number;
-  liquidity: number;
-  created_at: string;
-  clanker_url: string;
-}
-
-const mockTokens: Record<string, StationToken> = {
-  'station-420': {
-    address: '0x420420420420420420420420420420420420420',
-    symbol: 'VIBES420',
-    name: '420 FM Vibes',
-    total_supply: '1000000',
-    holder_count: 420,
-    price_usd: 0.000042,
-    market_cap: 42000,
-    liquidity: 10000,
-    created_at: '2024-01-01T04:20:00Z',
-    clanker_url: 'https://clanker.world/token/0x420',
-  },
-};
+import { createServerSupabase } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const { searchParams } = new URL(request.url);
     const stationId = searchParams.get('station_id');
 
@@ -38,15 +11,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'station_id required' }, { status: 400 });
     }
 
-    const token = mockTokens[stationId] || null;
-    const holders = token ? [
-      { wallet_address: 'djvibes.base', display_name: 'DJ Vibes', balance: '100000', percentage: 10 },
-      { wallet_address: 'chillmaster.base', display_name: 'ChillMaster', balance: '50000', percentage: 5 },
-    ] : [];
+    // Get station token from database
+    const { data: stationToken } = await supabase
+      .from('station_tokens')
+      .select('*')
+      .eq('station_id', stationId)
+      .single();
 
-    return NextResponse.json({ token, holders });
+    if (!stationToken) {
+      return NextResponse.json({ token: null, holders: [] });
+    }
+
+    // Get top holders
+    const { data: holders } = await supabase
+      .from('token_holders')
+      .select(`
+        wallet_address,
+        balance,
+        percentage,
+        users (farcaster_username)
+      `)
+      .eq('token_address', stationToken.address)
+      .order('balance', { ascending: false })
+      .limit(10);
+
+    return NextResponse.json({
+      token: {
+        address: stationToken.address,
+        symbol: stationToken.symbol,
+        name: stationToken.name,
+        total_supply: stationToken.total_supply,
+        holder_count: stationToken.holder_count || 0,
+        price_usd: stationToken.price_usd || 0,
+        market_cap: stationToken.market_cap || 0,
+        liquidity: stationToken.liquidity || 0,
+        created_at: stationToken.created_at,
+        clanker_url: stationToken.clanker_url,
+      },
+      holders: (holders || []).map((h: any) => ({
+        wallet_address: h.wallet_address,
+        display_name: h.users?.farcaster_username || null,
+        balance: h.balance,
+        percentage: h.percentage,
+      })),
+    });
   } catch (error) {
     console.error('Error fetching token:', error);
-    return NextResponse.json({ error: 'Failed to fetch token' }, { status: 500 });
+    return NextResponse.json({ token: null, holders: [] });
   }
 }

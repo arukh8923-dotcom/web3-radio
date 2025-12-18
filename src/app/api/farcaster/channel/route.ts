@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/supabase';
 
-// Mock channel data - will integrate with Neynar API
 interface Channel {
   id: string;
   name: string;
@@ -10,19 +10,9 @@ interface Channel {
   created_at: string;
 }
 
-const mockChannels: Record<string, Channel> = {
-  'station-420': {
-    id: 'web3radio-420',
-    name: '420 FM Community',
-    description: 'The official channel for 420 FM listeners. Share vibes, discuss tracks, and connect with fellow listeners.',
-    image_url: null,
-    follower_count: 420,
-    created_at: '2024-01-01T00:00:00Z',
-  },
-};
-
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const { searchParams } = new URL(request.url);
     const stationId = searchParams.get('station_id');
 
@@ -30,13 +20,30 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'station_id required' }, { status: 400 });
     }
 
-    // In production: Look up channel from database or Neynar
-    const channel = mockChannels[stationId] || null;
+    // Get station info to build channel data
+    const { data: station } = await supabase
+      .from('stations')
+      .select('id, name, description, image_url, listener_count, created_at')
+      .eq('id', stationId)
+      .single();
+
+    if (!station) {
+      return NextResponse.json({ channel: null });
+    }
+
+    const channel: Channel = {
+      id: `web3radio-${station.id}`,
+      name: `${station.name} Community`,
+      description: station.description || `The official channel for ${station.name} listeners.`,
+      image_url: station.image_url,
+      follower_count: station.listener_count || 0,
+      created_at: station.created_at,
+    };
 
     return NextResponse.json({ channel });
   } catch (error) {
     console.error('Error fetching channel:', error);
-    return NextResponse.json({ error: 'Failed to fetch channel' }, { status: 500 });
+    return NextResponse.json({ channel: null });
   }
 }
 

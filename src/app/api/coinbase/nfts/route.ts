@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/supabase';
+import { CONTRACTS } from '@/constants/addresses';
 
-// Mock NFT data - will integrate with Coinbase NFT API or indexer
 interface NFT {
   token_id: string;
   contract_address: string;
@@ -10,27 +11,9 @@ interface NFT {
   collection_name: string;
 }
 
-const mockNFTs: NFT[] = [
-  {
-    token_id: '1',
-    contract_address: '0x420420420420420420420420420420420420420',
-    name: 'Session #420',
-    description: '420 FM Special Session NFT',
-    image_url: null,
-    collection_name: 'Web3 Radio Sessions',
-  },
-  {
-    token_id: '42',
-    contract_address: '0x420420420420420420420420420420420420420',
-    name: 'First Tune In',
-    description: 'Achievement NFT',
-    image_url: null,
-    collection_name: 'Web3 Radio Achievements',
-  },
-];
-
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createServerSupabase();
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
 
@@ -38,12 +21,57 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'address required' }, { status: 400 });
     }
 
-    // In production: Fetch from Coinbase NFT API or The Graph
-    // Filter for Web3 Radio related NFTs
+    const nfts: NFT[] = [];
 
-    return NextResponse.json({ nfts: mockNFTs });
+    // Get session NFTs from database
+    const { data: sessions } = await supabase
+      .from('session_attendances')
+      .select('nft_token_id, sessions (title)')
+      .eq('wallet_address', address.toLowerCase())
+      .eq('nft_claimed', true)
+      .not('nft_token_id', 'is', null);
+
+    if (sessions) {
+      sessions.forEach((s: any) => {
+        if (s.nft_token_id) {
+          nfts.push({
+            token_id: s.nft_token_id,
+            contract_address: CONTRACTS.SESSION_NFT_FACTORY,
+            name: s.sessions?.title || 'Session NFT',
+            description: 'Web3 Radio Session Attendance NFT',
+            image_url: `/api/nft/session/${s.nft_token_id}/image`,
+            collection_name: 'Web3 Radio Sessions',
+          });
+        }
+      });
+    }
+
+    // Get achievement NFTs
+    const { data: achievements } = await supabase
+      .from('user_achievements')
+      .select('nft_token_id, achievement_id, achievements (name, description)')
+      .eq('wallet_address', address.toLowerCase())
+      .eq('nft_minted', true)
+      .not('nft_token_id', 'is', null);
+
+    if (achievements) {
+      achievements.forEach((a: any) => {
+        if (a.nft_token_id) {
+          nfts.push({
+            token_id: a.nft_token_id,
+            contract_address: CONTRACTS.STATION_NFT,
+            name: a.achievements?.name || 'Achievement NFT',
+            description: a.achievements?.description || 'Web3 Radio Achievement',
+            image_url: `/api/nft/achievement/${a.nft_token_id}/image`,
+            collection_name: 'Web3 Radio Achievements',
+          });
+        }
+      });
+    }
+
+    return NextResponse.json({ nfts });
   } catch (error) {
     console.error('Error fetching NFTs:', error);
-    return NextResponse.json({ error: 'Failed to fetch NFTs' }, { status: 500 });
+    return NextResponse.json({ nfts: [] });
   }
 }
