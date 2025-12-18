@@ -6,11 +6,11 @@ export const BASE_CHAIN_ID = Number(process.env.NEXT_PUBLIC_BASE_CHAIN_ID) || 84
 // Base RPC URL
 export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org';
 
-// Contract Addresses (loaded from env vars)
+// Contract Addresses (loaded from env vars, with fallback to mainnet addresses)
 export const CONTRACTS = {
-  // Core Tokens (Clanker-deployed)
-  RADIO_TOKEN: (process.env.NEXT_PUBLIC_RADIO_TOKEN_ADDRESS || '') as Address,
-  VIBES_TOKEN: (process.env.NEXT_PUBLIC_VIBES_TOKEN_ADDRESS || '') as Address,
+  // Core Tokens (Clanker-deployed on Base Mainnet)
+  RADIO_TOKEN: (process.env.NEXT_PUBLIC_RADIO_TOKEN_ADDRESS || '0xaF0741FB82633a190683c5cFb4b8546123E93B07') as Address,
+  VIBES_TOKEN: (process.env.NEXT_PUBLIC_VIBES_TOKEN_ADDRESS || '0xCD6387AfA893C1Ad070c9870B5e9C4c0B5D56b07') as Address,
   
   // Core Contracts
   STATION_NFT: (process.env.NEXT_PUBLIC_STATION_NFT_ADDRESS || '') as Address,
