@@ -43,10 +43,9 @@ export function useTokenBalances(): TokenBalances {
 
   useEffect(() => {
     if (address) {
+      // Fetch once on mount/address change - no auto-refresh to save API calls
+      // Use refetch() manually when needed (e.g., after transactions)
       fetchBalances();
-      // Refresh every 60 seconds to reduce RPC calls
-      const interval = setInterval(fetchBalances, 60000);
-      return () => clearInterval(interval);
     }
   }, [address, fetchBalances]);
 

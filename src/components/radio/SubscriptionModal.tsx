@@ -153,7 +153,7 @@ export function SubscriptionModal({ isOpen, onClose, stationId, stationName }: S
   };
 
   const handleCancel = async () => {
-    if (!subscription) return;
+    if (!subscription || !address) return;
     if (!confirm('Cancel your subscription? You will lose access when it expires.')) return;
     
     try {
