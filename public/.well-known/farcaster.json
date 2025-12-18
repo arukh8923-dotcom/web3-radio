@@ -14,7 +14,7 @@
     "splashImageUrl": "https://web3-radio-omega.vercel.app/icon.png",
     "splashBackgroundColor": "#1a1410",
     "subtitle": "Full On-Chain Radio on Base",
-    "description": "A decentralized radio platform where every tune, tip, and vibe is on-chain. Discover stations, tip DJs with $RADIO, earn $VIBES.",
+    "description": "A decentralized radio platform where every tune, tip, and vibe is on-chain. Discover stations, tip DJs with RADIO tokens, earn VIBES rewards.",
     "primaryCategory": "entertainment",
     "tags": ["radio", "music", "web3", "base", "defi"],
     "requiredChains": ["eip155:8453"],

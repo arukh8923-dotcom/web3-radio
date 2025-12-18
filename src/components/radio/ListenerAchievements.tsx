@@ -239,22 +239,22 @@ export function ListenerAchievements({ isOpen, onClose }: ListenerAchievementsPr
 
         {/* Stats Summary */}
         {stats && (
-          <div className="p-3 border-b border-brass/20 grid grid-cols-4 gap-2 text-center">
+          <div className="p-3 border-b border-brass/20 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
             <div>
               <p className="text-brass font-bold text-sm">{stats.total_listening_hours.toFixed(1)}h</p>
-              <p className="text-dial-cream/40 text-xs">Listened</p>
+              <p className="text-dial-cream/40 text-[10px] sm:text-xs">Listened</p>
             </div>
             <div>
               <p className="text-brass font-bold text-sm">{stats.stations_visited}</p>
-              <p className="text-dial-cream/40 text-xs">Stations</p>
+              <p className="text-dial-cream/40 text-[10px] sm:text-xs">Stations</p>
             </div>
             <div>
               <p className="text-brass font-bold text-sm">{stats.tips_sent}</p>
-              <p className="text-dial-cream/40 text-xs">Tips</p>
+              <p className="text-dial-cream/40 text-[10px] sm:text-xs">Tips</p>
             </div>
             <div>
               <p className="text-brass font-bold text-sm">{stats.consecutive_days}</p>
-              <p className="text-dial-cream/40 text-xs">Day Streak</p>
+              <p className="text-dial-cream/40 text-[10px] sm:text-xs">Streak</p>
             </div>
           </div>
         )}
