@@ -3,19 +3,26 @@
 interface PilotLightProps {
   isOn: boolean;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
-export function PilotLight({ isOn, onClick }: PilotLightProps) {
+export function PilotLight({ isOn, onClick, disabled }: PilotLightProps) {
+  const isClickable = onClick && !disabled;
+  
   return (
     <button
-      onClick={onClick}
+      onClick={isClickable ? onClick : undefined}
+      disabled={disabled || !onClick}
       className={`
         relative w-4 h-4 rounded-full transition-all duration-300
         ${isOn 
           ? 'bg-pilot-amber animate-pilot-pulse' 
-          : 'bg-gray-600'
+          : disabled || !onClick
+            ? 'bg-gray-700 cursor-not-allowed'
+            : 'bg-gray-600 hover:bg-gray-500 cursor-pointer'
         }
       `}
+      title={disabled || !onClick ? 'Connect wallet to power on' : isOn ? 'Turn off' : 'Turn on'}
     >
       {/* Glass dome effect */}
       <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 to-transparent" />
@@ -26,7 +33,7 @@ export function PilotLight({ isOn, onClick }: PilotLightProps) {
       )}
       
       {/* Chrome bezel */}
-      <div className="absolute -inset-0.5 rounded-full border border-brass/50" />
+      <div className={`absolute -inset-0.5 rounded-full border ${disabled || !onClick ? 'border-gray-600' : 'border-brass/50'}`} />
     </button>
   );
 }

@@ -53,7 +53,7 @@ export const useRadio = create<RadioState>()(
       volume: 50,
       bass: 50,
       treble: 50,
-      isOn: true,
+      isOn: false, // Start OFF - requires wallet to turn on
       isMuted: false,
       isTunedIn: false,
       currentStation: null,
@@ -69,13 +69,25 @@ export const useRadio = create<RadioState>()(
       setVolume: (vol) => set({ volume: vol }),
       setBass: (bass) => set({ bass }),
       setTreble: (treble) => set({ treble }),
-      togglePower: () => set((s) => ({ isOn: !s.isOn })),
+      togglePower: () => {
+        const { walletAddress, isOn } = get();
+        // Can only turn ON if wallet is connected
+        if (!isOn && !walletAddress) {
+          return; // Don't turn on without wallet
+        }
+        set({ isOn: !isOn });
+      },
       toggleMute: () => set((s) => ({ isMuted: !s.isMuted })),
       setWalletAddress: (address) => {
         set({ walletAddress: address });
         if (address) {
+          // Auto turn on when wallet connects
+          set({ isOn: true });
           get().loadPresets();
           get().loadPreferences();
+        } else {
+          // Turn off when wallet disconnects
+          set({ isOn: false, isTunedIn: false });
         }
       },
 

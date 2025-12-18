@@ -23,13 +23,13 @@ interface DJLeaderboardProps {
 }
 
 const GENRES = [
-  { id: 'all', label: 'All Genres', icon: '🎵' },
+  { id: 'all', label: 'All', icon: '🎵' },
   { id: 'electronic', label: 'Electronic', icon: '🎧' },
-  { id: 'hiphop', label: 'Hip Hop', icon: '🎤' },
+  { id: 'hiphop', label: 'Hip-Hop', icon: '🎤' },
   { id: 'rock', label: 'Rock', icon: '🎸' },
   { id: 'jazz', label: 'Jazz', icon: '🎷' },
   { id: 'chill', label: 'Chill', icon: '🌊' },
-  { id: '420', label: '420 Zone', icon: '🌿' },
+  { id: 'lofi', label: 'Lo-Fi', icon: '🎧' },
 ];
 
 const TIME_PERIODS = [
@@ -115,24 +115,25 @@ export function DJLeaderboard({ isOpen, onClose }: DJLeaderboardProps) {
               <button
                 key={genre.id}
                 onClick={() => setSelectedGenre(genre.id)}
-                className={`px-2 py-1 rounded text-xs whitespace-nowrap transition-all ${
+                className={`px-2 py-1 rounded text-xs whitespace-nowrap transition-all flex-shrink-0 ${
                   selectedGenre === genre.id
                     ? 'bg-brass text-cabinet-dark'
                     : 'bg-black/30 text-dial-cream/70 hover:bg-black/50'
                 }`}
               >
-                {genre.icon} {genre.label}
+                <span className="mr-1">{genre.icon}</span>
+                <span className="hidden sm:inline">{genre.label}</span>
               </button>
             ))}
           </div>
           
           {/* Time Period Filter */}
-          <div className="flex gap-1">
+          <div className="grid grid-cols-4 gap-1">
             {TIME_PERIODS.map((period) => (
               <button
                 key={period.id}
                 onClick={() => setSelectedPeriod(period.id)}
-                className={`flex-1 px-2 py-1 rounded text-xs transition-all ${
+                className={`px-1 py-1 rounded text-[10px] sm:text-xs transition-all text-center ${
                   selectedPeriod === period.id
                     ? 'bg-brass/20 text-brass border border-brass/50'
                     : 'bg-black/20 text-dial-cream/60 hover:bg-black/30'
