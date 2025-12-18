@@ -64,11 +64,7 @@ export function NowPlayingDetail({ station, isOpen, onClose }: NowPlayingDetailP
 
           {/* Category Badge */}
           <div className="flex justify-center">
-            <span className={`px-3 py-1 rounded-full text-sm ${
-              station.category === '420' 
-                ? 'bg-zone-420/30 text-zone-420' 
-                : 'bg-brass/20 text-brass'
-            }`}>
+            <span className="px-3 py-1 rounded-full text-sm bg-brass/20 text-brass">
               {station.category.toUpperCase()}
             </span>
           </div>

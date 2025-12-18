@@ -3,37 +3,24 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { base } from 'wagmi/chains';
-import { coinbaseWallet, injected, walletConnect } from 'wagmi/connectors';
-import { type ReactNode, useEffect, useState } from 'react';
+import { coinbaseWallet, injected } from 'wagmi/connectors';
+import { type ReactNode } from 'react';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
-// Check if running inside Farcaster frame
-const isFarcasterFrame = typeof window !== 'undefined' && 
-  (window.location !== window.parent.location || 
-   window.navigator.userAgent.includes('Farcaster'));
-
-// Simple Wagmi config for Base mainnet
+// Wagmi config for Base mainnet
+// Supports: Injected wallets (MetaMask, Farcaster, etc.) and Coinbase Wallet
 const config = createConfig({
   chains: [base],
   connectors: [
-    // Injected wallet (MetaMask, etc.) - also handles Farcaster's injected provider
+    // Injected wallet - handles MetaMask, Farcaster's injected provider, etc.
     injected({
       shimDisconnect: true,
     }),
-    // Coinbase Wallet with smart wallet preference
-    coinbaseWallet({ 
+    // Coinbase Wallet - primary wallet for Base ecosystem
+    coinbaseWallet({
       appName: 'Web3 Radio',
-      preference: 'smartWalletOnly',
-    }),
-    // WalletConnect for other wallets
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'web3radio',
-      metadata: {
-        name: 'Web3 Radio',
-        description: 'Decentralized Radio on Base',
-        url: 'https://web3radio.fm',
-        icons: ['https://web3radio.fm/icon.png'],
-      },
+      // Use 'all' to support both regular and smart wallet
+      preference: 'all',
     }),
   ],
   transports: {

@@ -310,7 +310,6 @@ export function RadioCabinet() {
           {currentStation && (
             <SmokeSignals
               stationId={currentStation.id}
-              frequency={frequency}
             />
           )}
 

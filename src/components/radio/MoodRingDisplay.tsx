@@ -6,7 +6,7 @@ import { useRadio } from '@/hooks/useRadio';
 import type { MoodRing } from '@/lib/api';
 
 interface MoodRingDisplayProps {
-  moodRing: MoodRing;
+  moodRing: MoodRing | null;
   stationId: string;
 }
 
@@ -24,12 +24,22 @@ export function MoodRingDisplay({ moodRing, stationId }: MoodRingDisplayProps) {
   const [voting, setVoting] = useState<string | null>(null);
   const [lastVoted, setLastVoted] = useState<string | null>(null);
 
+  // Default mood ring if null
+  const ring = moodRing || {
+    chill_count: 0,
+    hype_count: 0,
+    melancholy_count: 0,
+    euphoric_count: 0,
+    zen_count: 0,
+    current_mood: 'chill',
+  };
+
   const totalVotes = 
-    moodRing.chill_count + 
-    moodRing.hype_count + 
-    moodRing.melancholy_count + 
-    moodRing.euphoric_count + 
-    moodRing.zen_count;
+    ring.chill_count + 
+    ring.hype_count + 
+    ring.melancholy_count + 
+    ring.euphoric_count + 
+    ring.zen_count;
 
   const getPercentage = (count: number) => {
     if (totalVotes === 0) return 0;
@@ -62,9 +72,9 @@ export function MoodRingDisplay({ moodRing, stationId }: MoodRingDisplayProps) {
       {/* Mood Buttons */}
       <div className="flex gap-2">
         {MOODS.map((mood) => {
-          const count = moodRing[`${mood.key}_count` as keyof MoodRing] as number;
+          const count = ring[`${mood.key}_count` as keyof typeof ring] as number;
           const percentage = getPercentage(count);
-          const isActive = moodRing.current_mood === mood.key;
+          const isActive = ring.current_mood === mood.key;
           const isVoting = voting === mood.key;
           const justVoted = lastVoted === mood.key;
 
