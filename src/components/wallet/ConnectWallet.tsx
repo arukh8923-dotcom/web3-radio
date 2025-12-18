@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, type Connector } from 'wagmi';
 import Image from 'next/image';
+import { isInMiniApp } from '@/lib/farcaster';
 
 interface FarcasterProfile {
   fid: number | null;
@@ -19,12 +20,37 @@ export function ConnectWallet() {
   const [isOpen, setIsOpen] = useState(false);
   const [fcProfile, setFcProfile] = useState<FarcasterProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [autoConnectAttempted, setAutoConnectAttempted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Handle hydration
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Auto-connect in Farcaster Mini App
+  useEffect(() => {
+    if (!mounted || autoConnectAttempted || isConnected) return;
+
+    async function autoConnect() {
+      const inMiniApp = await isInMiniApp();
+      if (inMiniApp) {
+        // Find the Farcaster connector
+        const farcasterConnector = connectors.find(
+          (c) => c.id === 'farcasterFrame' || c.name.toLowerCase().includes('farcaster')
+        );
+        if (farcasterConnector) {
+          try {
+            connect({ connector: farcasterConnector });
+          } catch (error) {
+            console.error('Auto-connect failed:', error);
+          }
+        }
+      }
+      setAutoConnectAttempted(true);
+    }
+    autoConnect();
+  }, [mounted, autoConnectAttempted, isConnected, connectors, connect]);
 
   // Fetch Farcaster profile when wallet connects
   useEffect(() => {

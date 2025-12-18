@@ -1,6 +1,8 @@
 'use client';
 
-// Farcaster Mini App SDK - with fallback for browser-only mode
+// Farcaster Mini App SDK - Updated for Mini App (not Frame)
+// Reference: https://miniapps.farcaster.xyz/docs
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let sdk: any = null;
 
@@ -32,13 +34,33 @@ export type FarcasterContext = {
   added?: boolean;
 };
 
+// Environment detection
+export type AppEnvironment = 'farcaster' | 'browser' | 'unknown';
+
+export function detectEnvironment(): AppEnvironment {
+  if (typeof window === 'undefined') return 'unknown';
+  
+  // Check if inside Farcaster Mini App (iframe with specific parent)
+  const isInIframe = window !== window.parent;
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  
+  // Farcaster apps typically have specific characteristics
+  if (isInIframe || userAgent.includes('farcaster') || userAgent.includes('warpcast')) {
+    return 'farcaster';
+  }
+  
+  return 'browser';
+}
+
 // Check if running inside Farcaster Mini App
 export async function isInMiniApp(): Promise<boolean> {
   const sdkInstance = await getSDK();
   if (!sdkInstance) return false;
   
   try {
-    return await sdkInstance.isInMiniApp();
+    // The SDK context will be available if in Mini App
+    const context = await sdkInstance.context;
+    return !!context;
   } catch {
     return false;
   }
@@ -47,21 +69,21 @@ export async function isInMiniApp(): Promise<boolean> {
 // Initialize SDK and call ready() to hide splash screen
 export async function initializeMiniApp(): Promise<boolean> {
   const sdkInstance = await getSDK();
-  if (!sdkInstance) return false;
+  if (!sdkInstance) {
+    console.log('SDK not available, running in browser mode');
+    return false;
+  }
   
   try {
-    const inMiniApp = await sdkInstance.isInMiniApp();
-    if (inMiniApp) {
-      await sdkInstance.actions.ready();
-      return true;
-    }
-    return false;
+    // Call ready to signal the app is loaded
+    await sdkInstance.actions.ready();
+    console.log('Mini App initialized successfully');
+    return true;
   } catch (error) {
     console.error('Failed to initialize Mini App:', error);
     return false;
   }
 }
-
 
 // Get Farcaster context
 export async function getFarcasterContext(): Promise<FarcasterContext> {
@@ -71,27 +93,39 @@ export async function getFarcasterContext(): Promise<FarcasterContext> {
   }
 
   try {
-    const inMiniApp = await sdkInstance.isInMiniApp();
+    const context = await sdkInstance.context;
     
-    if (!inMiniApp) {
+    if (!context) {
       return { isInMiniApp: false };
     }
 
-    const context = await sdkInstance.context;
-    
     return {
       isInMiniApp: true,
-      user: context?.user ? {
+      user: context.user ? {
         fid: context.user.fid,
         username: context.user.username,
         displayName: context.user.displayName,
         pfpUrl: context.user.pfpUrl,
       } : undefined,
-      clientFid: context?.client?.clientFid,
-      added: context?.client?.added,
+      clientFid: context.client?.clientFid,
+      added: context.client?.added,
     };
   } catch {
     return { isInMiniApp: false };
+  }
+}
+
+// Get Ethereum provider from Farcaster wallet
+export async function getFarcasterEthereumProvider() {
+  const sdkInstance = await getSDK();
+  if (!sdkInstance) return null;
+
+  try {
+    const provider = await sdkInstance.wallet.ethProvider;
+    return provider;
+  } catch (error) {
+    console.error('Failed to get Farcaster Ethereum provider:', error);
+    return null;
   }
 }
 
@@ -107,10 +141,9 @@ export async function shareStation(stationName: string, frequency: number) {
   }
 
   try {
-    await sdkInstance.actions.composeCast({
-      text: `🎵 Listening to ${stationName} on ${frequency.toFixed(1)} FM via Web3 Radio!`,
-      embeds: [window.location.href],
-    });
+    await sdkInstance.actions.openUrl(
+      `https://warpcast.com/~/compose?text=${encodeURIComponent(`🎵 Listening to ${stationName} on ${frequency.toFixed(1)} FM via Web3 Radio!`)}&embeds[]=${encodeURIComponent(window.location.href)}`
+    );
   } catch (error) {
     console.error('Failed to compose cast:', error);
   }
@@ -125,7 +158,7 @@ export async function viewProfile(fid: number) {
   }
 
   try {
-    await sdkInstance.actions.viewProfile({ fid });
+    await sdkInstance.actions.openUrl(`https://warpcast.com/~/profiles/${fid}`);
   } catch (error) {
     console.error('Failed to view profile:', error);
   }
@@ -152,36 +185,9 @@ export async function addMiniApp(): Promise<boolean> {
   if (!sdkInstance) return false;
 
   try {
-    await sdkInstance.actions.addMiniApp();
-    return true;
+    const result = await sdkInstance.actions.addFrame();
+    return result?.added ?? false;
   } catch {
     return false;
-  }
-}
-
-// Quick Auth - get authenticated session
-export async function getAuthToken(): Promise<string | null> {
-  const sdkInstance = await getSDK();
-  if (!sdkInstance) return null;
-
-  try {
-    const { token } = await sdkInstance.quickAuth.getToken();
-    return token;
-  } catch (error) {
-    console.error('Failed to get auth token:', error);
-    return null;
-  }
-}
-
-// Get Ethereum provider from Farcaster wallet
-export async function getEthereumProvider() {
-  const sdkInstance = await getSDK();
-  if (!sdkInstance) return null;
-
-  try {
-    return await sdkInstance.wallet.getEthereumProvider();
-  } catch (error) {
-    console.error('Failed to get Ethereum provider:', error);
-    return null;
   }
 }

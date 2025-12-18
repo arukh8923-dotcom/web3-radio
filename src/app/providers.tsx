@@ -4,29 +4,35 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { coinbaseWallet, injected } from 'wagmi/connectors';
-import { type ReactNode } from 'react';
+import { farcasterFrame } from '@farcaster/miniapp-wagmi-connector';
+import { type ReactNode, useEffect, useState } from 'react';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { initializeMiniApp, isInMiniApp } from '@/lib/farcaster';
 
-// Wagmi config for Base mainnet
-// Supports: Injected wallets (MetaMask, Farcaster, etc.) and Coinbase Wallet
-const config = createConfig({
-  chains: [base],
-  connectors: [
-    // Injected wallet - handles MetaMask, Farcaster's injected provider, etc.
-    injected({
-      shimDisconnect: true,
-    }),
-    // Coinbase Wallet - primary wallet for Base ecosystem
-    coinbaseWallet({
-      appName: 'Web3 Radio',
-      // Use 'all' to support both regular and smart wallet
-      preference: 'all',
-    }),
-  ],
-  transports: {
-    [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'),
-  },
-});
+// Create wagmi config with Farcaster connector
+function createWagmiConfig() {
+  return createConfig({
+    chains: [base],
+    connectors: [
+      // Farcaster Mini App connector - auto-connects in Farcaster
+      farcasterFrame(),
+      // Injected wallet - handles MetaMask, etc.
+      injected({
+        shimDisconnect: true,
+      }),
+      // Coinbase Wallet - primary wallet for Base ecosystem
+      coinbaseWallet({
+        appName: 'Web3 Radio',
+        preference: 'all',
+      }),
+    ],
+    transports: {
+      [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'),
+    },
+  });
+}
+
+const config = createWagmiConfig();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,12 +43,37 @@ const queryClient = new QueryClient({
   },
 });
 
+// Component to initialize Farcaster Mini App
+function FarcasterInitializer({ children }: { children: ReactNode }) {
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    async function init() {
+      const inMiniApp = await isInMiniApp();
+      if (inMiniApp) {
+        await initializeMiniApp();
+      }
+      setInitialized(true);
+    }
+    init();
+  }, []);
+
+  // Show nothing until initialized to prevent flash
+  if (!initialized) {
+    return null;
+  }
+
+  return <>{children}</>;
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <FarcasterInitializer>
+            {children}
+          </FarcasterInitializer>
         </QueryClientProvider>
       </WagmiProvider>
     </ThemeProvider>

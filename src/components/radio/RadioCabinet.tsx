@@ -117,11 +117,12 @@ export function RadioCabinet() {
           <NixieDisplay value={frequency.toFixed(1)} label="FM" />
           <div className="flex items-center gap-4">
             <PilotLight 
-              isOn={isOn} 
-              onClick={address ? togglePower : undefined} 
+              isOn={isOn && !!address} 
+              onClick={togglePower}
+              disabled={!address}
             />
-            <span className={`text-sm font-dial ${address ? 'text-dial-cream/70' : 'text-dial-cream/40'}`}>
-              {address ? 'POWER' : 'CONNECT WALLET'}
+            <span className="text-sm font-dial text-dial-cream/70">
+              POWER
             </span>
           </div>
         </div>
