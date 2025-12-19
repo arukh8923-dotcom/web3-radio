@@ -1,0 +1,305 @@
+# =============================================================
+# GLOBAL STATS
+# =============================================================
+
+type GlobalStats @entity {
+  id: ID!
+  totalStations: BigInt!
+  totalBroadcasts: BigInt!
+  totalSubscriptions: BigInt!
+  totalTips: BigInt!
+  totalTipAmount: BigInt!
+  totalProposals: BigInt!
+  totalSignals: BigInt!
+  totalRooms: BigInt!
+  totalDJs: BigInt!
+  verifiedDJs: BigInt!
+  updatedAt: BigInt!
+}
+
+# =============================================================
+# USER
+# =============================================================
+
+type User @entity {
+  id: ID! # address
+  address: Bytes!
+  createdAt: BigInt!
+  
+  # Stats
+  totalTipsGiven: BigInt!
+  totalTipsReceived: BigInt!
+  totalSubscriptions: BigInt!
+  totalBroadcasts: BigInt!
+  totalVibesEarned: BigInt!
+  
+  # Relations
+  stations: [Station!]! @derivedFrom(field: "owner")
+  subscriptions: [Subscription!]! @derivedFrom(field: "subscriber")
+  tipsGiven: [Tip!]! @derivedFrom(field: "tipper")
+  tipsReceived: [Tip!]! @derivedFrom(field: "dj")
+  proposals: [Proposal!]! @derivedFrom(field: "proposer")
+  votes: [Vote!]! @derivedFrom(field: "voter")
+  signals: [Signal!]! @derivedFrom(field: "sender")
+  roomsHosted: [Room!]! @derivedFrom(field: "host")
+  roomMemberships: [RoomMember!]! @derivedFrom(field: "user")
+  djProfile: DJ @derivedFrom(field: "user")
+}
+
+# =============================================================
+# STATION & BROADCASTS
+# =============================================================
+
+type Station @entity {
+  id: ID! # station address
+  address: Bytes!
+  owner: User!
+  frequency: BigInt!
+  name: String!
+  isPremium: Boolean!
+  createdAt: BigInt!
+  
+  # Config
+  djTier: Int
+  basicFee: BigInt
+  premiumFee: BigInt
+  vipFee: BigInt
+  
+  # Stats
+  totalBroadcasts: BigInt!
+  totalSubscribers: BigInt!
+  totalTips: BigInt!
+  totalRevenue: BigInt!
+  
+  # Relations
+  broadcasts: [Broadcast!]! @derivedFrom(field: "station")
+  subscriptions: [Subscription!]! @derivedFrom(field: "station")
+  tips: [Tip!]! @derivedFrom(field: "station")
+  liveStream: LiveStream
+}
+
+type Broadcast @entity {
+  id: ID! # contentHash
+  contentHash: Bytes!
+  station: Station!
+  dj: User!
+  frequency: BigInt!
+  timestamp: BigInt!
+  duration: BigInt!
+  storageType: Int!
+  contentType: Int!
+  title: String!
+  artist: String!
+  isLive: Boolean!
+}
+
+type LiveStream @entity {
+  id: ID! # station address
+  station: Station!
+  contentHash: Bytes!
+  dj: User!
+  frequency: BigInt!
+  startedAt: BigInt!
+  endedAt: BigInt
+  duration: BigInt
+  isActive: Boolean!
+}
+
+# =============================================================
+# SUBSCRIPTIONS & TIPS
+# =============================================================
+
+type Subscription @entity {
+  id: ID! # subscriber-station
+  subscriber: User!
+  station: Station!
+  tier: Int!
+  startTime: BigInt!
+  endTime: BigInt!
+  amountPaid: BigInt!
+  autoRenew: Boolean!
+  isActive: Boolean!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type Tip @entity {
+  id: ID! # tx hash + log index
+  tipper: User!
+  dj: User!
+  station: Station
+  amount: BigInt!
+  djAmount: BigInt!
+  treasuryAmount: BigInt!
+  message: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+type RevenueEvent @entity {
+  id: ID! # tx hash + log index
+  recipient: User!
+  djAmount: BigInt!
+  treasuryAmount: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+# =============================================================
+# GOVERNANCE
+# =============================================================
+
+type Proposal @entity {
+  id: ID! # proposal id
+  proposalId: BigInt!
+  proposer: User!
+  title: String!
+  startTime: BigInt!
+  endTime: BigInt!
+  forVotes: BigInt!
+  againstVotes: BigInt!
+  abstainVotes: BigInt!
+  state: String! # Pending, Active, Canceled, Defeated, Succeeded, Queued, Executed, Expired
+  queuedAt: BigInt
+  executedAt: BigInt
+  canceledAt: BigInt
+  createdAt: BigInt!
+  
+  # Relations
+  votes: [Vote!]! @derivedFrom(field: "proposal")
+}
+
+type Vote @entity {
+  id: ID! # proposal-voter
+  proposal: Proposal!
+  voter: User!
+  voteType: Int! # 0=Against, 1=For, 2=Abstain
+  weight: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+# =============================================================
+# ZONE 420
+# =============================================================
+
+type Zone420Participant @entity {
+  id: ID! # user address
+  user: User!
+  joinTime: BigInt!
+  lastVibesEarned: BigInt!
+  totalVibesEarned: BigInt!
+  currentMood: Int! # 0=CHILL, 1=VIBING, 2=HYPED, 3=MELLOW, 4=BLAZED
+  sessionCount: BigInt!
+  isInZone: Boolean!
+}
+
+type Zone420Session @entity {
+  id: ID! # session id
+  sessionId: BigInt!
+  startTime: BigInt!
+  endTime: BigInt
+  participantCount: BigInt!
+  totalVibesDistributed: BigInt!
+  isActive: Boolean!
+}
+
+type VibesEarnedEvent @entity {
+  id: ID! # tx hash + log index
+  user: User!
+  amount: BigInt!
+  is420Bonus: Boolean!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+type CommunityMood @entity {
+  id: ID! # "current"
+  mood: Int!
+  totalVotes: BigInt!
+  updatedAt: BigInt!
+}
+
+# =============================================================
+# SMOKE SIGNALS
+# =============================================================
+
+type Signal @entity {
+  id: ID! # signal id
+  signalId: BigInt!
+  sender: User!
+  frequency: BigInt!
+  message: String!
+  createdAt: BigInt!
+  expiresAt: BigInt!
+  vibesBurned: BigInt!
+  isExpired: Boolean!
+  txHash: Bytes!
+}
+
+# =============================================================
+# HOTBOX ROOMS
+# =============================================================
+
+type Room @entity {
+  id: ID! # room id
+  roomId: BigInt!
+  host: User!
+  name: String!
+  frequency: BigInt!
+  gateToken: Int! # 0=RADIO, 1=VIBES
+  minBalance: BigInt!
+  maxMembers: BigInt!
+  memberCount: BigInt!
+  createdAt: BigInt!
+  closedAt: BigInt
+  isActive: Boolean!
+  
+  # Relations
+  members: [RoomMember!]! @derivedFrom(field: "room")
+}
+
+type RoomMember @entity {
+  id: ID! # room-user
+  room: Room!
+  user: User!
+  joinTime: BigInt!
+  leftAt: BigInt
+  revokedAt: BigInt
+  revokeReason: String
+  isActive: Boolean!
+}
+
+# =============================================================
+# DJ ATTESTATIONS
+# =============================================================
+
+type DJ @entity {
+  id: ID! # dj address
+  user: User!
+  name: String!
+  bio: String
+  imageUrl: String
+  genres: [String!]!
+  totalBroadcasts: BigInt!
+  totalListeners: BigInt!
+  totalTips: BigInt!
+  status: String! # None, Pending, Verified, Revoked
+  easAttestation: Bytes
+  verifiedAt: BigInt
+  requestedAt: BigInt
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type VerificationRequest @entity {
+  id: ID! # dj address
+  dj: DJ!
+  name: String!
+  socialProof: String!
+  portfolioUrl: String
+  requestedAt: BigInt!
+  processedAt: BigInt
+  approved: Boolean
+  rejectionReason: String
+}

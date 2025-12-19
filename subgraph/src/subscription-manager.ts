@@ -3,7 +3,7 @@ import {
   TipSent,
   SubscriptionCreated,
 } from "../generated/SubscriptionManager/SubscriptionManager";
-import { Tip, Subscription, Listener, Station, GlobalStats } from "../generated/schema";
+import { Tip, StationSubscription, Listener, Station, GlobalStats } from "../generated/schema";
 
 export function handleTipSent(event: TipSent): void {
   let tipId = event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
@@ -57,7 +57,7 @@ export function handleTipSent(event: TipSent): void {
 
 export function handleSubscriptionCreated(event: SubscriptionCreated): void {
   let subId = event.params.subscriber.toHexString() + "-" + event.params.station.toHexString();
-  let subscription = new Subscription(subId);
+  let subscription = new StationSubscription(subId);
 
   // Get or create listener
   let listenerId = event.params.subscriber.toHexString();

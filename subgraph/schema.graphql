@@ -48,13 +48,13 @@ type Listener @entity {
   totalListeningTime: BigInt!
   totalTipsSent: BigInt!
   vibesBalance: BigInt!
-  subscribedStations: [Subscription!]! @derivedFrom(field: "listener")
+  subscribedStations: [StationSubscription!]! @derivedFrom(field: "listener")
   achievements: [Achievement!]! @derivedFrom(field: "listener")
   firstTuneIn: BigInt!
   lastActive: BigInt!
 }
 
-type Subscription @entity {
+type StationSubscription @entity {
   id: ID!
   listener: Listener!
   station: Station!

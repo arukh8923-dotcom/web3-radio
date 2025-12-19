@@ -1,61 +1,87 @@
-// The Graph Subgraph Client for Web3 Radio
+// Web3 Radio Subgraph Client
 
-const SUBGRAPH_URL = process.env.NEXT_PUBLIC_SUBGRAPH_URL || 
-  'https://api.studio.thegraph.com/query/YOUR_ID/web3radio/version/latest';
+const SUBGRAPH_URL = process.env.NEXT_PUBLIC_SUBGRAPH_URL || '';
 
-interface GraphQLResponse<T> {
-  data?: T;
-  errors?: Array<{ message: string }>;
+export interface Station {
+  id: string;
+  frequency: string;
+  owner: string;
+  name: string;
+  description?: string;
+  category: string;
+  isPremium: boolean;
+  listenerCount: string;
+  totalTips: string;
+  signalStrength: string;
+  createdAt: string;
 }
 
-async function query<T>(queryString: string, variables?: Record<string, unknown>): Promise<T | null> {
-  try {
-    const response = await fetch(SUBGRAPH_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: queryString, variables }),
-    });
-    
-    const result: GraphQLResponse<T> = await response.json();
-    
-    if (result.errors) {
-      console.error('GraphQL errors:', result.errors);
-      return null;
-    }
-    
-    return result.data || null;
-  } catch (error) {
-    console.error('Subgraph query failed:', error);
-    return null;
+export interface Tip {
+  id: string;
+  from: string;
+  to: string;
+  amount: string;
+  timestamp: string;
+  txHash: string;
+  station: { id: string; name: string };
+}
+
+export interface Listener {
+  id: string;
+  address: string;
+  totalListeningTime: string;
+  totalTipsSent: string;
+  vibesBalance: string;
+  firstTuneIn: string;
+  lastActive: string;
+}
+
+export interface Session {
+  id: string;
+  frequency: string;
+  startTime: string;
+  endTime: string;
+  dj: string;
+  attendeeCount: string;
+}
+
+export interface GlobalStats {
+  totalStations: string;
+  totalListeners: string;
+  totalBroadcasts: string;
+  totalTipsVolume: string;
+  totalVibesMinted: string;
+}
+
+async function querySubgraph<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
+  if (!SUBGRAPH_URL) {
+    throw new Error('Subgraph URL not configured');
   }
-}
 
-// Station queries
-export async function getStations(first = 20, orderBy = 'listenerCount', orderDirection = 'desc') {
-  const result = await query<{ stations: Station[] }>(`
-    query GetStations($first: Int!, $orderBy: String!, $orderDirection: String!) {
-      stations(first: $first, orderBy: $orderBy, orderDirection: $orderDirection) {
-        id
-        frequency
-        owner
-        name
-        category
-        isPremium
-        listenerCount
-        totalTips
-        signalStrength
-        createdAt
-      }
-    }
-  `, { first, orderBy, orderDirection });
+  const response = await fetch(SUBGRAPH_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  const json = await response.json();
   
-  return result?.stations || [];
+  if (json.errors) {
+    throw new Error(json.errors[0]?.message || 'Subgraph query failed');
+  }
+
+  return json.data;
 }
 
-export async function getStationByFrequency(frequency: string) {
-  const result = await query<{ stations: Station[] }>(`
-    query GetStation($frequency: BigInt!) {
-      stations(where: { frequency: $frequency }) {
+
+// ============================================
+// QUERY FUNCTIONS
+// ============================================
+
+export async function getTopStations(limit = 10): Promise<Station[]> {
+  const query = `
+    query TopStations($limit: Int!) {
+      stations(first: $limit, orderBy: totalTips, orderDirection: desc) {
         id
         frequency
         owner
@@ -63,30 +89,41 @@ export async function getStationByFrequency(frequency: string) {
         description
         category
         isPremium
-        subscriptionFee
         listenerCount
         totalTips
         signalStrength
         createdAt
-        broadcasts(first: 10, orderBy: timestamp, orderDirection: desc) {
+      }
+    }
+  `;
+  const data = await querySubgraph<{ stations: Station[] }>(query, { limit });
+  return data.stations;
+}
+
+export async function getRecentTips(limit = 20): Promise<Tip[]> {
+  const query = `
+    query RecentTips($limit: Int!) {
+      tips(first: $limit, orderBy: timestamp, orderDirection: desc) {
+        id
+        from
+        to
+        amount
+        timestamp
+        txHash
+        station {
           id
-          contentHash
-          contentType
-          title
-          dj
-          timestamp
+          name
         }
       }
     }
-  `, { frequency });
-  
-  return result?.stations[0] || null;
+  `;
+  const data = await querySubgraph<{ tips: Tip[] }>(query, { limit });
+  return data.tips;
 }
 
-// Listener queries
-export async function getListener(address: string) {
-  const result = await query<{ listener: Listener }>(`
-    query GetListener($id: ID!) {
+export async function getListenerStats(address: string): Promise<Listener | null> {
+  const query = `
+    query ListenerStats($id: ID!) {
       listener(id: $id) {
         id
         address
@@ -95,63 +132,38 @@ export async function getListener(address: string) {
         vibesBalance
         firstTuneIn
         lastActive
-        subscribedStations {
-          id
-          station { id name frequency }
-          endTime
-          isActive
-        }
-        achievements {
-          id
-          achievementType
-          name
-          unlockedAt
-        }
       }
     }
-  `, { id: address.toLowerCase() });
-  
-  return result?.listener || null;
+  `;
+  const data = await querySubgraph<{ listener: Listener | null }>(query, { id: address.toLowerCase() });
+  return data.listener;
 }
 
-// Leaderboard queries
-export async function getDJLeaderboard(first = 20) {
-  const result = await query<{ djs: DJ[] }>(`
-    query GetDJLeaderboard($first: Int!) {
-      djs(first: $first, orderBy: totalTipsReceived, orderDirection: desc, where: { isActive: true }) {
-        id
-        address
-        station { id name frequency }
-        totalBroadcasts
-        totalTipsReceived
-      }
-    }
-  `, { first });
-  
-  return result?.djs || [];
-}
-
-// Session queries
-export async function getActiveSessions() {
-  const result = await query<{ sessions: Session[] }>(`
-    query GetActiveSessions {
-      sessions(where: { mintingClosed: false }, orderBy: startTime, orderDirection: desc) {
+export async function getStationById(id: string): Promise<Station | null> {
+  const query = `
+    query Station($id: ID!) {
+      station(id: $id) {
         id
         frequency
-        startTime
-        dj
-        attendeeCount
+        owner
+        name
+        description
+        category
+        isPremium
+        listenerCount
+        totalTips
+        signalStrength
+        createdAt
       }
     }
-  `);
-  
-  return result?.sessions || [];
+  `;
+  const data = await querySubgraph<{ station: Station | null }>(query, { id: id.toLowerCase() });
+  return data.station;
 }
 
-// Global stats
-export async function getGlobalStats() {
-  const result = await query<{ globalStats: GlobalStats }>(`
-    query GetGlobalStats {
+export async function getGlobalStats(): Promise<GlobalStats | null> {
+  const query = `
+    query GlobalStats {
       globalStats(id: "global") {
         totalStations
         totalListeners
@@ -160,16 +172,15 @@ export async function getGlobalStats() {
         totalVibesMinted
       }
     }
-  `);
-  
-  return result?.globalStats || null;
+  `;
+  const data = await querySubgraph<{ globalStats: GlobalStats | null }>(query);
+  return data.globalStats;
 }
 
-// Recent activity
-export async function getRecentTips(first = 10) {
-  const result = await query<{ tips: Tip[] }>(`
-    query GetRecentTips($first: Int!) {
-      tips(first: $first, orderBy: timestamp, orderDirection: desc) {
+export async function getTipsByStation(stationId: string, limit = 50): Promise<Tip[]> {
+  const query = `
+    query StationTips($stationId: String!, $limit: Int!) {
+      tips(first: $limit, where: { station: $stationId }, orderBy: timestamp, orderDirection: desc) {
         id
         from
         to
@@ -178,92 +189,24 @@ export async function getRecentTips(first = 10) {
         txHash
       }
     }
-  `, { first });
-  
-  return result?.tips || [];
+  `;
+  const data = await querySubgraph<{ tips: Tip[] }>(query, { stationId: stationId.toLowerCase(), limit });
+  return data.tips;
 }
 
-// Types
-interface Station {
-  id: string;
-  frequency: string;
-  owner: string;
-  name: string;
-  description?: string;
-  category: string;
-  isPremium: boolean;
-  subscriptionFee?: string;
-  listenerCount: string;
-  totalTips: string;
-  signalStrength: string;
-  createdAt: string;
-  broadcasts?: Broadcast[];
-}
-
-interface Broadcast {
-  id: string;
-  contentHash: string;
-  contentType: string;
-  title?: string;
-  dj: string;
-  timestamp: string;
-}
-
-interface Listener {
-  id: string;
-  address: string;
-  totalListeningTime: string;
-  totalTipsSent: string;
-  vibesBalance: string;
-  firstTuneIn: string;
-  lastActive: string;
-  subscribedStations?: Subscription[];
-  achievements?: Achievement[];
-}
-
-interface Subscription {
-  id: string;
-  station: { id: string; name: string; frequency: string };
-  endTime: string;
-  isActive: boolean;
-}
-
-interface Achievement {
-  id: string;
-  achievementType: string;
-  name: string;
-  unlockedAt: string;
-}
-
-interface DJ {
-  id: string;
-  address: string;
-  station: { id: string; name: string; frequency: string };
-  totalBroadcasts: string;
-  totalTipsReceived: string;
-}
-
-interface Session {
-  id: string;
-  frequency: string;
-  startTime: string;
-  dj: string;
-  attendeeCount: string;
-}
-
-interface Tip {
-  id: string;
-  from: string;
-  to: string;
-  amount: string;
-  timestamp: string;
-  txHash: string;
-}
-
-interface GlobalStats {
-  totalStations: string;
-  totalListeners: string;
-  totalBroadcasts: string;
-  totalTipsVolume: string;
-  totalVibesMinted: string;
+export async function getRecentSessions(limit = 10): Promise<Session[]> {
+  const query = `
+    query RecentSessions($limit: Int!) {
+      sessions(first: $limit, orderBy: startTime, orderDirection: desc) {
+        id
+        frequency
+        startTime
+        endTime
+        dj
+        attendeeCount
+      }
+    }
+  `;
+  const data = await querySubgraph<{ sessions: Session[] }>(query, { limit });
+  return data.sessions;
 }
