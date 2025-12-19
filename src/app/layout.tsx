@@ -3,33 +3,36 @@ import { Providers } from './providers';
 import { MiniAppInit } from '@/components/MiniAppInit';
 import './globals.css';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://web3-radio-omega.vercel.app';
+
 // Farcaster Mini App embed configuration
 const miniAppEmbed = {
   version: '1',
-  imageUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://web3-radio-omega.vercel.app'}/og-image.svg`,
+  imageUrl: `${APP_URL}/og-image.png`,
   button: {
     title: '📻 Open Radio',
     action: {
       type: 'launch_frame',
       name: 'Web3 Radio',
-      url: process.env.NEXT_PUBLIC_APP_URL || 'https://web3-radio-omega.vercel.app',
-      splashImageUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://web3-radio-omega.vercel.app'}/splash.svg`,
+      url: APP_URL,
+      splashImageUrl: `${APP_URL}/icon.png`,
       splashBackgroundColor: '#1a1410',
     },
   },
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://web3-radio-omega.vercel.app'),
+  metadataBase: new URL(APP_URL),
   title: 'Web3 Radio - Decentralized Radio on Base',
   description: 'Full on-chain radio experience with retro vibes. Tune in, tip DJs with $RADIO.',
   openGraph: {
     title: 'Web3 Radio',
     description: 'Decentralized radio on Base mainnet',
-    images: ['/og-image.svg'],
+    images: ['/og-image.png'],
   },
   other: {
     'fc:miniapp': JSON.stringify(miniAppEmbed),
+    'base:app_id': '6944a5eed19763ca26ddc48e',
   },
 };
 
