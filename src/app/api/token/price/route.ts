@@ -3,6 +3,10 @@ import { NextResponse } from 'next/server';
 const RADIO_ADDRESS = '0xaF0741FB82633a190683c5cFb4b8546123E93B07';
 const VIBES_ADDRESS = '0xCD6387AfA893C1Ad070c9870B5e9C4c0B7D56b07';
 
+// Pool addresses for more reliable price fetching
+const RADIO_POOL = '0xbb3b7ca4c9b0ea77f857679fcbbe7b04af7ecb79b5f188fd25820cfd07286650';
+const VIBES_POOL = '0xd5c5b28f553c2dd95000768a58bf4bff06c3c17dab57ae79d55e341eb45e6873';
+
 // Fallback prices if all APIs fail
 const FALLBACK_PRICES = {
   radio: 0.0000003, // $0.0000003
@@ -23,7 +27,25 @@ let cachedPrices: TokenPrice | null = null;
 let cacheTimestamp = 0;
 const CACHE_DURATION = 60 * 1000; // 60 seconds
 
-async function fetchFromGeckoTerminal(address: string): Promise<number | null> {
+// Fetch price from GeckoTerminal using pool address (more reliable)
+async function fetchFromGeckoTerminalPool(poolAddress: string): Promise<number | null> {
+  try {
+    const res = await fetch(
+      `https://api.geckoterminal.com/api/v2/networks/base/pools/${poolAddress}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    // Pool data has base_token_price_usd for the token price
+    const price = parseFloat(data?.data?.attributes?.base_token_price_usd);
+    return isNaN(price) ? null : price;
+  } catch {
+    return null;
+  }
+}
+
+// Fallback: fetch by token address
+async function fetchFromGeckoTerminalToken(address: string): Promise<number | null> {
   try {
     const res = await fetch(
       `https://api.geckoterminal.com/api/v2/networks/base/tokens/${address}`,
@@ -78,28 +100,40 @@ async function getTokenPrices(): Promise<TokenPrice> {
   let vibesPrice: number | null = null;
   let source = 'fallback';
 
-  // Try GeckoTerminal first (preferred)
-  const [geckoRadio, geckoVibes] = await Promise.all([
-    fetchFromGeckoTerminal(RADIO_ADDRESS),
-    fetchFromGeckoTerminal(VIBES_ADDRESS),
+  // Try GeckoTerminal pool addresses first (most reliable)
+  const [poolRadio, poolVibes] = await Promise.all([
+    fetchFromGeckoTerminalPool(RADIO_POOL),
+    fetchFromGeckoTerminalPool(VIBES_POOL),
   ]);
   
-  radioPrice = geckoRadio;
-  vibesPrice = geckoVibes;
+  radioPrice = poolRadio;
+  vibesPrice = poolVibes;
   
   if (radioPrice !== null && vibesPrice !== null) {
-    source = 'geckoterminal';
+    source = 'geckoterminal-pool';
   } else {
-    // Only fallback to DexScreener if GeckoTerminal fails
+    // Fallback to token address lookup
     if (radioPrice === null) {
-      radioPrice = await fetchFromDexScreener(RADIO_ADDRESS);
+      radioPrice = await fetchFromGeckoTerminalToken(RADIO_ADDRESS);
     }
     if (vibesPrice === null) {
-      vibesPrice = await fetchFromDexScreener(VIBES_ADDRESS);
+      vibesPrice = await fetchFromGeckoTerminalToken(VIBES_ADDRESS);
     }
     
     if (radioPrice !== null || vibesPrice !== null) {
-      source = radioPrice !== null && vibesPrice !== null ? 'mixed' : 'dexscreener';
+      source = 'geckoterminal-token';
+    } else {
+      // Last resort: DexScreener
+      if (radioPrice === null) {
+        radioPrice = await fetchFromDexScreener(RADIO_ADDRESS);
+      }
+      if (vibesPrice === null) {
+        vibesPrice = await fetchFromDexScreener(VIBES_ADDRESS);
+      }
+      
+      if (radioPrice !== null || vibesPrice !== null) {
+        source = 'dexscreener';
+      }
     }
   }
 
