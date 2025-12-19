@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { useSwap, SwapToken } from '@/hooks/useSwap';
 
 interface NFT {
   token_id: string;
@@ -21,7 +22,13 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
   const { address } = useAccount();
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'nfts' | 'buy'>('nfts');
+  const [activeTab, setActiveTab] = useState<'nfts' | 'buy' | 'swap'>('nfts');
+  
+  // Swap state
+  const [swapAmount, setSwapAmount] = useState('');
+  const [tokenIn, setTokenIn] = useState<SwapToken>('ETH');
+  const [tokenOut, setTokenOut] = useState<SwapToken>('RADIO');
+  const { swap, isSwapping, isConfirming, txHash, error: swapError, ethBalance } = useSwap();
 
   useEffect(() => {
     if (isOpen && address) {
@@ -54,6 +61,27 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
     window.open(DEX_LINKS[token], '_blank');
   };
 
+  const handleSwap = async () => {
+    if (!swapAmount || parseFloat(swapAmount) <= 0) return;
+    
+    const result = await swap({
+      tokenIn,
+      tokenOut,
+      amountIn: swapAmount,
+      slippage: 5,
+    });
+    
+    if (result) {
+      setSwapAmount('');
+    }
+  };
+
+  const swapTokens = () => {
+    const temp = tokenIn;
+    setTokenIn(tokenOut);
+    setTokenOut(temp);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -64,8 +92,8 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
           <div className="flex items-center gap-2">
             <span className="text-2xl">💎</span>
             <div>
-              <h3 className="text-blue-400 font-bold">Coinbase</h3>
-              <p className="text-dial-cream/50 text-xs">Wallet & NFTs</p>
+              <h3 className="text-blue-400 font-bold">Wallet</h3>
+              <p className="text-dial-cream/50 text-xs">NFTs & Swap</p>
             </div>
           </div>
           <button onClick={onClose} className="text-dial-cream/60 hover:text-dial-cream text-2xl">×</button>
@@ -77,13 +105,19 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
             onClick={() => setActiveTab('nfts')}
             className={`flex-1 py-2 text-sm ${activeTab === 'nfts' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-dial-cream/50'}`}
           >
-            My NFTs
+            NFTs
+          </button>
+          <button
+            onClick={() => setActiveTab('swap')}
+            className={`flex-1 py-2 text-sm ${activeTab === 'swap' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-dial-cream/50'}`}
+          >
+            Swap
           </button>
           <button
             onClick={() => setActiveTab('buy')}
             className={`flex-1 py-2 text-sm ${activeTab === 'buy' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-dial-cream/50'}`}
           >
-            Buy Crypto
+            DEX Links
           </button>
         </div>
 
@@ -108,10 +142,110 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
                 ))}
               </div>
             )
+          ) : activeTab === 'swap' ? (
+            <div className="space-y-4">
+              <p className="text-dial-cream/60 text-sm text-center">
+                Swap directly via Uniswap V3
+              </p>
+              
+              {/* From Token */}
+              <div className="bg-black/30 rounded-lg p-3 border border-blue-600/20">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-dial-cream/50 text-xs">From</span>
+                  {tokenIn === 'ETH' && (
+                    <span className="text-dial-cream/40 text-xs">Balance: {parseFloat(ethBalance).toFixed(4)} ETH</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={swapAmount}
+                    onChange={(e) => setSwapAmount(e.target.value)}
+                    placeholder="0.0"
+                    className="flex-1 bg-transparent text-dial-cream text-xl outline-none"
+                  />
+                  <select
+                    value={tokenIn}
+                    onChange={(e) => setTokenIn(e.target.value as SwapToken)}
+                    className="bg-blue-600/20 text-dial-cream rounded-lg px-3 py-1 outline-none"
+                  >
+                    <option value="ETH">ETH</option>
+                    <option value="RADIO">RADIO</option>
+                    <option value="VIBES">VIBES</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Swap Direction Button */}
+              <div className="flex justify-center">
+                <button
+                  onClick={swapTokens}
+                  className="bg-blue-600/20 hover:bg-blue-600/40 rounded-full p-2 transition-colors"
+                >
+                  <span className="text-xl">⇅</span>
+                </button>
+              </div>
+
+              {/* To Token */}
+              <div className="bg-black/30 rounded-lg p-3 border border-blue-600/20">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-dial-cream/50 text-xs">To</span>
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1 text-dial-cream/50 text-xl">~</div>
+                  <select
+                    value={tokenOut}
+                    onChange={(e) => setTokenOut(e.target.value as SwapToken)}
+                    className="bg-blue-600/20 text-dial-cream rounded-lg px-3 py-1 outline-none"
+                  >
+                    <option value="RADIO">RADIO</option>
+                    <option value="VIBES">VIBES</option>
+                    <option value="ETH">ETH</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {swapError && (
+                <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-2 text-red-400 text-xs">
+                  {swapError}
+                </div>
+              )}
+
+              {/* Success Message */}
+              {txHash && (
+                <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-2 text-green-400 text-xs">
+                  <p>Transaction submitted!</p>
+                  <a 
+                    href={`https://basescan.org/tx/${txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    View on BaseScan
+                  </a>
+                </div>
+              )}
+
+              {/* Swap Button */}
+              <button
+                onClick={handleSwap}
+                disabled={isSwapping || isConfirming || !swapAmount || tokenIn === tokenOut}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/30 disabled:cursor-not-allowed rounded-lg text-dial-cream font-bold transition-colors"
+              >
+                {isSwapping ? 'Swapping...' : isConfirming ? 'Confirming...' : 'Swap'}
+              </button>
+
+              <div className="p-3 bg-blue-600/10 rounded-lg text-center">
+                <p className="text-dial-cream/50 text-xs">
+                  Powered by Uniswap V3 • 1% pool fee • 5% slippage
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="space-y-4">
               <p className="text-dial-cream/60 text-sm text-center">
-                Swap tokens on Uniswap (Base)
+                View pools on GeckoTerminal
               </p>
               
               <TokenSwapOption
@@ -140,7 +274,7 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
 
               <div className="p-3 bg-blue-600/10 rounded-lg text-center">
                 <p className="text-dial-cream/50 text-xs">
-                  Powered by Uniswap • Decentralized Exchange
+                  GeckoTerminal • Decentralized Exchange
                 </p>
               </div>
             </div>
