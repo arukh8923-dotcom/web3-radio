@@ -7,9 +7,10 @@ interface AppMenuProps {
   onOpenProfile: () => void;
   onOpenSettings: () => void;
   onOpenHelp: () => void;
+  onOpenNFTs?: () => void;
 }
 
-export function AppMenu({ onOpenDiscover, onOpenProfile, onOpenSettings, onOpenHelp }: AppMenuProps) {
+export function AppMenu({ onOpenDiscover, onOpenProfile, onOpenSettings, onOpenHelp, onOpenNFTs }: AppMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -26,6 +27,7 @@ export function AppMenu({ onOpenDiscover, onOpenProfile, onOpenSettings, onOpenH
   const menuItems = [
     { icon: '🔍', label: 'Discover Stations', action: onOpenDiscover },
     { icon: '👤', label: 'Profile', action: onOpenProfile },
+    { icon: '🖼️', label: 'My NFTs', action: onOpenNFTs },
     { icon: '⚙️', label: 'Settings', action: onOpenSettings },
     { icon: '❓', label: 'Help', action: onOpenHelp },
   ];

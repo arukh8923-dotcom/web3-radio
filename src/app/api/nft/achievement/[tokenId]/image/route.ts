@@ -1,25 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByFid } from '@/lib/neynar';
+import { createServerSupabase } from '@/lib/supabase';
 
-type AchievementType = 'first_tune' | 'listener_100h' | 'tipper_gold' | 'session_master' | 'frequency_collector' | 'vibes_whale';
+type AchievementType = 'first_tune' | 'hour_listener' | 'day_listener' | 'first_tip' | 'big_tipper' | 'vibe_master' | 'session_attendee' | '420_explorer' | 'hotbox_member' | 'request_fulfilled';
 
-const ACHIEVEMENT_CONFIG: Record<AchievementType, { name: string; icon: string; color: string; description: string }> = {
+const ACHIEVEMENT_CONFIG: Record<string, { name: string; icon: string; color: string; description: string }> = {
   first_tune: { name: 'FIRST TUNE', icon: '📻', color: '#4ade80', description: 'Tuned in for the first time' },
-  listener_100h: { name: '100 HOUR LISTENER', icon: '🎧', color: '#f59e0b', description: 'Listened for 100+ hours' },
-  tipper_gold: { name: 'GOLD TIPPER', icon: '💰', color: '#fbbf24', description: 'Tipped over 1000 RADIO' },
-  session_master: { name: 'SESSION MASTER', icon: '🎪', color: '#a855f7', description: 'Attended 50+ sessions' },
-  frequency_collector: { name: 'FREQUENCY COLLECTOR', icon: '📡', color: '#3b82f6', description: 'Owns 5+ frequencies' },
-  vibes_whale: { name: 'VIBES WHALE', icon: '🐋', color: '#06b6d4', description: 'Holds 10000+ VIBES' },
+  hour_listener: { name: 'HOUR LISTENER', icon: '🎧', color: '#f59e0b', description: 'Listened for 1 hour total' },
+  day_listener: { name: 'DAY LISTENER', icon: '🎧', color: '#ef4444', description: 'Listened for 24 hours total' },
+  first_tip: { name: 'GENEROUS SOUL', icon: '💰', color: '#fbbf24', description: 'Sent your first tip' },
+  big_tipper: { name: 'BIG TIPPER', icon: '💎', color: '#a855f7', description: 'Tipped over 100 RADIO' },
+  vibe_master: { name: 'VIBE MASTER', icon: '✨', color: '#ec4899', description: 'Sent 100 vibes reactions' },
+  session_attendee: { name: 'SESSION ATTENDEE', icon: '🎪', color: '#8b5cf6', description: 'Attended a special session' },
+  '420_explorer': { name: '420 EXPLORER', icon: '🌿', color: '#22c55e', description: 'Visited the 420 zone' },
+  hotbox_member: { name: 'HOTBOX MEMBER', icon: '🚪', color: '#f97316', description: 'Joined a hotbox room' },
+  request_fulfilled: { name: 'REQUEST FULFILLED', icon: '🎵', color: '#06b6d4', description: 'Had a song request fulfilled' },
 };
 
 async function getAchievementNFTData(tokenId: string) {
+  const supabase = createServerSupabase();
+  
+  // tokenId could be achievement code or numeric ID
+  const { data: achievement } = await supabase
+    .from('user_achievements')
+    .select(`
+      id,
+      nft_token_id,
+      earned_at,
+      user_id,
+      achievements (code, name, description, points),
+      users (farcaster_fid, farcaster_username, wallet_address)
+    `)
+    .or(`nft_token_id.eq.${tokenId},achievements.code.eq.${tokenId}`)
+    .single();
+
+  if (achievement) {
+    const ach = achievement.achievements as any;
+    const user = achievement.users as any;
+    return {
+      tokenId: achievement.nft_token_id || tokenId,
+      achievementType: ach?.code || 'first_tune',
+      ownerFid: user?.farcaster_fid || 0,
+      ownerUsername: user?.farcaster_username || 'unknown',
+      unlockedAt: achievement.earned_at || new Date().toISOString(),
+      milestone: ach?.name || 'Achievement',
+      rank: ach?.points || 10,
+    };
+  }
+
+  // Fallback for direct achievement code lookup
   return {
     tokenId,
-    achievementType: 'listener_100h' as AchievementType,
+    achievementType: tokenId as AchievementType,
     ownerFid: 250705,
-    unlockedAt: new Date('2025-12-18T12:00:00').toISOString(),
-    milestone: '100 hours',
-    rank: 42, // Global rank for this achievement
+    ownerUsername: 'ukhy89',
+    unlockedAt: new Date().toISOString(),
+    milestone: ACHIEVEMENT_CONFIG[tokenId]?.name || 'Achievement',
+    rank: 1,
   };
 }
 
@@ -133,21 +170,32 @@ export async function GET(
   try {
     const nftData = await getAchievementNFTData(tokenId);
     
-    let ownerUsername = 'unknown';
-    let ownerFid = 0;
-    if (nftData.ownerFid) {
-      const profile = await getUserByFid(nftData.ownerFid);
-      if (profile) {
-        ownerUsername = profile.username;
-        ownerFid = profile.fid;
+    let ownerUsername = nftData.ownerUsername || 'unknown';
+    let ownerFid = nftData.ownerFid || 0;
+    
+    // Try to fetch fresh profile if we have FID
+    if (nftData.ownerFid && nftData.ownerFid > 0) {
+      try {
+        const profile = await getUserByFid(nftData.ownerFid);
+        if (profile) {
+          ownerUsername = profile.username;
+          ownerFid = profile.fid;
+        }
+      } catch {
+        // Use cached data
       }
     }
     
     const creatorUsername = process.env.NEXT_PUBLIC_CREATOR_USERNAME || 'ukhy89';
     
+    // Ensure achievementType exists in config, fallback to first_tune
+    const achievementType = ACHIEVEMENT_CONFIG[nftData.achievementType] 
+      ? nftData.achievementType 
+      : 'first_tune';
+    
     const svg = generateAchievementBadgeSVG({
-      tokenId,
-      achievementType: nftData.achievementType,
+      tokenId: nftData.tokenId || tokenId,
+      achievementType: achievementType as AchievementType,
       ownerUsername,
       ownerFid,
       unlockedAt: nftData.unlockedAt,

@@ -14,6 +14,7 @@ import { HelpModal } from '@/components/HelpModal';
 import { DJLeaderboard } from '@/components/radio/DJLeaderboard';
 import { DJStudioPanel } from '@/components/DJStudioPanel';
 import { BottomNav } from '@/components/BottomNav';
+import { CoinbaseIntegration } from '@/components/wallet/CoinbaseIntegration';
 import { useAccount } from 'wagmi';
 
 export default function Home() {
@@ -26,6 +27,7 @@ export default function Home() {
   const [showHelp, setShowHelp] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showDJStudio, setShowDJStudio] = useState(false);
+  const [showNFTs, setShowNFTs] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -57,6 +59,7 @@ export default function Home() {
               onOpenProfile={() => setShowProfile(true)}
               onOpenSettings={() => setShowSettings(true)}
               onOpenHelp={() => setShowHelp(true)}
+              onOpenNFTs={() => setShowNFTs(true)}
             />
           </div>
         </div>
@@ -109,6 +112,11 @@ export default function Home() {
       <DJStudioPanel
         isOpen={showDJStudio}
         onClose={() => setShowDJStudio(false)}
+      />
+
+      <CoinbaseIntegration
+        isOpen={showNFTs}
+        onClose={() => setShowNFTs(false)}
       />
 
       {/* Bottom Navigation */}
