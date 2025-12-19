@@ -9,15 +9,21 @@
     "name": "Web3 Radio",
     "iconUrl": "https://web3-radio-omega.vercel.app/icon.svg",
     "homeUrl": "https://web3-radio-omega.vercel.app",
-    "imageUrl": "https://web3-radio-omega.vercel.app/og-image.png",
-    "buttonTitle": "📻 Tune In",
+    "buttonTitle": "Tune In",
     "splashImageUrl": "https://web3-radio-omega.vercel.app/splash.svg",
     "splashBackgroundColor": "#1a1410",
+    "subtitle": "On-chain radio on Base",
+    "description": "Decentralized radio where every tune, tip, and vibe is on-chain. Tip DJs with RADIO tokens, earn VIBES rewards.",
+    "primaryCategory": "entertainment",
+    "tags": ["radio", "music", "web3", "base"],
     "requiredChains": ["eip155:8453"],
-    "requiredCapabilities": [
-      "actions.signIn",
-      "wallet.getEthereumProvider",
-      "actions.swapToken"
-    ]
+    "requiredCapabilities": ["wallet.getEthereumProvider", "actions.signIn"],
+    "imageUrl": "https://web3-radio-omega.vercel.app/og-image.png",
+    "ogImageUrl": "https://web3-radio-omega.vercel.app/og-image.png",
+    "heroImageUrl": "https://web3-radio-omega.vercel.app/og-image.png",
+    "screenshotUrls": ["https://web3-radio-omega.vercel.app/og-image.png"]
+  },
+  "baseBuilder": {
+    "ownerAddress": "0x09D02D25D0D082f7F2E04b4838cEfe271b2daB09"
   }
 }
