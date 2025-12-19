@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const RADIO_ADDRESS = '0xaF0741FB82633a190683c5cFb4b8546123E93B07';
-const VIBES_ADDRESS = '0xCD6387AfA893C1Ad070c9870B5e9C4c0B7D56b07';
+const VIBES_ADDRESS = '0xCD6387AfA893C1Ad070c9870B5e9C4c0B5D56b07';
 
 // Pool addresses for more reliable price fetching
 const RADIO_POOL = '0xbb3b7ca4c9b0ea77f857679fcbbe7b04af7ecb79b5f188fd25820cfd07286650';

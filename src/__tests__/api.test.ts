@@ -85,7 +85,7 @@ describe('Tips API Validation', () => {
   });
 
   it('should have correct VIBES token address', () => {
-    expect(CONTRACTS.VIBES_TOKEN).toBe('0xCD6387AfA893C1Ad070c9870B5e9C4c0B7D56b07');
+    expect(CONTRACTS.VIBES_TOKEN).toBe('0xCD6387AfA893C1Ad070c9870B5e9C4c0B5D56b07');
   });
 });
 
