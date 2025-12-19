@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
-import { useSwap, SwapToken } from '@/hooks/useSwap';
+import { useAccount, useBalance, useReadContract } from 'wagmi';
+import { formatUnits } from 'viem';
+import { CONTRACTS } from '@/constants/addresses';
 
 interface NFT {
   token_id: string;
@@ -18,37 +19,36 @@ interface CoinbaseIntegrationProps {
   onClose: () => void;
 }
 
+const ERC20_ABI = [
+  {
+    name: 'balanceOf',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'account', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const;
+
 export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProps) {
   const { address } = useAccount();
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'nfts' | 'buy' | 'swap'>('nfts');
-  
-  // Swap state
-  const [swapAmount, setSwapAmount] = useState('');
-  const [tokenIn, setTokenIn] = useState<SwapToken>('ETH');
-  const [tokenOut, setTokenOut] = useState<SwapToken>('RADIO');
-  const { 
-    swap, 
-    getQuote,
-    isSwapping, 
-    isQuoting,
-    isConfirming, 
-    txHash, 
-    error: swapError, 
-    quote,
-    getBalance,
-  } = useSwap();
+  const [activeTab, setActiveTab] = useState<'nfts' | 'swap'>('nfts');
 
-  // Debounced quote fetch
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (swapAmount && parseFloat(swapAmount) > 0 && tokenIn !== tokenOut) {
-        getQuote(tokenIn, tokenOut, swapAmount);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [swapAmount, tokenIn, tokenOut, getQuote]);
+  // Get balances
+  const { data: ethBalance } = useBalance({ address });
+  const { data: radioBalance } = useReadContract({
+    address: CONTRACTS.RADIO_TOKEN,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  });
+  const { data: vibesBalance } = useReadContract({
+    address: CONTRACTS.VIBES_TOKEN,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  });
 
   useEffect(() => {
     if (isOpen && address) {
@@ -70,36 +70,22 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
     setLoading(false);
   };
 
-  // DEX links for buying tokens - using GeckoTerminal pools
+  // DEX links - GeckoTerminal pools (Clanker deployed tokens)
   const DEX_LINKS = {
     RADIO: 'https://www.geckoterminal.com/base/pools/0xbb3b7ca4c9b0ea77f857679fcbbe7b04af7ecb79b5f188fd25820cfd07286650',
     VIBES: 'https://www.geckoterminal.com/base/pools/0xd5c5b28f553c2dd95000768a58bf4bff06c3c17dab57ae79d55e341eb45e6873',
-    ETH: 'https://app.uniswap.org/swap?chain=base',
   };
 
-  const openDEX = (token: 'RADIO' | 'VIBES' | 'ETH') => {
+  const openDEX = (token: 'RADIO' | 'VIBES') => {
     window.open(DEX_LINKS[token], '_blank');
   };
 
-  const handleSwap = async () => {
-    if (!swapAmount || parseFloat(swapAmount) <= 0) return;
-    
-    const result = await swap({
-      tokenIn,
-      tokenOut,
-      amountIn: swapAmount,
-      slippage: 5,
-    });
-    
-    if (result) {
-      setSwapAmount('');
-    }
-  };
-
-  const swapTokens = () => {
-    const temp = tokenIn;
-    setTokenIn(tokenOut);
-    setTokenOut(temp);
+  const formatBalance = (balance: bigint | undefined) => {
+    if (!balance) return '0';
+    const formatted = parseFloat(formatUnits(balance, 18));
+    if (formatted >= 1000000) return (formatted / 1000000).toFixed(2) + 'M';
+    if (formatted >= 1000) return (formatted / 1000).toFixed(2) + 'K';
+    return formatted.toFixed(2);
   };
 
   if (!isOpen) return null;
@@ -131,13 +117,7 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
             onClick={() => setActiveTab('swap')}
             className={`flex-1 py-2 text-sm ${activeTab === 'swap' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-dial-cream/50'}`}
           >
-            Swap
-          </button>
-          <button
-            onClick={() => setActiveTab('buy')}
-            className={`flex-1 py-2 text-sm ${activeTab === 'buy' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-dial-cream/50'}`}
-          >
-            DEX Links
+            Swap Tokens
           </button>
         </div>
 
@@ -162,150 +142,50 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
                 ))}
               </div>
             )
-          ) : activeTab === 'swap' ? (
-            <div className="space-y-4">
-              <p className="text-dial-cream/60 text-sm text-center">
-                Swap directly via Uniswap V3
-              </p>
-              
-              {/* From Token */}
-              <div className="bg-black/30 rounded-lg p-3 border border-blue-600/20">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-dial-cream/50 text-xs">From</span>
-                  <span className="text-dial-cream/40 text-xs">
-                    Balance: {parseFloat(getBalance(tokenIn)).toFixed(4)} {tokenIn}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={swapAmount}
-                    onChange={(e) => setSwapAmount(e.target.value)}
-                    placeholder="0.0"
-                    className="flex-1 bg-transparent text-dial-cream text-xl outline-none"
-                  />
-                  <select
-                    value={tokenIn}
-                    onChange={(e) => setTokenIn(e.target.value as SwapToken)}
-                    className="bg-blue-800 text-white rounded-lg px-3 py-1 outline-none border border-blue-500"
-                  >
-                    <option value="ETH" className="bg-blue-800 text-white">ETH</option>
-                    <option value="RADIO" className="bg-blue-800 text-white">RADIO</option>
-                    <option value="VIBES" className="bg-blue-800 text-white">VIBES</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Swap Direction Button */}
-              <div className="flex justify-center">
-                <button
-                  onClick={swapTokens}
-                  className="bg-blue-600/20 hover:bg-blue-600/40 rounded-full p-2 transition-colors"
-                >
-                  <span className="text-xl">⇅</span>
-                </button>
-              </div>
-
-              {/* To Token */}
-              <div className="bg-black/30 rounded-lg p-3 border border-blue-600/20">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-dial-cream/50 text-xs">To (estimated)</span>
-                  <span className="text-dial-cream/40 text-xs">
-                    Balance: {parseFloat(getBalance(tokenOut)).toFixed(4)} {tokenOut}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <div className="flex-1 text-dial-cream text-xl">
-                    {isQuoting ? (
-                      <span className="text-dial-cream/50 animate-pulse">Loading...</span>
-                    ) : quote ? (
-                      parseFloat(quote).toFixed(4)
-                    ) : (
-                      <span className="text-dial-cream/50">~</span>
-                    )}
-                  </div>
-                  <select
-                    value={tokenOut}
-                    onChange={(e) => setTokenOut(e.target.value as SwapToken)}
-                    className="bg-blue-800 text-white rounded-lg px-3 py-1 outline-none border border-blue-500"
-                  >
-                    <option value="RADIO" className="bg-blue-800 text-white">RADIO</option>
-                    <option value="VIBES" className="bg-blue-800 text-white">VIBES</option>
-                    <option value="ETH" className="bg-blue-800 text-white">ETH</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Error Message */}
-              {swapError && (
-                <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-2 text-red-400 text-xs">
-                  {swapError}
-                </div>
-              )}
-
-              {/* Success Message */}
-              {txHash && (
-                <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-2 text-green-400 text-xs">
-                  <p>Transaction submitted!</p>
-                  <a 
-                    href={`https://basescan.org/tx/${txHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
-                    View on BaseScan
-                  </a>
-                </div>
-              )}
-
-              {/* Swap Button */}
-              <button
-                onClick={handleSwap}
-                disabled={isSwapping || isConfirming || !swapAmount || tokenIn === tokenOut}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/30 disabled:cursor-not-allowed rounded-lg text-dial-cream font-bold transition-colors"
-              >
-                {isSwapping ? 'Swapping...' : isConfirming ? 'Confirming...' : 'Swap'}
-              </button>
-
-              <div className="p-3 bg-blue-600/10 rounded-lg text-center">
-                <p className="text-dial-cream/50 text-xs">
-                  Powered by Uniswap V3 • 1% pool fee • 5% slippage
-                </p>
-              </div>
-            </div>
           ) : (
             <div className="space-y-4">
+              {/* Balances */}
+              <div className="bg-black/30 rounded-lg p-3 border border-blue-600/20">
+                <p className="text-dial-cream/50 text-xs mb-2">Your Balances</p>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-dial-cream">⟠ ETH</span>
+                    <span className="text-dial-cream">{ethBalance ? parseFloat(formatUnits(ethBalance.value, 18)).toFixed(4) : '0'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-dial-cream">📻 RADIO</span>
+                    <span className="text-dial-cream">{formatBalance(radioBalance as bigint)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-dial-cream">✨ VIBES</span>
+                    <span className="text-dial-cream">{formatBalance(vibesBalance as bigint)}</span>
+                  </div>
+                </div>
+              </div>
+
               <p className="text-dial-cream/60 text-sm text-center">
-                View pools on GeckoTerminal
+                Swap on GeckoTerminal (Clanker pools)
               </p>
               
               <TokenSwapOption
-                token="RADIO"
                 name="$RADIO"
                 description="Platform governance token"
                 icon="📻"
+                balance={formatBalance(radioBalance as bigint)}
                 onSwap={() => openDEX('RADIO')}
               />
               
               <TokenSwapOption
-                token="VIBES"
                 name="$VIBES"
                 description="Rewards & utility token"
                 icon="✨"
+                balance={formatBalance(vibesBalance as bigint)}
                 onSwap={() => openDEX('VIBES')}
               />
-              
-              <TokenSwapOption
-                token="ETH"
-                name="ETH"
-                description="For gas fees on Base"
-                icon="⟠"
-                onSwap={() => openDEX('ETH')}
-              />
 
-              <div className="p-3 bg-blue-600/10 rounded-lg text-center">
-                <p className="text-dial-cream/50 text-xs">
-                  GeckoTerminal • Decentralized Exchange
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <p className="text-yellow-400 text-xs">
+                  💡 RADIO & VIBES are Clanker tokens. Swap via GeckoTerminal for best rates.
                 </p>
               </div>
             </div>
@@ -334,11 +214,11 @@ function NFTCard({ nft }: { nft: NFT }) {
   );
 }
 
-function TokenSwapOption({ token, name, description, icon, onSwap }: {
-  token: string;
+function TokenSwapOption({ name, description, icon, balance, onSwap }: {
   name: string;
   description: string;
   icon: string;
+  balance: string;
   onSwap: () => void;
 }) {
   return (
@@ -352,7 +232,10 @@ function TokenSwapOption({ token, name, description, icon, onSwap }: {
           <p className="text-dial-cream font-medium">{name}</p>
           <p className="text-dial-cream/50 text-xs">{description}</p>
         </div>
-        <span className="text-blue-400 text-sm">Swap →</span>
+        <div className="text-right">
+          <p className="text-dial-cream/40 text-xs">{balance}</p>
+          <span className="text-blue-400 text-sm">Swap →</span>
+        </div>
       </div>
     </button>
   );
