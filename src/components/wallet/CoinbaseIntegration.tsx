@@ -167,11 +167,11 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
                   <select
                     value={tokenIn}
                     onChange={(e) => setTokenIn(e.target.value as SwapToken)}
-                    className="bg-blue-600/20 text-dial-cream rounded-lg px-3 py-1 outline-none"
+                    className="bg-blue-800 text-white rounded-lg px-3 py-1 outline-none border border-blue-500"
                   >
-                    <option value="ETH">ETH</option>
-                    <option value="RADIO">RADIO</option>
-                    <option value="VIBES">VIBES</option>
+                    <option value="ETH" className="bg-blue-800 text-white">ETH</option>
+                    <option value="RADIO" className="bg-blue-800 text-white">RADIO</option>
+                    <option value="VIBES" className="bg-blue-800 text-white">VIBES</option>
                   </select>
                 </div>
               </div>
@@ -196,11 +196,11 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
                   <select
                     value={tokenOut}
                     onChange={(e) => setTokenOut(e.target.value as SwapToken)}
-                    className="bg-blue-600/20 text-dial-cream rounded-lg px-3 py-1 outline-none"
+                    className="bg-blue-800 text-white rounded-lg px-3 py-1 outline-none border border-blue-500"
                   >
-                    <option value="RADIO">RADIO</option>
-                    <option value="VIBES">VIBES</option>
-                    <option value="ETH">ETH</option>
+                    <option value="RADIO" className="bg-blue-800 text-white">RADIO</option>
+                    <option value="VIBES" className="bg-blue-800 text-white">VIBES</option>
+                    <option value="ETH" className="bg-blue-800 text-white">ETH</option>
                   </select>
                 </div>
               </div>
