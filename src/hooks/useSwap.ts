@@ -1,18 +1,45 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useBalance } from 'wagmi';
-import { parseUnits, formatUnits, encodeFunctionData } from 'viem';
+import { useState, useCallback, useEffect } from 'react';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useBalance, useReadContract } from 'wagmi';
+import { parseUnits, formatUnits } from 'viem';
 import { CONTRACTS } from '@/constants/addresses';
 
-// Uniswap V3 SwapRouter on Base
+// Uniswap V3 on Base
 const UNISWAP_ROUTER = '0x2626664c2603336E57B271c5C0b26F421741e481' as const;
+const UNISWAP_QUOTER = '0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a' as const;
 const WETH_ADDRESS = '0x4200000000000000000000000000000000000006' as const;
 
 // Pool fee tiers (0.3% = 3000, 1% = 10000)
 const POOL_FEE = 10000; // 1% for low liquidity tokens
 
-// Swap Router ABI (minimal)
+// Quoter V2 ABI
+const QUOTER_ABI = [
+  {
+    name: 'quoteExactInputSingle',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{
+      name: 'params',
+      type: 'tuple',
+      components: [
+        { name: 'tokenIn', type: 'address' },
+        { name: 'tokenOut', type: 'address' },
+        { name: 'amountIn', type: 'uint256' },
+        { name: 'fee', type: 'uint24' },
+        { name: 'sqrtPriceLimitX96', type: 'uint160' },
+      ],
+    }],
+    outputs: [
+      { name: 'amountOut', type: 'uint256' },
+      { name: 'sqrtPriceX96After', type: 'uint160' },
+      { name: 'initializedTicksCrossed', type: 'uint32' },
+      { name: 'gasEstimate', type: 'uint256' },
+    ],
+  },
+] as const;
+
+// Swap Router ABI
 const SWAP_ROUTER_ABI = [
   {
     name: 'exactInputSingle',
@@ -35,8 +62,8 @@ const SWAP_ROUTER_ABI = [
   },
 ] as const;
 
-// ERC20 Approve ABI
-const ERC20_APPROVE_ABI = [
+// ERC20 ABI
+const ERC20_ABI = [
   {
     name: 'approve',
     type: 'function',
@@ -48,13 +75,10 @@ const ERC20_APPROVE_ABI = [
     outputs: [{ name: '', type: 'bool' }],
   },
   {
-    name: 'allowance',
+    name: 'balanceOf',
     type: 'function',
     stateMutability: 'view',
-    inputs: [
-      { name: 'owner', type: 'address' },
-      { name: 'spender', type: 'address' },
-    ],
+    inputs: [{ name: 'account', type: 'address' }],
     outputs: [{ name: '', type: 'uint256' }],
   },
 ] as const;
@@ -65,14 +89,16 @@ interface SwapParams {
   tokenIn: SwapToken;
   tokenOut: SwapToken;
   amountIn: string;
-  slippage?: number; // Default 5%
+  slippage?: number;
 }
 
 export function useSwap() {
   const { address } = useAccount();
   const [isSwapping, setIsSwapping] = useState(false);
+  const [isQuoting, setIsQuoting] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [quote, setQuote] = useState<string | null>(null);
 
   const { writeContractAsync } = useWriteContract();
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({
@@ -82,6 +108,22 @@ export function useSwap() {
   // Get ETH balance
   const { data: ethBalance } = useBalance({ address });
 
+  // Get RADIO balance
+  const { data: radioBalance } = useReadContract({
+    address: CONTRACTS.RADIO_TOKEN,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  });
+
+  // Get VIBES balance
+  const { data: vibesBalance } = useReadContract({
+    address: CONTRACTS.VIBES_TOKEN,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  });
+
   const getTokenAddress = (token: SwapToken): `0x${string}` => {
     switch (token) {
       case 'ETH': return WETH_ADDRESS;
@@ -89,6 +131,62 @@ export function useSwap() {
       case 'VIBES': return CONTRACTS.VIBES_TOKEN;
     }
   };
+
+  const getBalance = (token: SwapToken): string => {
+    switch (token) {
+      case 'ETH': return ethBalance ? formatUnits(ethBalance.value, 18) : '0';
+      case 'RADIO': return radioBalance ? formatUnits(radioBalance as bigint, 18) : '0';
+      case 'VIBES': return vibesBalance ? formatUnits(vibesBalance as bigint, 18) : '0';
+    }
+  };
+
+  // Get quote for swap
+  const getQuote = useCallback(async (tokenIn: SwapToken, tokenOut: SwapToken, amountIn: string) => {
+    if (!amountIn || parseFloat(amountIn) <= 0) {
+      setQuote(null);
+      return null;
+    }
+
+    setIsQuoting(true);
+    setError(null);
+
+    try {
+      const tokenInAddress = getTokenAddress(tokenIn);
+      const tokenOutAddress = getTokenAddress(tokenOut);
+      const amountInWei = parseUnits(amountIn, 18);
+
+      // Call quoter via API to avoid gas estimation issues
+      const response = await fetch('/api/swap/quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokenIn: tokenInAddress,
+          tokenOut: tokenOutAddress,
+          amountIn: amountInWei.toString(),
+          fee: POOL_FEE,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const formattedQuote = formatUnits(BigInt(data.amountOut), 18);
+        setQuote(formattedQuote);
+        return formattedQuote;
+      } else {
+        const errData = await response.json();
+        setError(errData.error || 'Quote failed');
+        setQuote(null);
+        return null;
+      }
+    } catch (err: unknown) {
+      console.error('Quote failed:', err);
+      setError('Failed to get quote');
+      setQuote(null);
+      return null;
+    } finally {
+      setIsQuoting(false);
+    }
+  }, []);
 
   const swap = useCallback(async ({ tokenIn, tokenOut, amountIn, slippage = 5 }: SwapParams) => {
     if (!address) {
@@ -111,18 +209,22 @@ export function useSwap() {
       const amountInWei = parseUnits(amountIn, 18);
       
       // Calculate minimum output with slippage
-      const amountOutMinimum = BigInt(0); // For simplicity, accept any output (risky but works for low liquidity)
+      let amountOutMinimum = BigInt(0);
+      if (quote) {
+        const quoteWei = parseUnits(quote, 18);
+        amountOutMinimum = quoteWei * BigInt(100 - slippage) / BigInt(100);
+      }
 
       // If swapping from ERC20 (not ETH), need to approve first
       if (tokenIn !== 'ETH') {
-        const approveHash = await writeContractAsync({
+        await writeContractAsync({
           address: tokenInAddress,
-          abi: ERC20_APPROVE_ABI,
+          abi: ERC20_ABI,
           functionName: 'approve',
           args: [UNISWAP_ROUTER, amountInWei],
         });
         
-        // Wait a bit for approval to be mined
+        // Wait for approval
         await new Promise(resolve => setTimeout(resolve, 3000));
       }
 
@@ -147,21 +249,28 @@ export function useSwap() {
 
       setTxHash(hash);
       return hash;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Swap failed:', err);
-      setError(err.message || 'Swap failed');
+      const errorMessage = err instanceof Error ? err.message : 'Swap failed';
+      setError(errorMessage);
       return null;
     } finally {
       setIsSwapping(false);
     }
-  }, [address, writeContractAsync]);
+  }, [address, writeContractAsync, quote]);
 
   return {
     swap,
+    getQuote,
     isSwapping,
+    isQuoting,
     isConfirming,
     txHash,
     error,
+    quote,
+    getBalance,
     ethBalance: ethBalance ? formatUnits(ethBalance.value, 18) : '0',
+    radioBalance: radioBalance ? formatUnits(radioBalance as bigint, 18) : '0',
+    vibesBalance: vibesBalance ? formatUnits(vibesBalance as bigint, 18) : '0',
   };
 }

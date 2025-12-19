@@ -28,7 +28,27 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
   const [swapAmount, setSwapAmount] = useState('');
   const [tokenIn, setTokenIn] = useState<SwapToken>('ETH');
   const [tokenOut, setTokenOut] = useState<SwapToken>('RADIO');
-  const { swap, isSwapping, isConfirming, txHash, error: swapError, ethBalance } = useSwap();
+  const { 
+    swap, 
+    getQuote,
+    isSwapping, 
+    isQuoting,
+    isConfirming, 
+    txHash, 
+    error: swapError, 
+    quote,
+    getBalance,
+  } = useSwap();
+
+  // Debounced quote fetch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (swapAmount && parseFloat(swapAmount) > 0 && tokenIn !== tokenOut) {
+        getQuote(tokenIn, tokenOut, swapAmount);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [swapAmount, tokenIn, tokenOut, getQuote]);
 
   useEffect(() => {
     if (isOpen && address) {
@@ -152,9 +172,9 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
               <div className="bg-black/30 rounded-lg p-3 border border-blue-600/20">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-dial-cream/50 text-xs">From</span>
-                  {tokenIn === 'ETH' && (
-                    <span className="text-dial-cream/40 text-xs">Balance: {parseFloat(ethBalance).toFixed(4)} ETH</span>
-                  )}
+                  <span className="text-dial-cream/40 text-xs">
+                    Balance: {parseFloat(getBalance(tokenIn)).toFixed(4)} {tokenIn}
+                  </span>
                 </div>
                 <div className="flex gap-2">
                   <input
@@ -189,10 +209,21 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
               {/* To Token */}
               <div className="bg-black/30 rounded-lg p-3 border border-blue-600/20">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-dial-cream/50 text-xs">To</span>
+                  <span className="text-dial-cream/50 text-xs">To (estimated)</span>
+                  <span className="text-dial-cream/40 text-xs">
+                    Balance: {parseFloat(getBalance(tokenOut)).toFixed(4)} {tokenOut}
+                  </span>
                 </div>
                 <div className="flex gap-2">
-                  <div className="flex-1 text-dial-cream/50 text-xl">~</div>
+                  <div className="flex-1 text-dial-cream text-xl">
+                    {isQuoting ? (
+                      <span className="text-dial-cream/50 animate-pulse">Loading...</span>
+                    ) : quote ? (
+                      parseFloat(quote).toFixed(4)
+                    ) : (
+                      <span className="text-dial-cream/50">~</span>
+                    )}
+                  </div>
                   <select
                     value={tokenOut}
                     onChange={(e) => setTokenOut(e.target.value as SwapToken)}
