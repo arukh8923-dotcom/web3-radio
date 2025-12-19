@@ -3,8 +3,8 @@ import type { Address } from 'viem';
 // Base Mainnet Chain ID
 export const BASE_CHAIN_ID = Number(process.env.NEXT_PUBLIC_BASE_CHAIN_ID) || 8453;
 
-// Base RPC URL - CDP Integration (no fallback to avoid rate limiting)
-export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL || '';
+// Base RPC URL - CDP Integration with fallback
+export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org';
 
 // Treasury Address
 export const TREASURY_ADDRESS = '0x702AA27b8498EB3F9Ec0431BC5Fd258Bc19faf36' as Address;

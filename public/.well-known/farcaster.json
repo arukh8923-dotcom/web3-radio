@@ -7,7 +7,7 @@
   "miniapp": {
     "version": "1",
     "name": "Web3 Radio",
-    "iconUrl": "https://web3-radio-omega.vercel.app/icon.png",
+    "iconUrl": "https://web3-radio-omega.vercel.app/icon.svg",
     "homeUrl": "https://web3-radio-omega.vercel.app",
     "imageUrl": "https://web3-radio-omega.vercel.app/og-image.png",
     "heroImageUrl": "https://web3-radio-omega.vercel.app/og-image.png",

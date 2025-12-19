@@ -35,9 +35,11 @@ export const isContractsDeployed = () => true;
 
 // Public client for reading contract state
 // Use CDP RPC to avoid rate limiting from public endpoints
+import { BASE_RPC_URL } from '@/constants/addresses';
+
 export const publicClient = createPublicClient({
   chain: base,
-  transport: http(process.env.NEXT_PUBLIC_BASE_RPC_URL),
+  transport: http(BASE_RPC_URL || 'https://mainnet.base.org'),
 });
 
 // ERC-20 ABI (minimal for reading)

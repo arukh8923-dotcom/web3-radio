@@ -43,11 +43,11 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
     setLoading(false);
   };
 
-  // DEX links for buying tokens
+  // DEX links for buying tokens - using GeckoTerminal pools
   const DEX_LINKS = {
-    RADIO: 'https://app.uniswap.org/swap?outputCurrency=0xaF0741FB82633a190683c5cFb4b8546123E93B07&chain=base',
-    VIBES: 'https://app.uniswap.org/swap?outputCurrency=0xCD6387AfA893C1Ad070c9870B5e9C4c0B7D56b07&chain=base',
-    ETH: 'https://app.uniswap.org/swap?outputCurrency=ETH&chain=base',
+    RADIO: 'https://www.geckoterminal.com/base/pools/0xbb3b7ca4c9b0ea77f857679fcbbe7b04af7ecb79b5f188fd25820cfd07286650',
+    VIBES: 'https://www.geckoterminal.com/base/pools/0xd5c5b28f553c2dd95000768a58bf4bff06c3c17dab57ae79d55e341eb45e6873',
+    ETH: 'https://app.uniswap.org/swap?chain=base',
   };
 
   const openDEX = (token: 'RADIO' | 'VIBES' | 'ETH') => {

@@ -25,8 +25,11 @@ export function TokenBalances() {
   };
 
   const openGeckoTerminal = (token: 'radio' | 'vibes') => {
-    const address = token === 'radio' ? RADIO_TOKEN_ADDRESS : VIBES_TOKEN_ADDRESS;
-    window.open(`https://www.geckoterminal.com/base/pools/${address}`, '_blank');
+    // Use pool addresses for GeckoTerminal
+    const poolAddress = token === 'radio' 
+      ? '0xbb3b7ca4c9b0ea77f857679fcbbe7b04af7ecb79b5f188fd25820cfd07286650'
+      : '0xd5c5b28f553c2dd95000768a58bf4bff06c3c17dab57ae79d55e341eb45e6873';
+    window.open(`https://www.geckoterminal.com/base/pools/${poolAddress}`, '_blank');
   };
 
   return (
