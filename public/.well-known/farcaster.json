@@ -1,27 +1,26 @@
 {
   "accountAssociation": {
-    "header": "",
-    "payload": "",
-    "signature": ""
+    "header": "eyJmaWQiOjI1MDcwNSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDA5RDAyRDI1RDBEMDgyZjdGMkUwNGI0ODM4Y0VmZTI3MWIyZGFCMDkifQ",
+    "payload": "eyJkb21haW4iOiJ3ZWIzLXJhZGlvLW9tZWdhLnZlcmNlbC5hcHAifQ",
+    "signature": "MHg="
   },
   "miniapp": {
     "version": "1",
     "name": "Web3 Radio",
     "iconUrl": "https://web3-radio-omega.vercel.app/icon.png",
     "homeUrl": "https://web3-radio-omega.vercel.app",
-    "imageUrl": "https://web3-radio-omega.vercel.app/og-image.svg",
+    "imageUrl": "https://web3-radio-omega.vercel.app/icon.png",
     "buttonTitle": "📻 Tune In",
-    "splashImageUrl": "https://web3-radio-omega.vercel.app/splash.svg",
+    "splashImageUrl": "https://web3-radio-omega.vercel.app/icon.png",
     "splashBackgroundColor": "#1a1410",
-    "subtitle": "Full On-Chain Radio on Base",
-    "description": "A decentralized radio platform where every tune, tip, and vibe is on-chain. Discover stations, tip DJs with RADIO tokens, earn VIBES rewards.",
+    "subtitle": "On-Chain Radio on Base",
+    "description": "Decentralized radio where every tune, tip, and vibe is on-chain. Tip DJs with $RADIO, earn $VIBES rewards.",
     "primaryCategory": "entertainment",
     "tags": ["radio", "music", "web3", "base", "defi"],
     "requiredChains": ["eip155:8453"],
     "requiredCapabilities": [
       "actions.signIn",
-      "wallet.getEthereumProvider",
-      "actions.composeCast"
+      "wallet.getEthereumProvider"
     ]
   }
 }

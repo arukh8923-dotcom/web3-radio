@@ -43,16 +43,15 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
     setLoading(false);
   };
 
-  const openCoinbasePay = (amount: number, token: string) => {
-    // Coinbase Pay URL with parameters
-    const params = new URLSearchParams({
-      appId: process.env.NEXT_PUBLIC_COINBASE_APP_ID || 'web3radio',
-      destinationWallets: JSON.stringify([{ address, blockchains: ['base'] }]),
-      presetCryptoAmount: amount.toString(),
-      defaultAsset: token,
-    });
-    
-    window.open(`https://pay.coinbase.com/buy/select-asset?${params}`, '_blank');
+  // DEX links for buying tokens
+  const DEX_LINKS = {
+    RADIO: 'https://app.uniswap.org/swap?outputCurrency=0xaF0741FB82633a190683c5cFb4b8546123E93B07&chain=base',
+    VIBES: 'https://app.uniswap.org/swap?outputCurrency=0xCD6387AfA893C1Ad070c9870B5e9C4c0B7D56b07&chain=base',
+    ETH: 'https://app.uniswap.org/swap?outputCurrency=ETH&chain=base',
+  };
+
+  const openDEX = (token: 'RADIO' | 'VIBES' | 'ETH') => {
+    window.open(DEX_LINKS[token], '_blank');
   };
 
   if (!isOpen) return null;
@@ -112,28 +111,36 @@ export function CoinbaseIntegration({ isOpen, onClose }: CoinbaseIntegrationProp
           ) : (
             <div className="space-y-4">
               <p className="text-dial-cream/60 text-sm text-center">
-                Buy crypto with Coinbase Pay
+                Swap tokens on Uniswap (Base)
               </p>
               
-              <BuyOption
-                token="ETH"
-                name="Ethereum"
-                description="For gas fees on Base"
-                amounts={[10, 25, 50]}
-                onBuy={(amount) => openCoinbasePay(amount, 'ETH')}
+              <TokenSwapOption
+                token="RADIO"
+                name="$RADIO"
+                description="Platform governance token"
+                icon="📻"
+                onSwap={() => openDEX('RADIO')}
               />
               
-              <BuyOption
-                token="USDC"
-                name="USD Coin"
-                description="Stable for trading"
-                amounts={[25, 50, 100]}
-                onBuy={(amount) => openCoinbasePay(amount, 'USDC')}
+              <TokenSwapOption
+                token="VIBES"
+                name="$VIBES"
+                description="Rewards & utility token"
+                icon="✨"
+                onSwap={() => openDEX('VIBES')}
+              />
+              
+              <TokenSwapOption
+                token="ETH"
+                name="ETH"
+                description="For gas fees on Base"
+                icon="⟠"
+                onSwap={() => openDEX('ETH')}
               />
 
               <div className="p-3 bg-blue-600/10 rounded-lg text-center">
                 <p className="text-dial-cream/50 text-xs">
-                  Powered by Coinbase Pay • Secure & Fast
+                  Powered by Uniswap • Decentralized Exchange
                 </p>
               </div>
             </div>
@@ -162,33 +169,26 @@ function NFTCard({ nft }: { nft: NFT }) {
   );
 }
 
-function BuyOption({ token, name, description, amounts, onBuy }: {
+function TokenSwapOption({ token, name, description, icon, onSwap }: {
   token: string;
   name: string;
   description: string;
-  amounts: number[];
-  onBuy: (amount: number) => void;
+  icon: string;
+  onSwap: () => void;
 }) {
   return (
-    <div className="p-3 bg-black/20 rounded-lg border border-blue-600/20">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xl">{token === 'ETH' ? '⟠' : '💵'}</span>
-        <div>
+    <button
+      onClick={onSwap}
+      className="w-full p-3 bg-black/20 rounded-lg border border-blue-600/20 hover:border-blue-400/50 transition-colors text-left"
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-2xl">{icon}</span>
+        <div className="flex-1">
           <p className="text-dial-cream font-medium">{name}</p>
           <p className="text-dial-cream/50 text-xs">{description}</p>
         </div>
+        <span className="text-blue-400 text-sm">Swap →</span>
       </div>
-      <div className="flex gap-2">
-        {amounts.map((amount) => (
-          <button
-            key={amount}
-            onClick={() => onBuy(amount)}
-            className="flex-1 py-1.5 bg-blue-600/20 text-blue-400 text-xs rounded hover:bg-blue-600/30"
-          >
-            ${amount}
-          </button>
-        ))}
-      </div>
-    </div>
+    </button>
   );
 }
