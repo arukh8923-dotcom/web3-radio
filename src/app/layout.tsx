@@ -3,54 +3,57 @@ import { Providers } from './providers';
 import { MiniAppInit } from '@/components/MiniAppInit';
 import './globals.css';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://web3-radio-omega.vercel.app';
+const baseUrl = 'https://web3-radio-omega.vercel.app';
 
-// Farcaster Mini App embed configuration
-const miniAppEmbed = {
-  version: '1',
-  imageUrl: `${APP_URL}/og-image.png`,
-  button: {
-    title: '📻 Open Radio',
-    action: {
-      type: 'launch_frame',
-      name: 'Web3 Radio',
-      url: APP_URL,
-      splashImageUrl: `${APP_URL}/icon.png`,
-      splashBackgroundColor: '#1a1410',
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Web3 Radio',
+    description: 'Decentralized radio where every tune, tip, and vibe is on-chain. Tip DJs with RADIO tokens, earn VIBES rewards.',
+    icons: {
+      icon: `${baseUrl}/icon.svg`,
+      apple: `${baseUrl}/icon.svg`,
     },
-  },
-};
-
-export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
-  title: 'Web3 Radio - Decentralized Radio on Base',
-  description: 'Full on-chain radio experience with retro vibes. Tune in, tip DJs with $RADIO.',
-  openGraph: {
-    title: 'Web3 Radio',
-    description: 'Decentralized radio on Base mainnet',
-    url: APP_URL,
-    siteName: 'Web3 Radio',
-    images: [
-      {
-        url: `${APP_URL}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: 'Web3 Radio - Decentralized Radio on Base',
-      },
-    ],
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Web3 Radio',
-    description: 'Decentralized radio on Base mainnet',
-    images: [`${APP_URL}/og-image.png`],
-  },
-  other: {
-    'fc:miniapp': JSON.stringify(miniAppEmbed),
-    'base:app_id': '6944a5eed19763ca26ddc48e',
-  },
-};
+    openGraph: {
+      title: 'Web3 Radio',
+      description: 'Decentralized radio where every tune, tip, and vibe is on-chain. Tip DJs with RADIO tokens, earn VIBES rewards.',
+      url: baseUrl,
+      siteName: 'Web3 Radio',
+      images: [
+        {
+          url: `${baseUrl}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: 'Web3 Radio - On-chain radio on Base',
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Web3 Radio',
+      description: 'Decentralized radio where every tune, tip, and vibe is on-chain. Tip DJs with RADIO tokens, earn VIBES rewards.',
+      images: [`${baseUrl}/og-image.png`],
+    },
+    other: {
+      'base:app_id': '6944a5eed19763ca26ddc48e',
+      'fc:miniapp': JSON.stringify({
+        version: 'next',
+        imageUrl: `${baseUrl}/og-image.png`,
+        button: {
+          title: 'Tune In',
+          action: {
+            type: 'launch_frame',
+            name: 'Web3 Radio',
+            url: baseUrl,
+            splashImageUrl: `${baseUrl}/splash.svg`,
+            splashBackgroundColor: '#1a1410',
+          },
+        },
+      }),
+    },
+  };
+}
 
 export default function RootLayout({
   children,
